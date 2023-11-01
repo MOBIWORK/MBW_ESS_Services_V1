@@ -5,7 +5,7 @@ from frappe.utils import (
 from frappe.monitor import add_data_to_monitor
 from frappe.desk.query_report import (get_prepared_report_result)
 import json
-from mbw_service.api.common import (
+from mbw_service_v2.api.common import (
     gen_response,
     generate_report_result,
     get_report_doc,

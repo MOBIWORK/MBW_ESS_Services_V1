@@ -2,7 +2,7 @@ import frappe
 from datetime import datetime, timedelta
 from calendar import monthrange
 
-from mbw_service.api.common import (
+from mbw_service_v2.api.common import (
     gen_response,
     get_employee_id,
 )

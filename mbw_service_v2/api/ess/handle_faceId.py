@@ -6,7 +6,7 @@ import frappe
 import json
 from frappe import _
 
-from mbw_service.api.common import (
+from mbw_service_v2.api.common import (
     gen_response,
     get_employee_id,
     exception_handel,
@@ -20,12 +20,12 @@ from frappe.core.doctype.file.utils import delete_file
 from frappe.utils.file_manager import (
     save_file
 )
-from mbw_service.api.file import (
+from mbw_service_v2.api.file import (
     verify,
     my_minio
 )
-from mbw_service.translations.language import translations
-from mbw_service.utils import API_KEYS
+from mbw_service_v2.translations.language import translations
+from mbw_service_v2.utils import API_KEYS
 
 API_KEY = API_KEYS.get("API_KEY_FACE_EKGIS")
 BUCKET_NAME = API_KEYS.get("BUCKET_NAME_S3")

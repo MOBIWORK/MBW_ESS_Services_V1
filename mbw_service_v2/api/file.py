@@ -2,7 +2,7 @@ import frappe
 from minio import Minio
 import numpy as np
 from scipy.spatial.distance import cdist
-from mbw_service.utils import API_KEYS
+from mbw_service_v2.utils import API_KEYS
 
 
 class MinioConnection:

@@ -1,5 +1,5 @@
 import frappe
-from mbw_service.api.common import (
+from mbw_service_v2.api.common import (
     gen_response,
     exception_handel,
     validate_image,

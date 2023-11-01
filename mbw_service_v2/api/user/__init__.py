@@ -1,7 +1,7 @@
 import frappe
-from mbw_service.api.common import (gen_response,exception_handel,get_info_employee,get_employee_id,get_language, post_image)
+from mbw_service_v2.api.common import (gen_response,exception_handel,get_info_employee,get_employee_id,get_language, post_image)
 from datetime import datetime
-from mbw_service.translations.language import translations 
+from mbw_service_v2.translations.language import translations 
 import base64
 # cập nhật tài khoản
 @frappe.whitelist()

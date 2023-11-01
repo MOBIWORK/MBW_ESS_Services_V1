@@ -1,6 +1,6 @@
 import frappe
 import json
-from mbw_service.api.common import (
+from mbw_service_v2.api.common import (
     gen_response,
     get_employee_id,
     exception_handel,
@@ -12,7 +12,7 @@ from mbw_service.api.common import (
 )
 
 from datetime import datetime
-from mbw_service.translations.language import translations
+from mbw_service_v2.translations.language import translations
 from pypika import Field,functions, Order, CustomFunction
 # Dịch vụ chấm công
 

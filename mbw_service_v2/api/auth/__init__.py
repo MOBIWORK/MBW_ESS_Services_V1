@@ -4,7 +4,7 @@ from frappe import _
 from frappe.auth import LoginManager
 
 from datetime import datetime
-from mbw_service.api.common import (
+from mbw_service_v2.api.common import (
     gen_response,
     generate_key,
     get_employee_by_user,
@@ -12,7 +12,7 @@ from mbw_service.api.common import (
     get_shift_type_now,
     exception_handel
 )
-from mbw_service.translations.language import translations
+from mbw_service_v2.translations.language import translations
 
 # Đăng nhập
 

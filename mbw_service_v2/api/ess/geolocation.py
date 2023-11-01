@@ -1,7 +1,7 @@
 import frappe
-from mbw_service.utils import API_KEYS
+from mbw_service_v2.utils import API_KEYS
 import requests
-from mbw_service.api.common import (
+from mbw_service_v2.api.common import (
     gen_response
 )
 import json

@@ -8,7 +8,7 @@ import frappe
 import json
 from frappe import _
 
-from mbw_service.api.common import (
+from mbw_service_v2.api.common import (
     gen_response,
     get_employee_id,
     exception_handel,
@@ -26,7 +26,7 @@ from frappe.utils.file_manager import (
 )
 from frappe.utils import get_files_path
 
-from mbw_service.translations.language import translations
+from mbw_service_v2.translations.language import translations
 
 # chấm công nhân viên trong khoảng thời gian
 
