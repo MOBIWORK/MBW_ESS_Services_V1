@@ -1,0 +1,27 @@
+en:
+  successfully: Success.
+  error: Error.
+  faceid_success: Updated FaceID successfully.
+  not_face_recognition: Face recognition is not possible.
+  face_not_found: You have not registered your face yet.
+  faceid_register_success: FaceID registration successful.
+  faceid_verify_success: FaceID verification successful.
+  faceid_verify_fail: The photo was taken incorrectly with the registered FaceID.
+  login_success: Login successfully.
+  login_error: Login fail! Please check user or password.
+  logout_success: Logout successfully.
+  logout_error: Logout fail!
+  not_allow: Not allowed!
+  email_send_success: Password email sent.
+  email_send_fail: Password email sent fail.
+  title_1: You have to
+  check_in: checkin first
+  check_out: checkout first
+  create_success: Created successfully.
+  create_fail: Created fail
+  employee: Employee
+  title_2: has applied
+  from_date: from date
+  to_date: to date
+  title_3: From date do not > to date
+  title_4: Half day in from day and to day
