@@ -1,0 +1,129 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-10-03 16:46:46.917135",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "tab_break1",
+  "name_address",
+  "address",
+  "geofence",
+  "status",
+  "column_break1",
+  "map",
+  "longitude",
+  "latitude",
+  "tab_break2",
+  "is_limited",
+  "employees",
+  "wifi"
+ ],
+ "fields": [
+  {
+   "fieldname": "tab_break1",
+   "fieldtype": "Tab Break",
+   "label": "Th\u00f4ng tin \u0111\u1ecba \u0111i\u1ec3m"
+  },
+  {
+   "fieldname": "name_address",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "T\u00ean \u0111\u1ecba \u0111i\u1ec3m",
+   "reqd": 1
+  },
+  {
+   "fieldname": "address",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "\u0110\u1ecba \u0111i\u1ec3m",
+   "reqd": 1
+  },
+  {
+   "fieldname": "geofence",
+   "fieldtype": "Float",
+   "label": "B\u00e1n k\u00ednh"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Tr\u1ea1ng th\u00e1i",
+   "options": "Active\nLock",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "map",
+   "fieldtype": "Geolocation",
+   "label": "B\u1ea3n \u0111\u1ed3"
+  },
+  {
+   "fieldname": "longitude",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "in_list_view": 1,
+   "label": "Kinh \u0111\u1ed9"
+  },
+  {
+   "fieldname": "latitude",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "V\u0129 \u0111\u1ed9"
+  },
+  {
+   "fieldname": "tab_break2",
+   "fieldtype": "Tab Break",
+   "label": "C\u1ea5u h\u00ecnh"
+  },
+  {
+   "default": "Setting Employee",
+   "fieldname": "is_limited",
+   "fieldtype": "Select",
+   "label": "Gi\u1edbi h\u1ea1n nh\u00e2n vi\u00ean",
+   "options": "All employee\nSetting Employee"
+  },
+  {
+   "depends_on": "eval:doc.is_limited !==\"All employee\"",
+   "fieldname": "employees",
+   "fieldtype": "Table",
+   "label": "Nh\u00e2n vi\u00ean ",
+   "options": "Employee Child"
+  },
+  {
+   "fieldname": "wifi",
+   "fieldtype": "Table",
+   "label": "Wifi",
+   "options": "TimeSheet Wifi intermediate"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2023-11-02 10:19:28.326546",
+ "modified_by": "Administrator",
+ "module": "Mbw Service V2",
+ "name": "TimeSheet Position",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
