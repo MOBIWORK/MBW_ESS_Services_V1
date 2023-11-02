@@ -29,7 +29,7 @@ function setDefaultViewMap(frm) {
   
 		await frappe.call({
 		  type: "GET",
-		  method: "mbw_service.api.ess.geolocation.get_address_location",
+		  method: "mbw_service_v2.api.ess.geolocation.get_address_location",
 		  args: {
 			lat: lat,
 			lon: lon,
