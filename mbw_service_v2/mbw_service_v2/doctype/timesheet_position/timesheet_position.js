@@ -38,14 +38,28 @@ function setDefaultViewMap(frm) {
 			address = r.result.results;
 		  },
 		});
-
-
   
+		frm.set_value("longitude", lon);
+		frm.set_value("latitude", lat);
 		setFieldValue(frm, lat, lon, address);
 	  } else {
 		setDefaultViewMap(frm);
 		setFieldValue(frm);
 	  }
 	},
+	address: async function(frm) {
+		let address_text = frm.doc.address
+		await frappe.call({
+			type: "GET",
+			method: "mbw_service_v2.api.ess.geolocation.get_coordinates_location",
+			args: {
+				"address": address_text
+			},
+			callback: function (r) {
+				// let rs = r.result.results;
+				console.log("kết quả",r);
+			  },
+		})
+	}
   });
   

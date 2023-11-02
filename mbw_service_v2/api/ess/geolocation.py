@@ -21,3 +21,17 @@ def get_address_location(**kwargs):
         return gen_response(200, "", json.loads(response.text))
     except Exception as e:
         return e
+
+@frappe.whitelist(methods="GET", allow_guest=True)
+def get_coordinates_location(**kwargs):
+    try:
+        address = kwargs.get("address")
+        api_key = API_KEYS.get("API_KEY_MAP")
+
+        # call geolocation
+        url = f"https://api.ekgis.vn/v1/place/geocode/search?text={address}&gg=1&api_key={api_key}"
+    
+        response = requests.get(url)
+        return gen_response(200, "", json.loads(response.text))
+    except Exception as e:
+        return e
