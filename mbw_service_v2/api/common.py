@@ -65,11 +65,15 @@ def get_shift_type_now(employee_name):
 
 
 def today_list_shift(employee_name, time_now):
+    query = (ShiftAssignment.employee == employee_name) & (time_now.date() >= ShiftAssignment.start_date)
+    if not ShiftAssignment.end_date.isnull() :
+        query = (ShiftAssignment.employee == employee_name) & (time_now.date() >= ShiftAssignment.start_date) & (time_now.date() <= ShiftAssignment.end_date)
+    print("query::::",query)
     return (frappe.qb.from_(ShiftType)
             .inner_join(ShiftAssignment)
             .on(ShiftType.name == ShiftAssignment.shift_type)
-            .where((ShiftAssignment.employee == employee_name) & (time_now.date() >= ShiftAssignment.start_date) & (time_now.date() <= ShiftAssignment.end_date))
-            .select(ShiftType.name, ShiftType.start_time, ShiftType.end_time, ShiftType.allow_check_out_after_shift_end_time, ShiftType.begin_check_in_before_shift_start_time)
+            .where(((ShiftAssignment.employee == employee_name) & (time_now.date() >= ShiftAssignment.start_date) )or ((ShiftAssignment.employee == employee_name) & (time_now.date() >= ShiftAssignment.start_date) & (ShiftAssignment.start_date == None) ))
+            .select(ShiftAssignment.employee, ShiftType.name, ShiftType.start_time, ShiftType.end_time, ShiftType.allow_check_out_after_shift_end_time, ShiftType.begin_check_in_before_shift_start_time)
             .run(as_dict=True)
             )
 
