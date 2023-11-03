@@ -1,0 +1,23 @@
+{
+ "content": null,
+ "creation": "2023-11-03 09:44:35.517766",
+ "docstatus": 0,
+ "doctype": "Page",
+ "idx": 0,
+ "modified": "2023-11-03 09:44:35.517766",
+ "modified_by": "Administrator",
+ "module": "Mbw Service V2",
+ "name": "dms-attendance-sync",
+ "owner": "Administrator",
+ "page_name": "dms-attendance-sync",
+ "roles": [
+  {
+   "role": "All"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "\u0110\u1ed3ng b\u1ed9 d\u1eef li\u1ec7u Ch\u1ea5m C\u00f4ng DMS"
+}

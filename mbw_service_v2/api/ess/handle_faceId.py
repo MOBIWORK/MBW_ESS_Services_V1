@@ -161,9 +161,7 @@ def update_faceid_employee(**kwargs):
             message = translations.get(
                 "face_not_found").get(get_language())
 
-            data = {}
-            data['status'] = False
-            gen_response(200, message, data)
+            gen_response(404, message, [])
             return None
 
         # get doc
@@ -191,9 +189,7 @@ def update_faceid_employee(**kwargs):
             if int(data.get('status')) == 4:
                 message = translations.get(
                     "not_face_recognition").get(get_language())
-                data = {}
-                data['status'] = False
-                gen_response(200, message, data)
+                gen_response(406, message, [])
                 return None
 
             # save file and insert Doctype File
@@ -261,9 +257,7 @@ def verify_faceid_employee(**kwargs):
         if not len(employee_faces):
             message = translations.get(
                 "face_not_found").get(get_language())
-            data = {}
-            data['status'] = False
-            gen_response(200, message, data)
+            gen_response(404, message, [])
             return None
 
         # call api get vector
@@ -281,9 +275,7 @@ def verify_faceid_employee(**kwargs):
             if int(data.get('status')) == 4:
                 message = translations.get(
                     "not_face_recognition").get(get_language())
-                data = {}
-                data['status'] = False
-                gen_response(200, message, data)
+                gen_response(406, message, data)
                 return None
 
             image_check = data.get("uploaded_faces")

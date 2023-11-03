@@ -1,0 +1,67 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-11-03 10:29:50.951225",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "time_sync",
+  "ma_nv",
+  "checkin_start",
+  "checkin_end",
+  "total_records"
+ ],
+ "fields": [
+  {
+   "fieldname": "time_sync",
+   "fieldtype": "Date",
+   "label": "Th\u1eddi gian \u0111\u1ed3ng b\u1ed9"
+  },
+  {
+   "fieldname": "ma_nv",
+   "fieldtype": "Data",
+   "label": "M\u00e3 nh\u00e2n vi\u00ean"
+  },
+  {
+   "fieldname": "checkin_start",
+   "fieldtype": "Date",
+   "label": "Checkin Start"
+  },
+  {
+   "fieldname": "checkin_end",
+   "fieldtype": "Date",
+   "label": "Checkin End"
+  },
+  {
+   "fieldname": "total_records",
+   "fieldtype": "Int",
+   "label": "T\u1ed5ng s\u1ed1 b\u1ea3n ghi"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2023-11-03 10:29:50.951225",
+ "modified_by": "Administrator",
+ "module": "Mbw Service V2",
+ "name": "DMS Log",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
