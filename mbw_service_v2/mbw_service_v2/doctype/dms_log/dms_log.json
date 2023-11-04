@@ -11,7 +11,9 @@
   "checkin_start",
   "checkin_end",
   "total_records",
-  "status"
+  "status",
+  "total_import",
+  "message"
  ],
  "fields": [
   {
@@ -35,15 +37,26 @@
    "label": "T\u1ed5ng s\u1ed1 b\u1ea3n ghi"
   },
   {
+   "default": "\u0110ang ti\u1ebfn h\u00e0nh",
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Tr\u1ea1ng th\u00e1i",
-   "options": "Th\u00e0nh c\u00f4ng\nTh\u1ea5t b\u1ea1i"
+   "options": "\u0110ang ti\u1ebfn h\u00e0nh\nTh\u00e0nh c\u00f4ng\nTh\u1ea5t b\u1ea1i"
+  },
+  {
+   "fieldname": "total_import",
+   "fieldtype": "Int",
+   "label": "T\u1ed5ng s\u1ed1 b\u1ea3n ghi \u0111\u00e3 nh\u1eadp"
+  },
+  {
+   "fieldname": "message",
+   "fieldtype": "Text",
+   "label": "L\u00fd do"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-11-03 16:06:51.632796",
+ "modified": "2023-11-04 11:33:42.871159",
  "modified_by": "Administrator",
  "module": "Mbw Service V2",
  "name": "DMS Log",

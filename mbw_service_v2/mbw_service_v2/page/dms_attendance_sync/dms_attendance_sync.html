@@ -3,12 +3,14 @@
   <table class="table table-background-jobs">
     <thead>
       <tr>
-        <th style="width: 15%">Thời gian đồng bộ</th>
-        <th style="width: 15%">Mã nhân viên</th>
-        <th style="width: 15%">Bắt đầu đồng bộ</th>
-        <th style="width: 15%">Kết thúc đồng bộ</th>
-        <th style="width: 15%">Tổng số bản ghi</th>
-        <th>Trạng thái</th>
+        <th style="width: 10%">Thời gian đồng bộ</th>
+        <th style="width: 10%">Mã nhân viên</th>
+        <th style="width: 10%">Bắt đầu đồng bộ</th>
+        <th style="width: 10%">Kết thúc đồng bộ</th>
+        <th style="width: 10%">Tổng số đã nhập</th>
+        <th style="width: 10%">Tổng số thất bại</th>
+        <th style="width: 15%">Lý do</th>
+        <th style="width: 10%">Trạng thái</th>
       </tr>
     </thead>
     <tbody>
@@ -20,9 +22,17 @@
         <td>{{ item.ma_nv }}</td>
         <td>{{ item.checkin_start }}</td>
         <td>{{ item.checkin_end }}</td>
-        <td>{{ item.total_records }}</td>
+        <td>{{ item.total_import }}</td>
+        <td>{{ item.total_records-item.total_import }}</td>
+        <td>{{ item.message }}</td>
         <td>
+          {% if item.status == "Đang tiến hành" %}
+          <span class="indicator-pill orange"> {{ item.status }} </span>
+          {% else %} {% if item.status == "Thành công" %}
           <span class="indicator-pill green"> {{ item.status }} </span>
+          {% else %}
+          <span class="indicator-pill red"> {{ item.status }} </span>
+          {% endif %} {% endif %}
         </td>
       </tr>
       {% endfor %}

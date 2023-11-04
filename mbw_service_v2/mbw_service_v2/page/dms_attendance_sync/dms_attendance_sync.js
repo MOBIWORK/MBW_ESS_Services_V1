@@ -71,11 +71,11 @@ class DMSAttendanceSync {
     data["id_dms"] = doc?.id;
     data["token_key"] = doc?.token_key;
 
-    // frappe.call({
-    //   method: "mbw_service_v2.api.ess.sync_data.checkin_data",
-    //   type: "POST",
-    //   args: data,
-    // });
+    frappe.call({
+      method: "mbw_service_v2.api.ess.sync_data.checkin_data",
+      type: "POST",
+      args: data,
+    });
 
     frappe.msgprint({
       title: __("Thông báo"),
@@ -203,7 +203,28 @@ class DMSAttendanceSync {
       fieldtype: "Date",
       fieldname: "date_start",
       change: () => {
-        console.log(this.fieldDateStart.get_value());
+        let start_date = this.fieldDateStart.get_value();
+        let end_date = this.fieldDateEnd.get_value();
+        if (end_date && start_date) {
+          let time_start = new Date(start_date);
+          let time_end = new Date(end_date);
+          if ((time_end - time_start) / 1000 > 30 * 24 * 60 * 60) {
+            let date_end = time_start.getTime() + 30 * 24 * 60 * 60 * 1000;
+            date_end = new Date(date_end);
+            let day =
+              String(date_end.getDate()).length == 1
+                ? "0" + String(date_end.getDate())
+                : String(date_end.getDate());
+            let mon =
+              String(date_end.getMonth() + 1).length == 1
+                ? "0" + String(date_end.getMonth() + 1)
+                : String(date_end.getMonth() + 1);
+
+            let date_new = date_end.getFullYear() + "-" + mon + "-" + day;
+
+            this.fieldDateEnd.set_value(date_new);
+          }
+        }
       },
     });
 
@@ -212,7 +233,28 @@ class DMSAttendanceSync {
       fieldtype: "Date",
       fieldname: "date_end",
       change: () => {
-        console.log(this.fieldDateEnd.get_value());
+        let start_date = this.fieldDateStart.get_value();
+        let end_date = this.fieldDateEnd.get_value();
+        if (end_date && start_date) {
+          let time_start = new Date(start_date);
+          let time_end = new Date(end_date);
+          if ((time_end - time_start) / 1000 > 30 * 24 * 60 * 60) {
+            let date_end = time_end.getTime() - 30 * 24 * 60 * 60 * 1000;
+            date_end = new Date(date_end);
+            let day =
+              String(date_end.getDate()).length == 1
+                ? "0" + String(date_end.getDate())
+                : String(date_end.getDate());
+            let mon =
+              String(date_end.getMonth() + 1).length == 1
+                ? "0" + String(date_end.getMonth() + 1)
+                : String(date_end.getMonth() + 1);
+
+            let date_new = date_end.getFullYear() + "-" + mon + "-" + day;
+
+            this.fieldDateStart.set_value(date_new);
+          }
+        }
       },
     });
 
