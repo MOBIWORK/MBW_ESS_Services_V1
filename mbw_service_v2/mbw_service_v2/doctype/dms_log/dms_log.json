@@ -7,18 +7,13 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "time_sync",
   "ma_nv",
   "checkin_start",
   "checkin_end",
-  "total_records"
+  "total_records",
+  "status"
  ],
  "fields": [
-  {
-   "fieldname": "time_sync",
-   "fieldtype": "Date",
-   "label": "Th\u1eddi gian \u0111\u1ed3ng b\u1ed9"
-  },
   {
    "fieldname": "ma_nv",
    "fieldtype": "Data",
@@ -38,11 +33,17 @@
    "fieldname": "total_records",
    "fieldtype": "Int",
    "label": "T\u1ed5ng s\u1ed1 b\u1ea3n ghi"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Tr\u1ea1ng th\u00e1i",
+   "options": "Th\u00e0nh c\u00f4ng\nTh\u1ea5t b\u1ea1i"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-11-03 10:29:50.951225",
+ "modified": "2023-11-03 16:06:51.632796",
  "modified_by": "Administrator",
  "module": "Mbw Service V2",
  "name": "DMS Log",

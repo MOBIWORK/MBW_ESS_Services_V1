@@ -1,58 +1,45 @@
-{% if jobs.length %}
-<table class="table table-background-jobs">
-  <thead>
-    <tr>
-      <th style="width: 10%">{{ __("Queue") }}</th>
-      <th>{{ __("Job") }}</th>
-      <th style="width: 10%">{{ __("Status") }}</th>
-      <th style="width: 15%">{{ __("Created") }}</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for j in jobs %}
-    <tr>
-      <td class="worker-name">
-        {{ toTitle(j.queue.split(":").slice(-1)[0]) }}
-      </td>
-      <td>
-        <div>
-          <span class="job-name">
-            {{ frappe.utils.encode_tags(j.job_name) }}
-          </span>
-        </div>
-        {% if j.exc_info %}
-        <details>
-          <summary>{{ __("Exception") }}</summary>
-          <div class="exc_info">
-            <pre>{{ frappe.utils.encode_tags(j.exc_info) }}</pre>
-          </div>
-        </details>
-        {% endif %}
-      </td>
-      <td>
-        <span class="indicator-pill {{ j.color }}">
-          {{ toTitle(j.status) }}
-        </span>
-      </td>
-      <td class="creation text-muted">
-        {{ frappe.datetime.prettyDate(j.creation) }}
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+{% if list_sync.length %}
+<div class="table-section">
+  <table class="table table-background-jobs">
+    <thead>
+      <tr>
+        <th style="width: 15%">Thời gian đồng bộ</th>
+        <th style="width: 15%">Mã nhân viên</th>
+        <th style="width: 15%">Bắt đầu đồng bộ</th>
+        <th style="width: 15%">Kết thúc đồng bộ</th>
+        <th style="width: 15%">Tổng số bản ghi</th>
+        <th>Trạng thái</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in list_sync %}
+      <tr>
+        <td class="creation text-muted">
+          {{ frappe.datetime.prettyDate(item.creation) }}
+        </td>
+        <td>{{ item.ma_nv }}</td>
+        <td>{{ item.checkin_start }}</td>
+        <td>{{ item.checkin_end }}</td>
+        <td>{{ item.total_records }}</td>
+        <td>
+          <span class="indicator-pill green"> {{ item.status }} </span>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 {% else %}
 <div class="no-background-jobs">
   <img
     src="/assets/frappe/images/ui-states/list-empty-state.svg"
     alt="Empty State"
   />
-  <p class="text-muted">{{ __("No jobs found on this site") }}</p>
+  <p class="text-muted">{{ __("Chưa có log nào gần đây") }}</p>
 </div>
 {% endif %}
 <div class="footer">
   <div class="text-muted">
-    {{ __("Last refreshed") }} {{
-    frappe.datetime.now_datetime(true).toLocaleString() }}
+    {{ frappe.datetime.now_datetime().toLocaleString("%Y-%m-%d")}}
   </div>
 </div>

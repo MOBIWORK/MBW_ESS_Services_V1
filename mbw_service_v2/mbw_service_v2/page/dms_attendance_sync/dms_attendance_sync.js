@@ -1,40 +1,202 @@
 frappe.pages["dms-attendance-sync"].on_page_load = function (wrapper) {
   const dms_attendance_sync = new DMSAttendanceSync(wrapper);
+
+  $(wrapper).bind("show", () => {
+    dms_attendance_sync.show();
+  });
 };
 
 class DMSAttendanceSync {
   constructor(wrapper) {
     this.page = frappe.ui.make_app_page({
       parent: wrapper,
-      title: __("Đồng bộ dữ liệu Chấm Công DMS"),
+      title: __("Đồng bộ dữ liệu chấm công DMS"),
       single_column: true,
     });
+
+    this.page.main.addClass("frappe-card");
+    this.page.body.append('<div class="table-area"></div>');
+    this.$content = $(this.page.body).find(".table-area");
 
     this.make_filters();
   }
 
+  show() {
+    this.refreshSync();
+  }
+
+  refreshFilters() {
+    this.fieldTypeSync.set_value("Tất cả");
+    this.fieldDateStart.set_value("");
+    this.fieldDateEnd.set_value("");
+    this.fieldIdNvHr.set_value("");
+  }
+
+  async sync_data(type_sync, employee_code_dms, date_start, date_end) {
+    let date_fm_start = new Date(date_start);
+    let date_fm_end = new Date(date_end);
+
+    let date_start_new =
+      date_fm_start.getDate() +
+      "/" +
+      (date_fm_start.getMonth() + 1) +
+      "/" +
+      date_fm_start.getFullYear();
+    let date_end_new =
+      date_fm_end.getDate() +
+      "/" +
+      (date_fm_end.getMonth() + 1) +
+      "/" +
+      date_fm_end.getFullYear();
+
+    let data = { from_date: date_start_new, to_date: date_end_new };
+    if (type_sync == "Chọn nhân viên") {
+      data["emplyee_code"] = employee_code_dms;
+    }
+
+    let doc = await frappe.db.get_doc(
+      "DMS Basic Authen Settings",
+      "DMS Basic Authen Settings"
+    );
+
+    if (!doc?.id || !doc?.token_key) {
+      frappe.msgprint({
+        title: __("Cảnh báo"),
+        indicator: "yellow",
+        message: __("Vui lòng cấu hình DMS Basic Authen."),
+      });
+      return false;
+    }
+
+    data["id_dms"] = doc?.id;
+    data["token_key"] = doc?.token_key;
+
+    // frappe.call({
+    //   method: "mbw_service_v2.api.ess.sync_data.checkin_data",
+    //   type: "POST",
+    //   args: data,
+    // });
+
+    frappe.msgprint({
+      title: __("Thông báo"),
+      indicator: "blue",
+      message: __("Thiết lập đồng bộ thành công."),
+    });
+  }
+
+  refreshSync() {
+    frappe.call({
+      method: "mbw_service_v2.api.ess.dms_attendance_sync.get_list_sync",
+      type: "GET",
+      callback: (res) => {
+        if (!res.exc) {
+          this.$content.html(
+            frappe.render_template("dms_attendance_sync", {
+              list_sync: res?.result?.data || [],
+            })
+          );
+
+          let auto_refresh = this.auto_refresh.get_value();
+          if (frappe.get_route()[0] === "dms-attendance-sync" && auto_refresh) {
+            setTimeout(() => this.refreshSync(), 2000);
+          }
+        } else {
+          frappe.msgprint({
+            title: __("Error"),
+            indicator: "red",
+            message: __("Có lỗi xảy ra."),
+          });
+        }
+      },
+    });
+  }
+
   make_filters() {
-    const optionsType_sync = [];
     this.btnSync = this.page.set_primary_action("Đồng bộ", () => {
-      console.log("btnSync");
+      let type_sync = this.fieldTypeSync.get_value();
+      let employee_code_dms = this.maNvDms.get_value();
+      let date_start = this.fieldDateStart.get_value();
+      let date_end = this.fieldDateEnd.get_value();
+
+      if (!date_start || !date_end) {
+        frappe.msgprint({
+          title: __("Cảnh báo"),
+          indicator: "yellow",
+          message: __("Vui lòng chọn đầy đủ thông tin."),
+        });
+        return false;
+      }
+
+      if (type_sync == "Chọn nhân viên" && !employee_code_dms) {
+        frappe.msgprint({
+          title: __("Cảnh báo"),
+          indicator: "yellow",
+          message: __("Nhân viên không có dữ liệu DMS."),
+        });
+        return false;
+      }
+      this.sync_data(type_sync, employee_code_dms, date_start, date_end);
     });
 
     this.btnFresh = this.page.set_secondary_action("Làm mới", () => {
-      this.fieldSelect.set_value("Tất cả");
-      this.fieldSelect.set_value("Tất cả");
-      this.fieldSelect.set_value("Tất cả");
+      this.refreshFilters();
     });
 
-    this.fieldSelect = this.page.add_field({
+    this.fieldTypeSync = this.page.add_field({
       label: "Đồng bộ cho",
       fieldtype: "Select",
       fieldname: "type_sync",
       default: "Tất cả",
-      options: ["Tất cả", "Nhân viên cụ thể"],
+      options: ["Tất cả", "Chọn nhân viên"],
       change: () => {
-        console.log(this.fieldSelect.get_value());
+        if (this.fieldTypeSync.get_value() === "Chọn nhân viên") {
+          this.fieldIdNvHr.toggle(true);
+        } else {
+          this.fieldIdNvHr.toggle(false);
+          this.fieldIdNvHr.set_value("");
+        }
       },
     });
+
+    this.fieldIdNvHr = this.page.add_field({
+      label: "Nhân viên",
+      fieldtype: "Link",
+      fieldname: "ds_nv",
+      options: "Employee",
+      change: async () => {
+        let name = this.fieldIdNvHr.get_value();
+        this.maNvDms.toggle(name);
+        if (name) {
+          let doc = await frappe.db.get_doc("Employee", name, [
+            "employee_code_dms",
+          ]);
+
+          if (!doc?.employee_code_dms) {
+            frappe.msgprint({
+              title: __("Cảnh báo"),
+              indicator: "yellow",
+              message: __("Nhân viên không có dữ liệu DMS."),
+            });
+          }
+
+          this.maNvDms.set_value(doc?.employee_code_dms);
+        }
+      },
+    });
+
+    this.fieldIdNvHr.toggle(false);
+
+    this.maNvDms = this.page.add_field({
+      fieldname: "ma_nv_dms",
+      fieldtype: "Data",
+      in_list_view: 1,
+      label: "Mã nhân viên Dms",
+      read_only: 1,
+      change: () => {
+        // console.log(this.maNvDms.get_value());
+      },
+    });
+    this.maNvDms.toggle(false);
 
     this.fieldDateStart = this.page.add_field({
       label: "Ngày bắt đầu",
@@ -51,6 +213,18 @@ class DMSAttendanceSync {
       fieldname: "date_end",
       change: () => {
         console.log(this.fieldDateEnd.get_value());
+      },
+    });
+
+    this.auto_refresh = this.page.add_field({
+      label: __("Tự động"),
+      fieldname: "auto_refresh",
+      fieldtype: "Check",
+      default: 1,
+      change: () => {
+        if (this.auto_refresh.get_value()) {
+          this.refreshSync();
+        }
       },
     });
   }

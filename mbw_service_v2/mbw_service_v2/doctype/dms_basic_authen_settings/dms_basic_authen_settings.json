@@ -8,8 +8,7 @@
  "engine": "InnoDB",
  "field_order": [
   "id",
-  "token_key",
-  "ma_to_chuc"
+  "token_key"
  ],
  "fields": [
   {
@@ -27,20 +26,12 @@
    "label": "Token Key",
    "length": 155,
    "reqd": 1
-  },
-  {
-   "fieldname": "ma_to_chuc",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "M\u00e3 t\u1ed5 ch\u1ee9c",
-   "length": 155,
-   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-11-03 09:19:20.296935",
+ "modified": "2023-11-04 09:02:26.160867",
  "modified_by": "Administrator",
  "module": "Mbw Service V2",
  "name": "DMS Basic Authen Settings",

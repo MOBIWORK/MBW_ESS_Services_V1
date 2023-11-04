@@ -4,7 +4,7 @@
  "docstatus": 0,
  "doctype": "Page",
  "idx": 0,
- "modified": "2023-11-03 09:44:35.517766",
+ "modified": "2023-11-03 14:04:45.208488",
  "modified_by": "Administrator",
  "module": "Mbw Service V2",
  "name": "dms-attendance-sync",
@@ -19,5 +19,5 @@
  "standard": "Yes",
  "style": null,
  "system_page": 0,
- "title": "\u0110\u1ed3ng b\u1ed9 d\u1eef li\u1ec7u Ch\u1ea5m C\u00f4ng DMS"
+ "title": "\u0110\u1ed3ng b\u1ed9 d\u1eef li\u1ec7u ch\u1ea5m c\u00f4ng DMS"
 }
