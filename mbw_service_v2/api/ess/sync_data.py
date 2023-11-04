@@ -34,7 +34,6 @@ def checkin_data(**data):
             gen_response(500, dataTimeSheet.get('message'),[])
             return 
         data_checkin = dataTimeSheet.get('data')
-        return_checkin = {}
         if len(data_checkin) > 0 : 
             field_not_loop = ['stt','ma_nhan_vien','ten_nhan_vien']
             for employee in data_checkin:
@@ -44,37 +43,57 @@ def checkin_data(**data):
                     ["employee"],
                     # as_dict=1,
                 )
-                print("nhân viên:::",emp_data)
+
                 if emp_data:
+                    total = 0
+                    total_has = 0
                     for field, value in employee.items():
                         if(field not in field_not_loop):
-                            return_checkin[emp_data] = []
+                            dataCheckShift = value.get('data_cc')
+                            for data_check in dataCheckShift :
+                                total +=1
+
+                    new_log = frappe.new_doc("Dms Log")
+                    data_log = {
+                        "ma_nv": emp_data,
+                        "checkin_start": from_date,
+                        "checkin_end": to_date,
+                        "total_records": total,
+                        "total_import" : 0,
+                        "status": "Đang tiến hành"
+                    }
+                    for fiel, value in data_log.items():
+                        setattr(new_log,fiel,value)
+                    
+                    new_log.insert()
+                    # employee_log = frappe.get_doc()
+                    for field, value in employee.items():
+                        if(field not in field_not_loop):
                             dataCheckShift = value.get('data_cc')
                             for docShift in dataCheckShift: 
                                 if bool(docShift.get('thoi_gian')): 
                                     hour = docShift.get('thoi_gian').split(':')[0]
                                     minute = docShift.get('thoi_gian').split(':')[1]
                                     ime_check_server = datetime.strptime(value.get('ngay'),"%Y-%m-%dT%H:%M:%S.%fZ").replace(hour=int(hour),minute=int(minute))
-                                    print('type',type(ime_check_server))
                                     data = {
                                         "time" : ime_check_server,
                                         "device_id": json.dumps({"longitude": docShift.get("long"), "latitude": docShift.get("lat")}),
                                         "log_type": "IN" if docShift.get("loai") == "Vào" else "OUT",
                                         "image" : docShift.get('hinh_anh'),
-                                        "employee": emp_data,
-                                        "wifi": "e6aeb0f411"
+                                        "employee": emp_data,                                
                                     }
-                                    print("data",data)
                                     new_check = frappe.new_doc("Employee Checkin")
                                     for field, value in data.items():
                                         setattr(new_check, field, value)
                                     setattr(new_check,"image_attach",data.get("image"))
                                     new_check.insert()
-                                    print("data",new_check)
-                                    return new_check
-
-                                    # return_checkin[emp_data].append(new_check)
-                                    # print("return_checkin",return_checkin)
-        gen_response(200,"",data_checkin)
+                                    total_has +=1
+                    new_log.total_import = total_has
+                    new_log.status = "Thành công"
+                    new_log.save()       
+                    
+        return
     except Exception as e:
+        setattr(new_log,'status',"Thất bại")
+        new_log.save()
         exception_handel(e)
