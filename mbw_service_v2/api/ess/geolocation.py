@@ -29,7 +29,7 @@ def get_coordinates_location(**kwargs):
         api_key = API_KEYS.get("API_KEY_MAP")
 
         # call geolocation
-        url = f"https://api.ekgis.vn/v1/place/geocode/search?text={address}&gg=1&api_key={api_key}"
+        url = f"https://api.ekgis.vn/v1/place/geocode/forward?address={address}&gg=1&api_key={api_key}"
     
         response = requests.get(url)
         return gen_response(200, "", json.loads(response.text))

@@ -77,27 +77,41 @@ def today_list_shift(employee_name, time_now):
             .run(as_dict=True)
             )
 
-
-def shift_now(employee_name, time_now):
-    in_shift = (frappe.qb.from_(ShiftType)
+def inshift(employee_name,time_now) :
+    data = (frappe.qb.from_(ShiftType)
                       .inner_join(ShiftAssignment)
                       .on(ShiftType.name == ShiftAssignment.shift_type)
                       .where((ShiftAssignment.employee == employee_name) & (time_now.time() >= ShiftType.start_time) & (time_now.time() <= ShiftType.end_time) & (time_now.date() >= ShiftAssignment.start_date) & (time_now.date() <= ShiftAssignment.end_date))
                       .select(ShiftType.name, ShiftType.start_time, ShiftType.end_time, ShiftType.allow_check_out_after_shift_end_time, ShiftType.begin_check_in_before_shift_start_time)
                       .run(as_dict=True)
                 )
-    if len(in_shift) == 0:
-        next_shift = (frappe.qb.from_(ShiftType)
-                      .inner_join(ShiftAssignment)
-                      .on(ShiftType.name == ShiftAssignment.shift_type)
-                      .where((ShiftAssignment.employee == employee_name) & (time_now.time() <= ShiftType.start_time) & (time_now.date() >= ShiftAssignment.start_date) & (time_now.date() <= ShiftAssignment.end_date))
-                      .select(ShiftType.name, ShiftType.start_time, ShiftType.end_time, ShiftType.allow_check_out_after_shift_end_time, ShiftType.begin_check_in_before_shift_start_time)
-                      .run(as_dict=True)
-                      )
-        if len(next_shift) == 0:
+    if len(data) == 0:
+        return False
+    return data[0]
+
+    
+def nextshift(employee_name,time_now) :
+    data = (frappe.qb.from_(ShiftType)
+                        .inner_join(ShiftAssignment)
+                        .on(ShiftType.name == ShiftAssignment.shift_type)
+                        .where((ShiftAssignment.employee == employee_name) & (time_now.time() <= ShiftType.start_time) & (time_now.date() >= ShiftAssignment.start_date) & (time_now.date() <= ShiftAssignment.end_date))
+                        .select(ShiftType.name, ShiftType.start_time, ShiftType.end_time, ShiftType.allow_check_out_after_shift_end_time, ShiftType.begin_check_in_before_shift_start_time)
+                        .run(as_dict=True)
+                        )
+    if len(data) == 0:
+        return False
+    return data[0]
+
+
+def shift_now(employee_name, time_now):
+    in_shift = inshift(employee_name, time_now)
+    if not in_shift:
+        next_shift = nextshift(employee_name, time_now)
+        if not next_shift:
             return False
-        return next_shift[0]
-    return in_shift[0]
+        return next_shift
+    return in_shift
+
 
 # ======================================================================================
 
@@ -382,6 +396,11 @@ def valid_number(string):
 	except ValueError:
 		return False
 
+from base64 import b64encode
+
+def basic_auth(username, password):
+    token = b64encode(f"{username}:{password}".encode('utf-8')).decode("ascii")
+    return f'Basic {token}'
 
 
 
