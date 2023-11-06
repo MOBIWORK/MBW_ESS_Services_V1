@@ -29,15 +29,14 @@ def calc_minutes(time_shift, time_real, type_calc='late_entry'):
 def calculate_late_working_hours(doc, method):
     if doc.shift:
         shift_type = frappe.db.get_value('Shift Type', doc.shift, [
-            'start_time', 'end_time', 'enable_entry_grace_period', 'late_entry_grace_period', 'early_exit_grace_period', 'enable_exit_grace_period'], as_dict=True)
+            'start_time', 'end_time', 'late_entry_grace_period', 'early_exit_grace_period'], as_dict=True)
 
         if shift_type:
             # thoi gian cham cong muon checkin
             start_time = shift_type.get('start_time')
-            enable_entry_grace_period = shift_type.get(
-                'enable_entry_grace_period')
-            late_entry_grace_period = shift_type.get('late_entry_grace_period')
-            if enable_entry_grace_period and late_entry_grace_period and doc.in_time:
+            late_entry_grace_period = shift_type.get(
+                'late_entry_grace_period') if shift_type.get('late_entry_grace_period') else 0
+            if doc.in_time:
                 minutes = calc_minutes(
                     start_time, doc.in_time, "late_entry") - late_entry_grace_period
                 doc.late_check_in = minutes
@@ -46,10 +45,9 @@ def calculate_late_working_hours(doc, method):
 
             # thoi gian cham cong som checkout
             end_time = shift_type.get('end_time')
-            enable_exit_grace_period = shift_type.get(
-                'enable_exit_grace_period')
-            early_exit_grace_period = shift_type.get('early_exit_grace_period')
-            if enable_exit_grace_period and early_exit_grace_period and doc.out_time:
+            early_exit_grace_period = shift_type.get(
+                'early_exit_grace_period') if shift_type.get('early_exit_grace_period') else 0
+            if doc.out_time:
                 minutes = calc_minutes(
                     end_time, doc.out_time, 'early_exit') - early_exit_grace_period
                 doc.early_check_out = minutes
