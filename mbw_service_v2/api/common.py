@@ -36,13 +36,14 @@ def get_shift_type_now(employee_name):
     shift_type_now = today_list_shift(employee_name, time_now)
     shift_status = "Bạn không có ca hôm nay"
     time_query = time_now.replace(hour=0, minute=0, second=0)
-    time_query_next_day = time_query + timedelta(1)
+    time_query_next_day =  time_now.replace(hour=23, minute=59, second=59)
+    print("ngay", )
     if len(shift_type_now) > 0:
         EmployeeCheckin = frappe.qb.DocType("Employee Checkin")
         last_checkin_today = (frappe.qb.from_(EmployeeCheckin)
-                              .limit(1)
+                              .limit(4)
                               .where((EmployeeCheckin.time >= time_query) & (EmployeeCheckin.time <= time_query_next_day))
-                              .orderby(EmployeeCheckin.time, Order.desc)
+                              .orderby(EmployeeCheckin.time,order= Order.desc)
                               .select('*')
                               .run(as_dict=True))
         if not last_checkin_today:

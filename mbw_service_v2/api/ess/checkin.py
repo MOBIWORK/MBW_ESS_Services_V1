@@ -69,6 +69,7 @@ def get_list_cham_cong(**kwargs):
 @frappe.whitelist(methods="GET")
 def get_shift_now():
     try:
+        print("vao day")
         name= get_employee_id()
         shift_now = get_shift_type_now(name)
         if shift_now["shift_type_now"]:
