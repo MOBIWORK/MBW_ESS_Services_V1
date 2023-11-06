@@ -87,9 +87,7 @@ def register_faceid_employee(**kwargs):
             if int(data.get('status')) == 4:
                 message = translations.get(
                     "not_face_recognition").get(get_language())
-                data = {}
-                data['status'] = False
-                gen_response(200, message, data)
+                gen_response(406, message, {})
                 return None
 
             # insert Employee FaceID
@@ -123,7 +121,6 @@ def register_faceid_employee(**kwargs):
             data = {}
             data['faceid_name'] = doc_face_name
             data['file_url'] = file_url
-            data['status'] = True
 
             message = translations.get(
                 "faceid_register_success").get(get_language())
