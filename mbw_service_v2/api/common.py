@@ -146,14 +146,11 @@ def get_report_doc(report_name):
 # Tính khoảng cách giữa hai vị trí
 R = 6373.0
 
-
+from geopy.distance import great_circle
 def distance_of_two(long_client, lat_client, long_compare, lat_compare):
-    dlat = lat_compare - lat_client
-    dlon = long_compare - long_client
-    a = (sin(dlat/2))**2 + cos(lat_client) * \
-        cos(lat_compare) * (sin(dlon/2))**2
-    c = 2 * atan2(sqrt(a), sqrt(1-a))
-    return R * c
+    point1 = ( lat_client,long_client)
+    point2 = (lat_compare,long_compare)
+    return great_circle(point1, point2).meters
 
 # định nghĩa trả về
 

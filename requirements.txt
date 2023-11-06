@@ -4,3 +4,4 @@ numpy
 scipy
 minio
 python-i18n
+geopy

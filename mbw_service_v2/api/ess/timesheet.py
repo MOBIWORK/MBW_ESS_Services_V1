@@ -95,7 +95,7 @@ def get_list_timesheet_location(**kwargs):
                     x['longitude']), lat_compare=float(x["latitude"]))
                 x["distance"] = distance
                 x["wifi"] = wifi
-            timesheet_position.sort(key=lambda x: x.distance, reverse=True)
+            timesheet_position = sorted(timesheet_position, key=lambda x: x['distance'])
         message = translations.get("successfully").get(get_language())
         gen_response(200, message, {
             "timesheet_position": timesheet_position,
