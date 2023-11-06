@@ -22,9 +22,15 @@ function setDefaultViewMap(frm) {
   
 	map: async function (frm) {
 	  let mapdata = JSON.parse(frm.doc.map).features[0];
-	  if (mapdata && mapdata.geometry.type == "Point") {
-		let lat = mapdata.geometry.coordinates[1];
-		let lon = mapdata.geometry.coordinates[0];
+	  let mapdata_point = JSON.parse(frm.doc.map).features 
+	  let last_point = mapdata_point[mapdata_point.length -1]
+	  console.log("nmapp in",last_point);
+
+
+	  if (last_point && last_point.geometry.type == "Point") {
+
+		let lat = last_point.geometry.coordinates[1];
+		let lon = last_point.geometry.coordinates[0];
 		let address = "";
   
 		await frappe.call({
@@ -38,9 +44,9 @@ function setDefaultViewMap(frm) {
 			address = r.result.results;
 		  },
 		});
-  
-		frm.set_value("longitude", lon);
-		frm.set_value("latitude", lat);
+		frm.set_value('map',JSON.stringify(
+			[last_point]
+			))
 		setFieldValue(frm, lat, lon, address);
 	  } else {
 		setDefaultViewMap(frm);
@@ -48,18 +54,27 @@ function setDefaultViewMap(frm) {
 	  }
 	},
 	address: async function(frm) {
-		let address_text = frm.doc.address
-		await frappe.call({
-			type: "GET",
-			method: "mbw_service_v2.api.ess.geolocation.get_coordinates_location",
-			args: {
-				"address": address_text
-			},
-			callback: function (r) {
-				// let rs = r.result.results;
-				console.log("kết quả",r);
-			  },
+		frm.fields_dict.address.$input.on('blur',async function() {
+
+			let address_text = frm.doc.address
+			await frappe.call({
+				type: "GET",
+				method: "mbw_service_v2.api.ess.geolocation.get_coordinates_location",
+				args: {
+					"address": address_text
+				},
+				callback: function (r) {
+					let rs = r.result.results;
+					if(rs) {
+						let {geometry: {location}} = rs[0]
+						console.log("location",location);
+						frm.set_value('map',JSON.stringify(
+							[{"type":"Feature","properties":{},"geometry":{"type":"Point","coordinates":[location.lng,location.lat]}}]
+							))
+					}
+				  },
+			})
 		})
-	}
+	},
   });
   
