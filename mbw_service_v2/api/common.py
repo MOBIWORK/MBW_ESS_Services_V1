@@ -46,7 +46,7 @@ def get_shift_type_now(employee_name):
                               .orderby(EmployeeCheckin.time,order= Order.desc)
                               .select('*')
                               .run(as_dict=True))
-        if not last_checkin_today:
+        if not last_checkin_today or last_checkin_today[0].get("log_type") == "OUT":
             shift_type_now = shift_now(employee_name, time_now)
             shift_status = False
         else:
