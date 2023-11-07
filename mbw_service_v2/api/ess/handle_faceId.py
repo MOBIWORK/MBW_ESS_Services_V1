@@ -129,7 +129,7 @@ def register_faceid_employee(**kwargs):
         else:
             message = translations.get(
                 "error").get(get_language())
-            gen_response(500, message)
+            gen_response(406, message)
             return None
 
     except Exception as e:
@@ -215,7 +215,6 @@ def update_faceid_employee(**kwargs):
             data = {}
             data['faceid_name'] = doc_face_name
             data['file_url'] = file_url
-            data['status'] = True
 
             message = translations.get(
                 "faceid_success").get(get_language())
@@ -224,7 +223,7 @@ def update_faceid_employee(**kwargs):
         else:
             message = translations.get(
                 "error").get(get_language())
-            gen_response(500, message)
+            gen_response(406, message)
     except Exception as e:
         # delete when error
         if doc_file_name:
@@ -310,7 +309,7 @@ def verify_faceid_employee(**kwargs):
         else:
             message = translations.get(
                 "error").get(get_language())
-            gen_response(500, message)
+            gen_response(406, message)
     except Exception as e:
         print(e)
         message = translations.get(
