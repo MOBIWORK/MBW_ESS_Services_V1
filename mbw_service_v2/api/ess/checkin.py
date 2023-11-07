@@ -129,7 +129,7 @@ def get_list_shift_request(**kwargs):
                       .offset(start)
                       .limit(page_size)
                       .orderby(ShiftRequest.creation, order=Order.desc)
-                      .select(ShiftRequest.name, UNIX_TIMESTAMP(ShiftRequest.creation).as_("creation"),UNIX_TIMESTAMP(ShiftRequest.from_date).as_("from_date"), UNIX_TIMESTAMP(ShiftRequest.to_date).as_("to_date"), ShiftRequest.shift_type, ShiftType.start_time, ShiftType.end_time,ShiftRequest.status, Employee.image).run(as_dict=True)
+                      .select(ShiftRequest.name, UNIX_TIMESTAMP(ShiftRequest.creation).as_("creation"),UNIX_TIMESTAMP(ShiftRequest.from_date).as_("from_date"), UNIX_TIMESTAMP(ShiftRequest.to_date).as_("to_date"), ShiftRequest.shift_type, ShiftType.start_time, ShiftType.end_time,ShiftRequest.status, ShiftRequest.approver,Employee.employee_name ,Employee.image).run(as_dict=True)
                       )
         queryOpen = frappe.db.count('Shift Request', {'status': 'Draft', 'employee': employeID})
         queryApprover = frappe.db.count('Shift Request', {'status': 'Approved', 'employee': employeID})
