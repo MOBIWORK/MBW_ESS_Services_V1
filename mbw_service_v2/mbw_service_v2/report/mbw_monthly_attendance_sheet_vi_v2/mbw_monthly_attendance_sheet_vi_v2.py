@@ -14,7 +14,7 @@ from frappe.utils import cint, cstr, getdate
 Filters = frappe._dict
 
 status_map = {
-	"Present": "AAA",
+	"Present": "P",
 	"Absent": "A",
 	"Half Day": "HD",
 	"Work From Home": "WFH",
@@ -39,7 +39,6 @@ def execute(filters: Optional[Filters] = None) -> Tuple:
 
 	columns = get_columns(filters)
 	data = get_data(filters, attendance_map)
-
 	if not data:
 		frappe.msgprint(
 			_("No attendance records found for this criteria."), alert=True, indicator="orange"
@@ -105,6 +104,7 @@ def get_columns(filters: Filters) -> List[Dict]:
 					"width": 110,
 				},
 				{"label": _("Total Leaves"), "fieldname": "total_leaves", "fieldtype": "Float", "width": 110},
+				{"label": _("Total Hour"), "fieldname": "total_hours", "fieldtype": "Float", "width": 110},
 				{"label": _("Total Absent"), "fieldname": "total_absent", "fieldtype": "Float", "width": 110},
 				{
 					"label": _("Total Holidays"),
@@ -120,7 +120,6 @@ def get_columns(filters: Filters) -> List[Dict]:
 				},
 			]
 		)
-		columns.extend(get_columns_for_leave_types())
 		columns.extend(
 			[
 				{
@@ -130,13 +129,26 @@ def get_columns(filters: Filters) -> List[Dict]:
 					"width": 140,
 				},
 				{
+					"label": _("Time Late Entries"),
+					"fieldname": "time_late_entries",
+					"fieldtype": "Float",
+					"width": 140,
+				},
+				{
 					"label": _("Total Early Exits"),
 					"fieldname": "total_early_exits",
 					"fieldtype": "Float",
 					"width": 140,
 				},
+				{
+					"label": _("Time Early Exits"),
+					"fieldname": "time_early_exits",
+					"fieldtype": "Float",
+					"width": 140,
+				},
 			]
 		)
+		columns.extend(get_columns_for_leave_types())
 	else:
 		columns.append({"label": _("Shift"), "fieldname": "shift", "fieldtype": "Data", "width": 120})
 		columns.extend(get_columns_for_days(filters))
@@ -370,8 +382,9 @@ def get_rows(
 				continue
 
 			leave_summary = get_leave_summary(employee, filters)
+			# Xu ly thoi gian ra vao muon
 			entry_exits_summary = get_entry_exits_summary(employee, filters)
-
+			print("employee",employee,"entry_exits_summary",entry_exits_summary,"attendance",attendance,'\n')
 			row = {"employee": employee, "employee_name": details.employee_name}
 			set_defaults_for_summarized_view(filters, row)
 			row.update(attendance)
@@ -428,6 +441,7 @@ def get_attendance_status_for_summarized_view(
 
 	return {
 		"total_present": summary.total_present + summary.total_half_days,
+		"total_hours": summary.total_hours,
 		"total_leaves": summary.total_leaves + summary.total_half_days,
 		"total_absent": summary.total_absent,
 		"total_holidays": total_holidays,
@@ -445,6 +459,9 @@ def get_attendance_summary_and_days(employee: str, filters: Filters) -> Tuple[Di
 	)
 	sum_present = Sum(present_case).as_("total_present")
 
+	hours_case = frappe.qb.terms.Case().when(((Attendance.status == "Present") | (Attendance.status == "Work From Home")),Attendance.working_hours).else_(0)
+	sum_hours = Sum(hours_case).as_("total_hours")
+
 	absent_case = frappe.qb.terms.Case().when(Attendance.status == "Absent", 1).else_(0)
 	sum_absent = Sum(absent_case).as_("total_absent")
 
@@ -459,6 +476,7 @@ def get_attendance_summary_and_days(employee: str, filters: Filters) -> Tuple[Di
 		.select(
 			sum_present,
 			sum_absent,
+			sum_hours,
 			sum_leave,
 			sum_half_day,
 		)
@@ -563,16 +581,22 @@ def get_entry_exits_summary(employee: str, filters: Filters) -> Dict[str, float]
 	{'total_late_entries': 5, 'total_early_exits': 2}
 	"""
 	Attendance = frappe.qb.DocType("Attendance")
-
-	late_entry_case = frappe.qb.terms.Case().when(Attendance.late_entry == "1", "1")
+	# so lan va thoi gian vao muon
+	late_entry_case = frappe.qb.terms.Case().when(Attendance.late_entry == "1", 1)
 	count_late_entries = Count(late_entry_case).as_("total_late_entries")
 
-	early_exit_case = frappe.qb.terms.Case().when(Attendance.early_exit == "1", "1")
+	time_entry_case = frappe.qb.terms.Case().when(Attendance.late_entry == "1", Attendance.late_check_in)
+	time_late_entries = Sum(time_entry_case).as_("time_late_entries")
+	# so lan va thoi gian ra som
+	early_exit_case = frappe.qb.terms.Case().when(Attendance.early_exit == "1", 1)
 	count_early_exits = Count(early_exit_case).as_("total_early_exits")
+
+	time_exit_case = frappe.qb.terms.Case().when(Attendance.early_exit == "1", Attendance.early_check_out)
+	time_early_exits = Sum(time_exit_case).as_("time_early_exits")
 
 	entry_exits = (
 		frappe.qb.from_(Attendance)
-		.select(count_late_entries, count_early_exits)
+		.select(count_late_entries,time_late_entries, count_early_exits,time_early_exits)
 		.where(
 			(Attendance.docstatus == 1)
 			& (Attendance.employee == employee)

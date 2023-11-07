@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["MBW Monthly Attendance Sheet vi"] = {
+frappe.query_reports["MBW Monthly Attendance Sheet vi v2"] = {
 	"filters": [
 		{
 			"fieldname": "month",
@@ -68,7 +68,7 @@ frappe.query_reports["MBW Monthly Attendance Sheet vi"] = {
 	],
 	onload: function() {
 		return  frappe.call({
-			method: "hrms.hr.report.monthly_attendance_sheet.monthly_attendance_sheet.get_attendance_years",
+			method: "mbw_service_v2.mbw_service_v2.report.mbw_monthly_attendance_sheet_vi_v2.mbw_monthly_attendance_sheet_vi_v2.get_attendance_years",
 			callback: function(r) {
 				var year_filter = frappe.query_report.get_filter('year');
 				year_filter.df.options = r.message;
