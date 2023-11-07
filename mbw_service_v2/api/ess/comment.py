@@ -19,6 +19,8 @@ import json
 def get_list_comment_leave(**kwargs):
     try:
         name = kwargs.get('name')
+        type_comment = kwargs.get('type_comment')
+
         page_size = 20 if not kwargs.get(
             'page_size') else int(kwargs.get('page_size'))
         page = 1 if not kwargs.get('page') or int(
@@ -35,7 +37,7 @@ def get_list_comment_leave(**kwargs):
             .inner_join(Employee)
             .on(Comment.owner == Employee.user_id)
             .select(count_all)
-            .where((Comment.reference_doctype == 'Leave Application') & (Comment.reference_name == name))
+            .where((Comment.reference_doctype == type_comment) & (Comment.reference_name == name))
             .where((Comment.comment_type == 'Comment'))
         ).run(as_dict=True)[0].get('count')
 
@@ -44,7 +46,7 @@ def get_list_comment_leave(**kwargs):
             .inner_join(Employee)
             .on(Comment.owner == Employee.user_id)
             .select(Comment.comment_by, Employee.image, Comment.content, UNIX_TIMESTAMP(Comment.creation).as_('creation'))
-            .where((Comment.reference_doctype == 'Leave Application') & (Comment.reference_name == name))
+            .where((Comment.reference_doctype == type_comment) & (Comment.reference_name == name))
             .where((Comment.comment_type == 'Comment'))
             .offset(start)
             .limit(page_size)
@@ -73,7 +75,7 @@ def post_comment_leave(**kwargs):
     try:
         name_doc = kwargs.get('name')
         content = kwargs.get('content')
-        reference_doctype = "Leave Application"
+        type_comment = kwargs.get('type_comment')
         info_employee = get_employee_by_user(get_user_id(), ["*"])
 
         if not info_employee:
@@ -81,15 +83,19 @@ def post_comment_leave(**kwargs):
             gen_response(406, message, [])
             return None
 
-        check_doc = frappe.db.exists(reference_doctype, name_doc, cache=True)
-        if not check_doc:
+        if not type_comment or not frappe.db.get_value('DocType', type_comment):
+            message = "Loại bình luận không đúng."
+            gen_response(406, message, [])
+            return None
+
+        if not frappe.db.exists(type_comment, name_doc, cache=True):
             message = "Không tìm thấy đơn từ."
             gen_response(406, message, [])
             return None
 
         # them moi comment
         doc_comment = frappe.new_doc('Comment')
-        doc_comment.reference_doctype = reference_doctype
+        doc_comment.reference_doctype = type_comment
         doc_comment.reference_name = name_doc
         doc_comment.comment_type = 'Comment'
         doc_comment.content = content
