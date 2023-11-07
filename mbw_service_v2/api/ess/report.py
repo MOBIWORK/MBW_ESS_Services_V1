@@ -34,7 +34,7 @@ def get_report_monthly(
     
     # rs = frappe.getdoc("Report","Monthly Attendance Sheet")
     # return rs
-    report = get_report_doc("Monthly Attendance Sheet")
+    report = get_report_doc("MBW Monthly Attendance Sheet vi v2")
     user = frappe.session.user
     filters = json.loads(filters)
     employee = get_employee_id()
@@ -43,7 +43,7 @@ def get_report_monthly(
     filters["employee"] = employee
     filters['company'] = ok.get('company')
     result = generate_report_result(report, filters, user, False, None)
-    const_fiel = ["employee","employee_name","total_present","total_leaves","total_absent","total_holidays","unmarked_days","total_late_entries","total_early_exits","shift"]
+    const_fiel = ["employee","employee_name","total_present","total_hours","total_leaves","total_absent","total_holidays","unmarked_days","total_late_entries","time_late_entries","total_early_exits","time_early_exits","shift"]
     if result :
         result = result[0] 
         vacation = []
