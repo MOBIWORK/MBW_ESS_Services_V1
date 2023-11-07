@@ -5,7 +5,7 @@ import requests
 import json
 from datetime import datetime
 from mbw_service_v2.translations.language import translations
-
+from frappe.utils import cstr
 
 @frappe.whitelist(methods="POST")
 def checkin_data(**data):
@@ -36,6 +36,8 @@ def checkin_data(**data):
             gen_response(500, dataTimeSheet.get('message'), [])
             return
         data_checkin = dataTimeSheet.get('data')
+        
+        # return data_checkin
         if len(data_checkin) > 0:
             field_not_loop = ['stt', 'ma_nhan_vien', 'ten_nhan_vien']
             for employee in data_checkin:
@@ -49,12 +51,12 @@ def checkin_data(**data):
                 if emp_data:
                     total = 0
                     total_has = 0
+                    thoi_gian_co = []
                     for field, value in employee.items():
                         if (field not in field_not_loop):
                             dataCheckShift = value.get('data_cc')
                             for data_check in dataCheckShift:
                                 total += 1
-
                     new_log = frappe.new_doc("DMS Log")
                     data_log = {
                         "ma_nv": emp_data,
@@ -64,6 +66,7 @@ def checkin_data(**data):
                         "total_import": 0,
                         "status": "Đang tiến hành"
                     }
+                    
                     for fiel, value in data_log.items():
                         setattr(new_log, fiel, value)
 
@@ -72,14 +75,17 @@ def checkin_data(**data):
                     for field, value in employee.items():
                         if (field not in field_not_loop):
                             dataCheckShift = value.get('data_cc')
+                            thoigian = {
+                                value.get("date_time") : []
+                            }
                             for docShift in dataCheckShift:
                                 if bool(docShift.get('thoi_gian')):
+                                    thoigian[value.get("date_time")].append(docShift.get('thoi_gian'))
                                     hour = docShift.get(
                                         'thoi_gian').split(':')[0]
                                     minute = docShift.get(
                                         'thoi_gian').split(':')[1]
-                                    ime_check_server = datetime.strptime(value.get(
-                                        'ngay'), "%Y-%m-%dT%H:%M:%S.%fZ").replace(hour=int(hour), minute=int(minute))
+                                    ime_check_server = datetime.strptime(value.get('date_time'),  '%a, %d %b %Y %H:%M:%S %Z').replace(hour=int(hour), minute=int(minute))
                                     data = {
                                         "time": ime_check_server,
                                         "device_id": json.dumps({"longitude": docShift.get("long"), "latitude": docShift.get("lat")}),
@@ -87,21 +93,54 @@ def checkin_data(**data):
                                         "image": docShift.get('hinh_anh'),
                                         "employee": emp_data,
                                     }
+                                    ShiftType = frappe.qb.DocType('Shift Type')
+                                    ShiftAssignment = frappe.qb.DocType('Shift Assignment')
+
+
+                                    that_shift_now = (frappe.qb.from_(ShiftType)
+                                        .inner_join(ShiftAssignment)
+                                        .on(ShiftType.name == ShiftAssignment.shift_type)
+                                        .where(
+                                            (ShiftAssignment.employee == emp_data) & 
+                                            (ime_check_server.time() >= ShiftType.start_time) & 
+                                            (ime_check_server.time() <= ShiftType.end_time) & 
+                                            (ime_check_server.date() >= ShiftAssignment.start_date) & 
+                                            (ime_check_server.date() <= ShiftAssignment.end_date)
+                                        )
+                                        .select(ShiftType.name, ShiftType.start_time, ShiftType.end_time, ShiftType.allow_check_out_after_shift_end_time, ShiftType.begin_check_in_before_shift_start_time)
+                                        .run(as_dict=True)
+                                    )
+                                    if len(that_shift_now) == 0 :
+                                        continue
+                                    that_shift_now = that_shift_now[0]
+                                    # print("data in",data,'\n')
+                                    # print("data del",that_shift_now.get('name'),data['log_type'],'\n')
+                                    # print("end=================="'\n')
+
+                                    countDelete = frappe.db.delete('Employee Checkin',{
+                                        "employee": emp_data,
+                                        "shift" : that_shift_now.get('name'),
+                                        "log_type" : data['log_type'],
+                                        "time" : ['between', [datetime.strptime(value.get('date_time'),  '%a, %d %b %Y %H:%M:%S %Z').replace(hour=0, minute=0),datetime.strptime(value.get('date_time'),  '%a, %d %b %Y %H:%M:%S %Z').replace(hour=23, minute=59)]] 
+                                    })
                                     new_check = frappe.new_doc(
                                         "Employee Checkin")
-                                    for field, value in data.items():
-                                        setattr(new_check, field, value)
+                                    for field, value_data in data.items():
+                                        setattr(new_check, field, value_data)
                                     setattr(new_check, "image_attach",
                                             data.get("image"))
+                                    
                                     new_check.insert()
                                     total_has += 1
+                            thoi_gian_co.append(thoigian)
                     new_log.total_import = total_has
                     new_log.status = "Thành công"
                     new_log.save()
 
-        return
+        return thoi_gian_co
     except Exception as e:
-        # setattr(new_log,'status',"Thất bại")
-        # new_log.save()
+        new_log.status = "Thất bại"
+        new_log.message = cstr(e)
+        new_log.save()
         print(e)
         exception_handel(e)
