@@ -87,7 +87,7 @@ def register_faceid_employee(**kwargs):
             if int(data.get('status')) == 4:
                 message = translations.get(
                     "not_face_recognition").get(get_language())
-                gen_response(406, message, {})
+                gen_response(404, message, {})
                 return None
 
             # insert Employee FaceID
@@ -129,7 +129,7 @@ def register_faceid_employee(**kwargs):
         else:
             message = translations.get(
                 "error").get(get_language())
-            gen_response(406, message)
+            gen_response(404, message)
             return None
 
     except Exception as e:
@@ -186,7 +186,7 @@ def update_faceid_employee(**kwargs):
             if int(data.get('status')) == 4:
                 message = translations.get(
                     "not_face_recognition").get(get_language())
-                gen_response(406, message, [])
+                gen_response(404, message, [])
                 return None
 
             # save file and insert Doctype File
@@ -223,7 +223,7 @@ def update_faceid_employee(**kwargs):
         else:
             message = translations.get(
                 "error").get(get_language())
-            gen_response(406, message)
+            gen_response(404, message)
     except Exception as e:
         # delete when error
         if doc_file_name:
@@ -271,7 +271,7 @@ def verify_faceid_employee(**kwargs):
             if int(data.get('status')) == 4:
                 message = translations.get(
                     "not_face_recognition").get(get_language())
-                gen_response(406, message, data)
+                gen_response(404, message, data)
                 return None
 
             image_check = data.get("uploaded_faces")
@@ -309,7 +309,7 @@ def verify_faceid_employee(**kwargs):
         else:
             message = translations.get(
                 "error").get(get_language())
-            gen_response(406, message)
+            gen_response(404, message)
     except Exception as e:
         print(e)
         message = translations.get(

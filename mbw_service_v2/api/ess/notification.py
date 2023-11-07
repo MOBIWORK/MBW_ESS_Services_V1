@@ -22,32 +22,33 @@ def get_list_notification(**kwargs):
         start_time = kwargs.get("start_time")
         end_time = kwargs.get("end_time")
 
-        page_size = 20 if not kwargs.get(
-            'page_size') else int(kwargs.get('page_size'))
-        page = 1 if not kwargs.get('page') or int(
-            kwargs.get('page')) <= 0 else int(kwargs.get('page'))
+        page_size = 20 if not kwargs.get('page_size') else int(kwargs.get('page_size'))
+        page = 1 if not kwargs.get('page') or int(kwargs.get('page')) <= 0 else int(kwargs.get('page'))
         start = (page - 1) * page_size
-
-        start_day = str(datetime.fromtimestamp(int(start_time))).split(" ")[0]
-        end_day = str(datetime.fromtimestamp(int(end_time))).split(" ")[0]
 
         NoticeBoard = DocType("Notice Board")
         EmployeeJoin = frappe.qb.DocType('Notice Board Employee')
         Employee = frappe.qb.DocType('Employee')
         UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
-        count_all = Count('*').as_("count")
+        
+        query_code = (EmployeeJoin.employee == employee_id) | (NoticeBoard.apply_for == "All Employee")
+        if start_time and end_time:
+            start_day = datetime.fromtimestamp(int(start_time))
+            end_day = datetime.fromtimestamp(int(end_time))
+            query_code = query_code & (NoticeBoard.creation <= end_day) & (NoticeBoard.creation >= start_day)
 
-        total_doc = (
-            frappe.qb.from_(NoticeBoard)
-            .left_join(EmployeeJoin)
-            .on(NoticeBoard.name == EmployeeJoin.parent)
-            .inner_join(Employee)
-            .on(NoticeBoard.owner == Employee.user_id)
-            .select(count_all)
-            .where((NoticeBoard.from_date <= end_day))
-            .where((NoticeBoard.to_date >= start_day))
-            .where((EmployeeJoin.employee == employee_id) | (NoticeBoard.apply_for == "All Employee"))
-        ).run(as_dict=True)[0].get('count')
+        # count_all = Count('*').as_("count")
+        # total_doc = (
+        #     frappe.qb.from_(NoticeBoard)
+        #     .left_join(EmployeeJoin)
+        #     .on(NoticeBoard.name == EmployeeJoin.parent)
+        #     .inner_join(Employee)
+        #     .on(NoticeBoard.owner == Employee.user_id)
+        #     .select(count_all)
+        #     .where((NoticeBoard.from_date <= end_day))
+        #     .where((NoticeBoard.to_date >= start_day))
+        #     .where((EmployeeJoin.employee == employee_id) | (NoticeBoard.apply_for == "All Employee"))
+        # ).run(as_dict=True)[0].get('count')
 
         list_doc = (
             frappe.qb.from_(NoticeBoard)
@@ -58,9 +59,7 @@ def get_list_notification(**kwargs):
             .select(NoticeBoard.name, Employee.employee_name, Employee.image, NoticeBoard.notice_title, NoticeBoard.message, NoticeBoard.description, UNIX_TIMESTAMP(NoticeBoard.from_date).as_("from_date"), UNIX_TIMESTAMP(NoticeBoard.to_date).as_("to_date"), UNIX_TIMESTAMP(NoticeBoard.creation).as_('creation'), NoticeBoard.priority_level, NoticeBoard.employee_watched)
             .offset(start)
             .limit(page_size)
-            .where((NoticeBoard.from_date <= end_day))
-            .where((NoticeBoard.to_date >= start_day))
-            .where((EmployeeJoin.employee == employee_id) | (NoticeBoard.apply_for == "All Employee"))
+            .where(query_code)
             .orderby(NoticeBoard.creation, order=Order.desc)
         ).run(as_dict=True)
 
@@ -84,7 +83,7 @@ def get_list_notification(**kwargs):
         message = "Thành công"
         result = {
             "data": list_doc,
-            "total_doc": total_doc
+            # "total_doc": total_doc
         }
         gen_response(200, message, result)
     except Exception as e:
@@ -160,7 +159,7 @@ def get_info_notification(**kwargs):
             gen_response(200, message, info)
         else:
             message = "Không tồn tại tài liệu"
-            gen_response(406, message, list_doc)
+            gen_response(404, message, list_doc)
             return None
     except Exception as e:
         print(e)
@@ -172,6 +171,8 @@ def get_info_notification(**kwargs):
 def get_list_notification_system(**kwargs):
     try:
         user_id = get_user_id()
+        start_time = kwargs.get("start_time")
+        end_time = kwargs.get("end_time")
 
         page_size = 20 if not kwargs.get(
             'page_size') else int(kwargs.get('page_size'))
@@ -182,15 +183,21 @@ def get_list_notification_system(**kwargs):
         NotificationLog = DocType("Notification Log")
         Employee = frappe.qb.DocType('Employee')
         UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
-        count_all = Count('*').as_("count")
+        
+        query_code = (NotificationLog.for_user == user_id)
+        if start_time and end_time:
+            start_day = datetime.fromtimestamp(int(start_time))
+            end_day = datetime.fromtimestamp(int(end_time))
+            query_code = query_code & (NotificationLog.creation <= end_day) & (NotificationLog.creation >= start_day)
 
-        total_doc = (
-            frappe.qb.from_(NotificationLog)
-            .inner_join(Employee)
-            .on(NotificationLog.owner == Employee.user_id)
-            .select(count_all)
-            .where((NotificationLog.for_user == user_id))
-        ).run(as_dict=True)[0].get('count')
+        # count_all = Count('*').as_("count")
+        # total_doc = (
+        #     frappe.qb.from_(NotificationLog)
+        #     .inner_join(Employee)
+        #     .on(NotificationLog.owner == Employee.user_id)
+        #     .select(count_all)
+        #     .where((NotificationLog.for_user == user_id))
+        # ).run(as_dict=True)[0].get('count')
 
         list_doc = (
             frappe.qb.from_(NotificationLog)
@@ -199,7 +206,7 @@ def get_list_notification_system(**kwargs):
             .select(NotificationLog.subject, NotificationLog.document_type, NotificationLog.document_name, Employee.employee_name, Employee.image, UNIX_TIMESTAMP(NotificationLog.creation).as_('creation'), NotificationLog._seen)
             .offset(start)
             .limit(page_size)
-            .where((NotificationLog.for_user == user_id))
+            .where(query_code)
             .orderby(NotificationLog.creation, order=Order.desc)
         ).run(as_dict=True)
         for doc in list_doc:
@@ -222,7 +229,7 @@ def get_list_notification_system(**kwargs):
         message = "Thành công"
         result = {
             "data": list_doc,
-            "total_doc": total_doc
+            # "total_doc": total_doc
         }
         gen_response(200, message, result)
     except Exception as e:

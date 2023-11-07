@@ -80,17 +80,17 @@ def post_comment_leave(**kwargs):
 
         if not info_employee:
             message = "Không tìm thấy người dùng."
-            gen_response(406, message, [])
+            gen_response(404, message, [])
             return None
 
         if not type_comment or not frappe.db.get_value('DocType', type_comment):
             message = "Loại bình luận không đúng."
-            gen_response(406, message, [])
+            gen_response(404, message, [])
             return None
 
         if not frappe.db.exists(type_comment, name_doc, cache=True):
             message = "Không tìm thấy đơn từ."
-            gen_response(406, message, [])
+            gen_response(404, message, [])
             return None
 
         # them moi comment
