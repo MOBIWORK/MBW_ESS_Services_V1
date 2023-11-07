@@ -174,7 +174,7 @@ def create_shift_request(**data) :
         new_shift_request.insert()
         gen_response(201,"Success",{
             "shift_request": new_shift_request,
-            "approver_info": approver_info
+            "approver_info": approver_info[0]
         })
     except Exception as e:
         exception_handel(e)
