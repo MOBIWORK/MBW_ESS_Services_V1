@@ -161,7 +161,7 @@ def get_columns_for_leave_types() -> List[Dict]:
 	types = []
 	for entry in leave_types:
 		types.append(
-			{"label": entry, "fieldname": frappe.scrub(entry), "fieldtype": "Float", "width": 120}
+			{"label": _(entry), "fieldname": frappe.scrub(entry), "fieldtype": "Float", "width": 120}
 		)
 
 	return types
