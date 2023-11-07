@@ -73,7 +73,8 @@ def get_employee_info() :
         user_info = get_info_employee(name= employee_id,fields=["employee", "employee_name","gender", "date_of_birth", "date_of_joining" ,"salutation", "image","user_id","department", "designation","cell_number", "current_address"])
         user_info['date_of_birth'] = user_info['date_of_birth']
         base_url = frappe.utils.get_request_site_address()
-        user_info['image'] = base_url + user_info['image']
+        if user_info['image']:
+            user_info['image'] = base_url + user_info['image']
 
         gen_response(200,"",user_info)
     except Exception as e:
