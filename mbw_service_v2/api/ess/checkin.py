@@ -20,19 +20,23 @@ from pypika import Field,functions, Order, CustomFunction
 @frappe.whitelist(methods="POST")
 def checkin_shift(**data):
     try:
-        # employee = get_employee_id()
-        # time_check = datetime.fromtimestamp(int(data.get('time')))  
-        time_check_server = datetime.now().strftime("%m/%d/%Y, %H:%M:%S")    
-        new_check = frappe.new_doc("Employee Checkin")
-        data["device_id"] = json.dumps({"longitude": data.get(
-            "longitude"), "latitude": data.get("latitude")})
-        # data["time"] = time_check_server
-        for field, value in dict(data).items():
-            setattr(new_check, field, value)
-        setattr(new_check,"image_attach",data.get("image"))
-        new_check.insert()
-        message = translations.get("create_success").get(get_language())
-        gen_response(200,message,new_check)
+        name= get_employee_id()
+        shift_now = get_shift_type_now(name) 
+        print("ca",shift_now.get("shift_type_now"))
+        if shift_now.get("shift_type_now"):   
+            new_check = frappe.new_doc("Employee Checkin")
+            data["device_id"] = json.dumps({"longitude": data.get(
+                "longitude"), "latitude": data.get("latitude")})
+            for field, value in dict(data).items():
+                setattr(new_check, field, value)
+            log_type = "IN" if shift_now.get('shift_status') == False or shift_now.get('shift_status') == "OUT" else "OUT"
+            setattr(new_check,'log_type',log_type)
+            setattr(new_check,"image_attach",data.get("image"))
+            new_check.insert()
+            message = translations.get("create_success").get(get_language())
+            gen_response(200,message,new_check)
+            return
+        gen_response(500, "Bạn không có ca",None)
     except frappe.DoesNotExistError:
         message = translations.get("error").get(get_language())
         gen_response(404, message, []) 
