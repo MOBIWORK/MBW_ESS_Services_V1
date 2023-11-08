@@ -80,14 +80,18 @@ class MinioConnection:
                                       object_name=object_name, data=data, metadata=metadata,
                                       length=length, part_size=part_size)
 
+def create_my_minio():
+    settings = frappe.get_doc("MBW Employee Settings").as_dict()
 
-my_minio = MinioConnection(
-    endpoint=CONFIG_KEYS.get("ENDPOINT_S3"),
-    access_key=CONFIG_KEYS.get("ACCESS_KEY_S3"),
-    secret_key=CONFIG_KEYS.get("KEY_SECRET_S3"),
-    region="auto",
-    secure=0
-)
+    return MinioConnection(
+        endpoint=settings.get("endpoint_s3"),
+        access_key=settings.get("access_key_s3"),
+        secret_key=settings.get("key_secret_s3"),
+        region="auto",
+        secure=0
+    )
+    
+my_minio = create_my_minio()
 
 
 def distance_cal(embedding_check, know_embedding):

@@ -27,14 +27,8 @@ from mbw_service_v2.api.file import (
 from mbw_service_v2.translations.language import translations
 from mbw_service_v2.utils import CONFIG_KEYS
 
-API_KEY_FACE_EKGIS = CONFIG_KEYS.get("API_KEY_FACE_EKGIS")
-BUCKET_NAME = CONFIG_KEYS.get("BUCKET_NAME_S3")
-ENDPOINT = CONFIG_KEYS.get("ENDPOINT_S3")
-
 
 """Begin FaceID"""
-
-
 @frappe.whitelist(methods="GET")
 def get_faceid_employee(**kwargs):
     try:
@@ -61,6 +55,8 @@ def get_faceid_employee(**kwargs):
 def register_faceid_employee(**kwargs):
     doc_face_name = None
     doc_file_name = None
+    
+    settings = frappe.get_doc("MBW Employee Settings").as_dict()
 
     try:
         employee_id = get_employee_id()
@@ -72,7 +68,7 @@ def register_faceid_employee(**kwargs):
             faceimage = list_check[1]
 
         # call api get vector
-        url = f"https://api.ekgis.vn/deepvision/faceid/v1/encoding?api_key={API_KEY_FACE_EKGIS}"
+        url = f"https://api.ekgis.vn/deepvision/faceid/v1/encoding?api_key={settings.get('api_key_face_ekgis')}"
         headers = {
             'Content-Type': 'application/json'
         }
@@ -146,7 +142,7 @@ def register_faceid_employee(**kwargs):
 @frappe.whitelist(methods="POST")
 def update_faceid_employee(**kwargs):
     doc_file_name = None
-
+    settings = frappe.get_doc("MBW Employee Settings").as_dict()
     try:
         employee_id = get_employee_id()
         faceimage = kwargs.get('faceimage')
@@ -171,7 +167,7 @@ def update_faceid_employee(**kwargs):
             faceimage = list_check[1]
 
         # call api get vector
-        url = f"https://api.ekgis.vn/deepvision/faceid/v1/encoding?api_key={API_KEY_FACE_EKGIS}"
+        url = f"https://api.ekgis.vn/deepvision/faceid/v1/encoding?api_key={settings.get('api_key_face_ekgis')}"
         headers = {
             'Content-Type': 'application/json'
         }
@@ -237,6 +233,11 @@ def update_faceid_employee(**kwargs):
 @frappe.whitelist(methods="POST")
 def verify_faceid_employee(**kwargs):
     try:
+        settings = frappe.get_doc("MBW Employee Settings").as_dict()
+        api_key_face_ekgis = settings.get('api_key_face_ekgis')
+        bucket_name_s3 = settings.get('bucket_name_s3')
+        endpoint_s3 = settings.get('endpoint_s3')
+        
         employee_id = get_employee_id()
         faceimage = kwargs.get('faceimage')
 
@@ -257,7 +258,7 @@ def verify_faceid_employee(**kwargs):
             return None
 
         # call api get vector
-        url = f"https://api.ekgis.vn/deepvision/faceid/v1/encoding?api_key={API_KEY_FACE_EKGIS}"
+        url = f"https://api.ekgis.vn/deepvision/faceid/v1/encoding?api_key={api_key_face_ekgis}"
         headers = {
             'Content-Type': 'application/json'
         }
@@ -288,12 +289,12 @@ def verify_faceid_employee(**kwargs):
                 file_name = "checkin_" + employee_id + \
                     "_" + str(datetime.now()) + ".png"
                 object_name = f"{frappe.local.site}/checkin/{file_name}"
-                my_minio.put_object(bucket_name=BUCKET_NAME,
+                my_minio.put_object(bucket_name=bucket_name_s3,
                                     object_name=object_name, data=io.BytesIO(imgdata))
 
                 # data response
                 data = {}
-                data["file_url"] = f"https://{ENDPOINT}/{BUCKET_NAME}/{object_name}"
+                data["file_url"] = f"https://{endpoint_s3}/{bucket_name_s3}/{object_name}"
                 data['status'] = True
                 message = translations.get(
                     "faceid_verify_success").get(get_language())
