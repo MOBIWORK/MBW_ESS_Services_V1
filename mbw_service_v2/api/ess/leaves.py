@@ -26,7 +26,7 @@ def get_detail_leave(name):
                 .select(Employee.image.as_("avatar_employee")).run(as_dict=True))
 
     gen_response(200, i18n.t('translate.successfully', locale=get_language()), {
-        "leave_application" : leave_application[0],
+        "data" : leave_application[0],
         "avata_employee": employee[0].avatar_employee
     })
 
@@ -83,7 +83,7 @@ def get_list_leave(**kwargs):
         queryApprover = frappe.db.count('Leave Application', {'status': 'Approved', 'employee': employee_id})
         queryReject = frappe.db.count('Leave Application', {'status': 'Rejected', 'employee': employee_id})
         gen_response(200, i18n.t('translate.successfully', locale=get_language()), {
-            "leave_application": leave_application,
+            "data": leave_application,
             "avata_employee": employee[0].avatar_employee,
             "queryOpen": queryOpen,
             "queryApprover": queryApprover,
@@ -134,7 +134,7 @@ def create_leave(**kwargs):
         leave_application = frappe.qb.DocType('Leave Application')
         detail_leave_applicaton = frappe.qb.from_(leave_application).where(leave_application.name == name_new_doc).select(leave_application.name, leave_application.employee_name,leave_application.employee, UNIX_TIMESTAMP(leave_application.creation).as_("creation"), UNIX_TIMESTAMP(leave_application.from_date).as_("from_date"),UNIX_TIMESTAMP(leave_application.to_date).as_("to_date"), leave_application.leave_type, leave_application.status,leave_application.leave_approver,leave_application.half_day,UNIX_TIMESTAMP(leave_application.half_day_date).as_("half_day_date"),leave_application.total_leave_days,leave_application.description).run(as_dict=True)
         gen_response(201, i18n.t('translate.create_success', locale=get_language()), {
-            "leave_application": detail_leave_applicaton,
+            "data": detail_leave_applicaton,
             "avata_employee": employee[0].avatar_employee
         })
     
