@@ -20,7 +20,7 @@ def get_detail_leave(name):
                               .on(LeaveApplication.leave_approver == Employee.user_id)
                               .where((LeaveApplication.employee == employee_id) & (LeaveApplication.name == name))
                               .orderby(LeaveApplication.creation, order=Order.desc)
-                              .select(LeaveApplication.name,LeaveApplication.employee_name,LeaveApplication.employee, UNIX_TIMESTAMP(LeaveApplication.creation).as_("creation"),UNIX_TIMESTAMP(LeaveApplication.from_date).as_("from_date"),UNIX_TIMESTAMP(LeaveApplication.to_date).as_("to_date"),LeaveApplication.half_day, UNIX_TIMESTAMP(LeaveApplication.half_day_date).as_("half_day_date"), LeaveApplication.total_leave_days ,LeaveApplication.leave_type, LeaveApplication.status,LeaveApplication.leave_approver,LeaveApplication.description ,Employee.image.as_("avatar_approver")).run(as_dict=True))
+                              .select(LeaveApplication.name,LeaveApplication.employee_name,LeaveApplication.employee, UNIX_TIMESTAMP(LeaveApplication.creation).as_("creation"),UNIX_TIMESTAMP(LeaveApplication.from_date).as_("from_date"),UNIX_TIMESTAMP(LeaveApplication.to_date).as_("to_date"),LeaveApplication.half_day, UNIX_TIMESTAMP(LeaveApplication.half_day_date).as_("half_day_date"), LeaveApplication.total_leave_days ,LeaveApplication.leave_type, LeaveApplication.status,LeaveApplication.leave_approver,LeaveApplication.description ,Employee.image.as_("avatar_approver"), Employee.employee_name.as_("name_leave_approver")).run(as_dict=True))
     for leave in leave_application:
         leave['avatar_approver'] = validate_image(leave.get("avatar_approver"))
     employee = (frappe.qb.from_(Employee)
@@ -75,7 +75,7 @@ def get_list_leave(**kwargs):
                               .limit(page_size)
                               .where(query_code)
                               .orderby(LeaveApplication.creation, order=Order.desc)
-                              .select(LeaveApplication.name,LeaveApplication.employee_name,LeaveApplication.employee, UNIX_TIMESTAMP(LeaveApplication.creation).as_("creation"), UNIX_TIMESTAMP(LeaveApplication.from_date).as_("from_date"),UNIX_TIMESTAMP(LeaveApplication.to_date).as_("to_date"), LeaveApplication.leave_type, LeaveApplication.status,LeaveApplication.leave_approver,LeaveApplication.half_day,UNIX_TIMESTAMP(LeaveApplication.half_day_date).as_("half_day_date"),LeaveApplication.total_leave_days,LeaveApplication.description ,Employee.image).run(as_dict=True)
+                              .select(LeaveApplication.name,LeaveApplication.employee_name,LeaveApplication.employee, UNIX_TIMESTAMP(LeaveApplication.creation).as_("creation"), UNIX_TIMESTAMP(LeaveApplication.from_date).as_("from_date"),UNIX_TIMESTAMP(LeaveApplication.to_date).as_("to_date"), LeaveApplication.leave_type, LeaveApplication.status,LeaveApplication.leave_approver,LeaveApplication.half_day,UNIX_TIMESTAMP(LeaveApplication.half_day_date).as_("half_day_date"),LeaveApplication.total_leave_days,LeaveApplication.description ,Employee.image, Employee.employee_name.as_("name_leave_approver")).run(as_dict=True)
                               )
         for leave in leave_application:
             leave['image'] = validate_image(leave.get("image"))
@@ -140,7 +140,7 @@ def create_leave(**kwargs):
                                    .inner_join(Employee)
                                    .on(leave_application.leave_approver == Employee.user_id)
                                    .where(leave_application.name == name_new_doc)
-                                   .select(leave_application.name, leave_application.employee_name,leave_application.employee, UNIX_TIMESTAMP(leave_application.creation).as_("creation"), UNIX_TIMESTAMP(leave_application.from_date).as_("from_date"),UNIX_TIMESTAMP(leave_application.to_date).as_("to_date"), leave_application.leave_type, leave_application.status,leave_application.leave_approver,leave_application.half_day,UNIX_TIMESTAMP(leave_application.half_day_date).as_("half_day_date"),leave_application.total_leave_days,leave_application.description, Employee.image).run(as_dict=True))
+                                   .select(leave_application.name, leave_application.employee_name,leave_application.employee, UNIX_TIMESTAMP(leave_application.creation).as_("creation"), UNIX_TIMESTAMP(leave_application.from_date).as_("from_date"),UNIX_TIMESTAMP(leave_application.to_date).as_("to_date"), leave_application.leave_type, leave_application.status,leave_application.leave_approver,leave_application.half_day,UNIX_TIMESTAMP(leave_application.half_day_date).as_("half_day_date"),leave_application.total_leave_days,leave_application.description, Employee.image, Employee.employee_name.as_("name_leave_approver")).run(as_dict=True))
         for leave in detail_leave_applicaton:
             leave['image'] = validate_image(leave.get("image"))
         avata_employee = validate_image(employee[0].avatar_employee)
@@ -196,12 +196,12 @@ def get_leave_details():
     query_code = (Employee.user_id == leave_approver)
     query_approver = (frappe.qb.from_(Employee)
                             .where(query_code)
-                            .select(Employee.user_id.as_("leave_approver") ,Employee.image).run(as_dict=True)
+                            .select(Employee.user_id.as_("leave_approver") ,Employee.image, Employee.employee_name.as_("name_leave_approver")).run(as_dict=True)
                             )
-
+    for leave in query_approver:
+            leave['image'] = validate_image(leave.get("image"))
     # is used in set query
     lwp = frappe.get_list("Leave Type", filters={"is_lwp": 1}, pluck="name")
-    
     gen_response(200, i18n.t('translate.successfully', locale=get_language()), {
         "leave_allocation": leave_allocation,
         "leave_approver": query_approver[0],
