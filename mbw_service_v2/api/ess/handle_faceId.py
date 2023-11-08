@@ -25,11 +25,11 @@ from mbw_service_v2.api.file import (
     my_minio
 )
 from mbw_service_v2.translations.language import translations
-from mbw_service_v2.utils import API_KEYS
+from mbw_service_v2.utils import CONFIG_KEYS
 
-API_KEY = API_KEYS.get("API_KEY_FACE_EKGIS")
-BUCKET_NAME = API_KEYS.get("BUCKET_NAME_S3")
-ENDPOINT = API_KEYS.get("ENDPOINT_S3")
+API_KEY_FACE_EKGIS = CONFIG_KEYS.get("API_KEY_FACE_EKGIS")
+BUCKET_NAME = CONFIG_KEYS.get("BUCKET_NAME_S3")
+ENDPOINT = CONFIG_KEYS.get("ENDPOINT_S3")
 
 
 """Begin FaceID"""
@@ -72,7 +72,7 @@ def register_faceid_employee(**kwargs):
             faceimage = list_check[1]
 
         # call api get vector
-        url = f"https://api.ekgis.vn/deepvision/faceid/v1/encoding?api_key={API_KEY}"
+        url = f"https://api.ekgis.vn/deepvision/faceid/v1/encoding?api_key={API_KEY_FACE_EKGIS}"
         headers = {
             'Content-Type': 'application/json'
         }
@@ -171,7 +171,7 @@ def update_faceid_employee(**kwargs):
             faceimage = list_check[1]
 
         # call api get vector
-        url = f"https://api.ekgis.vn/deepvision/faceid/v1/encoding?api_key={API_KEY}"
+        url = f"https://api.ekgis.vn/deepvision/faceid/v1/encoding?api_key={API_KEY_FACE_EKGIS}"
         headers = {
             'Content-Type': 'application/json'
         }
@@ -257,7 +257,7 @@ def verify_faceid_employee(**kwargs):
             return None
 
         # call api get vector
-        url = f"https://api.ekgis.vn/deepvision/faceid/v1/encoding?api_key={API_KEY}"
+        url = f"https://api.ekgis.vn/deepvision/faceid/v1/encoding?api_key={API_KEY_FACE_EKGIS}"
         headers = {
             'Content-Type': 'application/json'
         }

@@ -1,5 +1,5 @@
 import frappe
-from mbw_service_v2.utils import API_KEYS
+from mbw_service_v2.utils import CONFIG_KEYS
 import requests
 from mbw_service_v2.api.common import (
     gen_response
@@ -12,7 +12,7 @@ def get_address_location(**kwargs):
     try:
         lat = kwargs.get('lat')
         lon = kwargs.get('lon')
-        api_key = API_KEYS.get("API_KEY_MAP")
+        api_key = CONFIG_KEYS.get("API_KEY_MAP")
 
         # call geolocation
         url = f"https://api.ekgis.vn/v1/place/geocode/reverse/address?latlng={lat},{lon}&gg=1&api_key={api_key}"
@@ -26,7 +26,7 @@ def get_address_location(**kwargs):
 def get_coordinates_location(**kwargs):
     try:
         address = kwargs.get("address")
-        api_key = API_KEYS.get("API_KEY_MAP")
+        api_key = CONFIG_KEYS.get("API_KEY_MAP")
 
         # call geolocation
         url = f"https://api.ekgis.vn/v1/place/geocode/forward?address={address}&gg=1&api_key={api_key}"

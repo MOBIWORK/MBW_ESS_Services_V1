@@ -2,7 +2,7 @@ import frappe
 from minio import Minio
 import numpy as np
 from scipy.spatial.distance import cdist
-from mbw_service_v2.utils import API_KEYS
+from mbw_service_v2.utils import CONFIG_KEYS
 
 
 class MinioConnection:
@@ -82,9 +82,9 @@ class MinioConnection:
 
 
 my_minio = MinioConnection(
-    endpoint=API_KEYS.get("ENDPOINT_S3"),
-    access_key=API_KEYS.get("ACCESS_KEY_S3"),
-    secret_key=API_KEYS.get("KEY_SECRET_S3"),
+    endpoint=CONFIG_KEYS.get("ENDPOINT_S3"),
+    access_key=CONFIG_KEYS.get("ACCESS_KEY_S3"),
+    secret_key=CONFIG_KEYS.get("KEY_SECRET_S3"),
     region="auto",
     secure=0
 )

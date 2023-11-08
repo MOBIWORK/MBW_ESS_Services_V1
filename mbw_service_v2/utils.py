@@ -1,4 +1,4 @@
-API_KEYS = {
+CONFIG_KEYS = {
     "API_KEY_MAP": "njpam46aNfokCW8BMDAVBHI2MuBBbMsciz0uDzSd",
     "ENDPOINT_S3": "s3-hn-2.cloud.cmctelecom.vn",
     "ACCESS_KEY_S3": "NZE7S3POFTP8JQ6MOJSW",
