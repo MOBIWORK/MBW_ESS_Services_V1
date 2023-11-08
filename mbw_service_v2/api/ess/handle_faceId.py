@@ -25,7 +25,6 @@ from mbw_service_v2.api.file import (
     my_minio
 )
 from mbw_service_v2.translations.language import translations
-from mbw_service_v2.utils import CONFIG_KEYS
 
 
 """Begin FaceID"""
