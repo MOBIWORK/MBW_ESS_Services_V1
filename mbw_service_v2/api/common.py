@@ -37,7 +37,6 @@ def get_shift_type_now(employee_name):
     shift_status = "Bạn không có ca hôm nay"
     time_query = time_now.replace(hour=0, minute=0, second=0)
     time_query_next_day =  time_now.replace(hour=23, minute=59, second=59)
-    print("ngay", )
     if len(shift_type_now) > 0:
         EmployeeCheckin = frappe.qb.DocType("Employee Checkin")
         last_checkin_today = (frappe.qb.from_(EmployeeCheckin)
@@ -69,7 +68,6 @@ def today_list_shift(employee_name, time_now):
     query = (ShiftAssignment.employee == employee_name) & (time_now.date() >= ShiftAssignment.start_date)
     if not ShiftAssignment.end_date.isnull() :
         query = (ShiftAssignment.employee == employee_name) & (time_now.date() >= ShiftAssignment.start_date) & (time_now.date() <= ShiftAssignment.end_date)
-    print("query::::",query)
     return (frappe.qb.from_(ShiftType)
             .inner_join(ShiftAssignment)
             .on(ShiftType.name == ShiftAssignment.shift_type)
@@ -82,10 +80,19 @@ def inshift(employee_name,time_now) :
     data = (frappe.qb.from_(ShiftType)
                       .inner_join(ShiftAssignment)
                       .on(ShiftType.name == ShiftAssignment.shift_type)
-                      .where((ShiftAssignment.employee == employee_name) & (time_now.time() >= ShiftType.start_time) & (time_now.time() <= ShiftType.end_time) & (time_now.date() >= ShiftAssignment.start_date) & (time_now.date() <= ShiftAssignment.end_date))
+                      .where(
+                          (ShiftAssignment.employee == employee_name) & 
+                          (time_now.time() >= ShiftType.start_time) & 
+                          (time_now.time() <= ShiftType.end_time) & 
+                            (
+                                ((time_now.date() >= ShiftAssignment.start_date) & (time_now.date() <= ShiftAssignment.end_date)) |
+                                ((time_now.date() >= ShiftAssignment.start_date) | (ShiftAssignment.end_date == False))
+                            )
+                             )
                       .select(ShiftType.name, ShiftType.start_time, ShiftType.end_time, ShiftType.allow_check_out_after_shift_end_time, ShiftType.begin_check_in_before_shift_start_time)
                       .run(as_dict=True)
                 )
+    print("trong ca",data)
     if len(data) == 0:
         return False
     return data[0]
@@ -99,6 +106,7 @@ def nextshift(employee_name,time_now) :
                         .select(ShiftType.name, ShiftType.start_time, ShiftType.end_time, ShiftType.allow_check_out_after_shift_end_time, ShiftType.begin_check_in_before_shift_start_time)
                         .run(as_dict=True)
                         )
+    print("ca tiep",data)
     if len(data) == 0:
         return False
     return data[0]
@@ -106,6 +114,7 @@ def nextshift(employee_name,time_now) :
 
 def shift_now(employee_name, time_now):
     in_shift = inshift(employee_name, time_now)
+
     if not in_shift:
         next_shift = nextshift(employee_name, time_now)
         if not next_shift:
