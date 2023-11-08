@@ -22,7 +22,6 @@ def checkin_shift(**data):
     try:
         name= get_employee_id()
         shift_now = get_shift_type_now(name) 
-        print("ca",shift_now.get("shift_type_now"))
         if shift_now.get("shift_type_now"):   
             new_check = frappe.new_doc("Employee Checkin")
             data["device_id"] = json.dumps({"longitude": data.get(
