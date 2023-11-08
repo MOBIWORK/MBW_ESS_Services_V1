@@ -1,12 +1,13 @@
 import frappe
 
-from mbw_service_v2.api.common import (gen_response,exception_handel, get_language, get_employee_id, validate_datetime, validate_empty,get_user_id, get_employee_by_user)
+from mbw_service_v2.api.common import (gen_response,exception_handel, get_language, get_employee_id, validate_datetime, validate_empty,get_user_id, get_employee_by_user, validate_image)
 from pypika import Order, CustomFunction, Tuple
 from datetime import datetime
 
 from mbw_service_v2.config_translate import i18n
 from frappe.utils import ( cint, flt )
 from hrms.hr.doctype.leave_application.leave_application import (get_leave_allocation_records, get_leave_balance_on, get_leaves_for_period, get_leaves_pending_approval_for_period, get_leave_approver)
+base_url = frappe.utils.get_request_site_address()
 
 @frappe.whitelist(methods='GET')
 def get_detail_leave(name):
@@ -20,14 +21,15 @@ def get_detail_leave(name):
                               .where((LeaveApplication.employee == employee_id) & (LeaveApplication.name == name))
                               .orderby(LeaveApplication.creation, order=Order.desc)
                               .select(LeaveApplication.name,LeaveApplication.employee_name,LeaveApplication.employee, UNIX_TIMESTAMP(LeaveApplication.creation).as_("creation"),UNIX_TIMESTAMP(LeaveApplication.from_date).as_("from_date"),UNIX_TIMESTAMP(LeaveApplication.to_date).as_("to_date"),LeaveApplication.half_day, UNIX_TIMESTAMP(LeaveApplication.half_day_date).as_("half_day_date"), LeaveApplication.total_leave_days ,LeaveApplication.leave_type, LeaveApplication.status,LeaveApplication.leave_approver,LeaveApplication.description ,Employee.image.as_("avatar_approver")).run(as_dict=True))
-    
+    for leave in leave_application:
+        leave['avatar_approver'] = validate_image(leave.get("avatar_approver"))
     employee = (frappe.qb.from_(Employee)
                 .where(Employee.name == employee_id)
                 .select(Employee.image.as_("avatar_employee")).run(as_dict=True))
-
+    avata_employee = validate_image(employee[0].avatar_employee)
     gen_response(200, i18n.t('translate.successfully', locale=get_language()), {
         "data" : leave_application[0],
-        "avata_employee": employee[0].avatar_employee
+        "avata_employee": avata_employee
     })
 
 @frappe.whitelist()
@@ -75,16 +77,18 @@ def get_list_leave(**kwargs):
                               .orderby(LeaveApplication.creation, order=Order.desc)
                               .select(LeaveApplication.name,LeaveApplication.employee_name,LeaveApplication.employee, UNIX_TIMESTAMP(LeaveApplication.creation).as_("creation"), UNIX_TIMESTAMP(LeaveApplication.from_date).as_("from_date"),UNIX_TIMESTAMP(LeaveApplication.to_date).as_("to_date"), LeaveApplication.leave_type, LeaveApplication.status,LeaveApplication.leave_approver,LeaveApplication.half_day,UNIX_TIMESTAMP(LeaveApplication.half_day_date).as_("half_day_date"),LeaveApplication.total_leave_days,LeaveApplication.description ,Employee.image).run(as_dict=True)
                               )
-        
+        for leave in leave_application:
+            leave['image'] = validate_image(leave.get("image"))
         employee = (frappe.qb.from_(Employee)
                 .where(Employee.name == employee_id)
                 .select(Employee.image.as_("avatar_employee")).run(as_dict=True))
         queryOpen = frappe.db.count('Leave Application', {'status': 'Open', 'employee': employee_id})
         queryApprover = frappe.db.count('Leave Application', {'status': 'Approved', 'employee': employee_id})
         queryReject = frappe.db.count('Leave Application', {'status': 'Rejected', 'employee': employee_id})
+        avata_employee = validate_image(employee[0].avatar_employee)
         gen_response(200, i18n.t('translate.successfully', locale=get_language()), {
             "data": leave_application,
-            "avata_employee": employee[0].avatar_employee,
+            "avata_employee": avata_employee,
             "queryOpen": queryOpen,
             "queryApprover": queryApprover,
             "queryReject": queryReject
@@ -132,10 +136,17 @@ def create_leave(**kwargs):
                 .select(Employee.image.as_("avatar_employee")).run(as_dict=True))
         name_new_doc = new_doc.get('name')
         leave_application = frappe.qb.DocType('Leave Application')
-        detail_leave_applicaton = frappe.qb.from_(leave_application).where(leave_application.name == name_new_doc).select(leave_application.name, leave_application.employee_name,leave_application.employee, UNIX_TIMESTAMP(leave_application.creation).as_("creation"), UNIX_TIMESTAMP(leave_application.from_date).as_("from_date"),UNIX_TIMESTAMP(leave_application.to_date).as_("to_date"), leave_application.leave_type, leave_application.status,leave_application.leave_approver,leave_application.half_day,UNIX_TIMESTAMP(leave_application.half_day_date).as_("half_day_date"),leave_application.total_leave_days,leave_application.description).run(as_dict=True)
+        detail_leave_applicaton = (frappe.qb.from_(leave_application)
+                                   .inner_join(Employee)
+                                   .on(leave_application.leave_approver == Employee.user_id)
+                                   .where(leave_application.name == name_new_doc)
+                                   .select(leave_application.name, leave_application.employee_name,leave_application.employee, UNIX_TIMESTAMP(leave_application.creation).as_("creation"), UNIX_TIMESTAMP(leave_application.from_date).as_("from_date"),UNIX_TIMESTAMP(leave_application.to_date).as_("to_date"), leave_application.leave_type, leave_application.status,leave_application.leave_approver,leave_application.half_day,UNIX_TIMESTAMP(leave_application.half_day_date).as_("half_day_date"),leave_application.total_leave_days,leave_application.description, Employee.image).run(as_dict=True))
+        for leave in detail_leave_applicaton:
+            leave['image'] = validate_image(leave.get("image"))
+        avata_employee = validate_image(employee[0].avatar_employee)
         gen_response(201, i18n.t('translate.create_success', locale=get_language()), {
             "data": detail_leave_applicaton,
-            "avata_employee": employee[0].avatar_employee
+            "avata_employee": avata_employee
         })
     
     except Exception as e:
