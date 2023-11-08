@@ -1,5 +1,5 @@
 import frappe
-from mbw_service_v2.utils import CONFIG_KEYS, CONFIG_GEO_ADDRESS, CONFIG_GEO_LOCATION
+from mbw_service_v2.utils import CONFIG_GEO_ADDRESS, CONFIG_GEO_LOCATION
 import requests
 from mbw_service_v2.api.common import (
     gen_response
