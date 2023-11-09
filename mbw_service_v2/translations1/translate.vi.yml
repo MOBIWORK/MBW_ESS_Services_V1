@@ -25,3 +25,6 @@ vi:
   to_date: đến ngày
   title_3: From date không được phép > to date
   title_4: Nghỉ nửa ngày phải nằm trong khoảng
+  no_location_shift: Bạn không thể chấm công tại đây
+  error_network: Lỗi mạng
+  no_shift: Bạn không có ca

@@ -13,8 +13,8 @@ from mbw_service_v2.api.common import (
 )
 
 from datetime import datetime
-from mbw_service_v2.translations.language import translations
 from pypika import  Order, CustomFunction
+from mbw_service_v2.config_translate import i18n
 # Dịch vụ chấm công
 
 
@@ -38,7 +38,7 @@ def checkin_shift(**data):
                         is_enable_checkin = True
                         break
                 if not is_enable_checkin :
-                    gen_response(500, "Ban khong the cham cong tai day",[])
+                    gen_response(500, i18n.t('translate.no_location_shift', locale=get_language()),[])
                     return
                 
             in_wf = False
@@ -52,7 +52,7 @@ def checkin_shift(**data):
                     in_mac = True
                     break
             if not in_mac and not in_wf :
-                gen_response(500, "loi mang",[])
+                gen_response(500, i18n.t('translate.error_network', locale=get_language()),[])
                 return
     
             
@@ -67,13 +67,11 @@ def checkin_shift(**data):
                 setattr(new_check,'log_type',log_type)
                 setattr(new_check,"image_attach",data.get("image"))
                 new_check.insert()
-                message = translations.get("create_success").get(get_language())
-                gen_response(200,message,new_check)
+                gen_response(200,i18n.t('translate.successfully', locale=get_language()),new_check)
                 return
-            gen_response(500, "Bạn không có ca",None)
+            gen_response(500, i18n.t('translate.no_shift', locale=get_language()),None)
     except frappe.DoesNotExistError:
-        message = translations.get("error").get(get_language())
-        gen_response(404, message, []) 
+        gen_response(404, i18n.t('translate.error', locale=get_language()), []) 
 
 # danh sách chấm công nhân viên
 
@@ -97,8 +95,7 @@ def get_list_cham_cong(**kwargs):
                       .run(as_dict=True)
                       )
         new_shift = group_fields(shift_type, "shift")
-        message = translations.get("successfully").get(get_language())
-        gen_response(200, message, new_shift)
+        gen_response(200, i18n.t('translate.successfully', locale=get_language()), new_shift)
     except Exception as e:
         exception_handel(e)
 
@@ -111,7 +108,7 @@ def get_shift_now():
         if shift_now["shift_type_now"]:
             shift_now["shift_type_now"]["start_time_today"] = delta_to_time_now(shift_now["shift_type_now"]["start_time"])
             shift_now["shift_type_now"]["end_time_today"] =delta_to_time_now(shift_now["shift_type_now"]["end_time"])
-        gen_response(200,"",shift_now) 
+        gen_response(200,i18n.t('translate.successfully', locale=get_language()),shift_now) 
     except Exception as e:
         exception_handel(e)
 
@@ -126,7 +123,7 @@ def get_shift_list():
         for x in list_shift:
             x["start_time_today"] = delta_to_time_now(x["start_time"])
             x["end_time_today"] = delta_to_time_now(x['end_time'])
-        gen_response(200,"",list_shift) 
+        gen_response(200, i18n.t('translate.successfully', locale=get_language()),list_shift) 
     except Exception as e:
         exception_handel(e)
 
@@ -163,7 +160,7 @@ def get_list_shift_request(**kwargs):
         queryApprover = frappe.db.count('Shift Request', {'status': 'Approved', 'employee': employeID})
         queryReject = frappe.db.count('Shift Request', {'status': 'Rejected', 'employee': employeID})
         # shift_assignment = frappe.db.get_list('Shift Assignment', filters=myfilter , fields=["*"])
-        return gen_response(200, " ", {
+        return gen_response(200, i18n.t('translate.successfully', locale=get_language()), {
             "data": queryShift,
             "queryOpen": queryOpen,
             "queryApprover": queryApprover,
@@ -200,7 +197,7 @@ def create_shift_request(**data) :
                          )
  
         new_shift_request.insert()
-        gen_response(201,"Success",{
+        gen_response(201,i18n.t('translate.create_success', locale=get_language()),{
             "shift_request": new_shift_request,
             "approver_info": approver_info[0]
         })
@@ -245,6 +242,6 @@ def get_approved():
                          .run(as_dict=True)
                          )
  
-        gen_response(200,"",approver_info)
+        gen_response(200,i18n.t('translate.successfully', locale=get_language()),approver_info)
     except Exception as e:
         exception_handel(e)

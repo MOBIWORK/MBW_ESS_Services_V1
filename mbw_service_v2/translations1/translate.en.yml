@@ -25,3 +25,6 @@ en:
   to_date: to date
   title_3: From date do not > to date
   title_4: Half day in from day and to day
+  no_location_shift: You can't clock in here
+  error_network: Network error
+  no_shift: You don't have a shift
