@@ -2,19 +2,18 @@ import frappe
 @frappe.whitelist(methods="GET",allow_guest= True)
 def get_ip_network():
     try:
-        import socket
-        client_ip = frappe.local.request.remote_addr
-        import netifaces
-        import requests
-        import psutil
+        # # Lấy địa chỉ IP của người dùng từ tiêu đề HTTP "X-Forwarded-For"
+        remote_ip = frappe.get_request_header("X-Forwarded-For")
 
-        # Lấy địa chỉ IP mạng của giao diện mạng (ví dụ: eth0)
-        network_interfaces = psutil.net_if_addrs().keys() 
-        # return network_interfaces
-        network_interface = "enp2s0"
-        network_ip = netifaces.ifaddresses(network_interface)[netifaces.AF_INET][0]['addr']
-        print(f"Địa chỉ IP mạng của giao diện {network_interface}: {network_ip}")        
-        return network_ip
+        if remote_ip:
+            # Nếu có giá trị X-Forwarded-For, nó chứa địa chỉ IP của người dùng
+            print(f"Địa chỉ IP của người dùng 1: {remote_ip}")
+        else:
+            # Nếu không có X-Forwarded-For, thử lấy từ REMOTE_ADDR
+            remote_ip = frappe.local.request.environ.get('REMOTE_ADDR')
+            print(f"Địa chỉ IP của người dùng 2: {remote_ip}")
+
+        return remote_ip        
     except Exception as e:
         return e
         # exception_handel(e)

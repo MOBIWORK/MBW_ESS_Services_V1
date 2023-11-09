@@ -1,37 +1,38 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2023-10-03 16:40:50.470458",
+ "creation": "2023-11-09 15:08:11.402715",
+ "default_view": "List",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "wifi_name",
-  "wifi_address"
+  "mac_name",
+  "mac_address"
  ],
  "fields": [
   {
-   "fieldname": "wifi_name",
+   "fieldname": "mac_name",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "T\u00ean Wifi",
+   "label": "T\u00ean \u0111\u1ea1i ch\u1ec9 mac",
    "reqd": 1
   },
   {
-   "fieldname": "wifi_address",
+   "fieldname": "mac_address",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "\u0110\u1ecba ch\u1ec9 ip",
+   "label": "\u0110\u1ecba ch\u1ec9 mac",
    "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2023-11-09 15:08:34.719969",
+ "modified": "2023-11-09 15:08:18.206104",
  "modified_by": "Administrator",
  "module": "Mbw Service V2",
- "name": "TimeSheet Wifi intermediate",
+ "name": "TimeSheet Wifi  mac intermediate",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",

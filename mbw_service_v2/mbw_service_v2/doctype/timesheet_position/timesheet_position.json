@@ -19,7 +19,8 @@
   "tab_break2",
   "is_limited",
   "employees",
-  "wifi"
+  "wifi",
+  "mac"
  ],
  "fields": [
   {
@@ -98,13 +99,19 @@
   {
    "fieldname": "wifi",
    "fieldtype": "Table",
-   "label": "Wifi",
+   "label": "Thi\u1ebft l\u1eadp ch\u1ea5m c\u00f4ng theo IP",
    "options": "TimeSheet Wifi intermediate"
+  },
+  {
+   "fieldname": "mac",
+   "fieldtype": "Table",
+   "label": "Thi\u1ebft l\u1eadp ch\u1ea5m c\u00f4ng theo MAC",
+   "options": "TimeSheet Wifi  mac intermediate"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-11-02 10:19:28.326546",
+ "modified": "2023-11-09 15:09:32.543220",
  "modified_by": "Administrator",
  "module": "Mbw Service V2",
  "name": "TimeSheet Position",
