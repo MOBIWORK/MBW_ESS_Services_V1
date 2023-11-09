@@ -5,5 +5,3 @@ scipy
 minio
 python-i18n
 geopy
-netifaces
-psutil
