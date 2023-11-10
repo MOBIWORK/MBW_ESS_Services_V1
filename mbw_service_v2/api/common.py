@@ -151,7 +151,7 @@ def nextshift(employee_name,time_now) :
                                 ((time_now.date() >= ShiftAssignment.start_date) | (ShiftAssignment.end_date == False))
                             )
                             )
-                        .orderby(ShiftType.start,order= Order.asc)
+                        .orderby(ShiftType.start_time,order= Order.asc)
                         .select(ShiftType.name, ShiftType.start_time, ShiftType.end_time, ShiftType.allow_check_out_after_shift_end_time, ShiftType.begin_check_in_before_shift_start_time)
                         .run(as_dict=True)
                         )

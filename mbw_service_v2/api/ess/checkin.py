@@ -141,8 +141,8 @@ def get_shift_now():
                 time_now = datetime.now()
                 shift_suggest = False
                 in_shift = inshift(name, time_now)
-                if in_shift or inshift.get("name") != last_check.get("shift"):
-                    shift_suggest = inshift
+                if in_shift and in_shift.get("name") != last_check.get("shift"):
+                    shift_suggest = in_shift
                 else :
                     shift_suggest =  nextshift(name, time_now)
 
