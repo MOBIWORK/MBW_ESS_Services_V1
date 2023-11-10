@@ -6,6 +6,7 @@ from mbw_service_v2.api.common import  (get_last_check, gen_response,get_employe
     group_fields,
     get_ip_network,
     nextshift,
+    inshift,
     enable_check_shift
     )
     
@@ -138,10 +139,15 @@ def get_shift_now():
         if last_check  :  
             if last_check.get("log_type") == "OUT" : 
                 time_now = datetime.now()
-                next_shift =  nextshift(name, time_now)
-                print(next_shift)
+                shift_suggest = False
+                in_shift = inshift(name, time_now)
+                if in_shift or inshift.get("name") != last_check.get("shift"):
+                    shift_suggest = inshift
+                else :
+                    shift_suggest =  nextshift(name, time_now)
+
                 shift_now = {
-                "shift_type_now" :next_shift,
+                "shift_type_now" :shift_suggest,
                 "shift_status" : False
                 }
             else :
@@ -157,10 +163,15 @@ def get_shift_now():
                     },
                     "shift_status" : "IN"
                     }
-            if shift_now["shift_type_now"]:
-                shift_now["shift_type_now"]["start_time_today"] = delta_to_time_now(shift_now["shift_type_now"]["start_time"])
-                shift_now["shift_type_now"]["end_time_today"] =delta_to_time_now(shift_now["shift_type_now"]["end_time"])
-        
+        else: 
+            in_shift = inshift(name, time_now)
+            shift_now = {
+            "shift_type_now" :in_shift,
+            "shift_status" : False
+            }
+        if shift_now["shift_type_now"]:
+            shift_now["shift_type_now"]["start_time_today"] = delta_to_time_now(shift_now["shift_type_now"]["start_time"])
+            shift_now["shift_type_now"]["end_time_today"] =delta_to_time_now(shift_now["shift_type_now"]["end_time"])
         gen_response(200,i18n.t('translate.successfully', locale=get_language()),shift_now) 
 
         return
