@@ -27,6 +27,9 @@ def checkin_shift(**data):
         timesheet_position_detail = frappe.get_doc("TimeSheet Position",id_position)
         name= get_employee_id()
         time_now = datetime.now()
+        if not id_position or not shift: 
+            gen_response(500, i18n.t('translate.invalid_value', locale=get_language()),[])
+            return
 
         if not enable_check_shift(name, shift,time_now) : 
             gen_response(500, i18n.t('translate.not_found_shift', locale=get_language()),[])
