@@ -156,8 +156,7 @@ def get_info_notification(**kwargs):
 
             gen_response(200, i18n.t('translate.successfully', locale=get_language()), info)
         else:
-            message = "Không tồn tại tài liệu"
-            gen_response(404, i18n.t('translate.error', locale=get_language()), list_doc)
+            gen_response(404, i18n.t('translate.not_found', locale=get_language()), list_doc)
             return None
     except Exception as e:
         print(e)
