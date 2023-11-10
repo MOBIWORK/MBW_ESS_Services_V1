@@ -26,7 +26,7 @@ from frappe.utils.file_manager import (
 )
 from frappe.utils import get_files_path
 
-from mbw_service_v2.translations.language import translations
+from mbw_service_v2.config_translate import i18n
 
 # chấm công nhân viên trong khoảng thời gian
 
@@ -64,11 +64,9 @@ def get_list_cham_cong(**kwargs):
                       .where((EmployeeCheckin.time >= start_time) & (EmployeeCheckin.time <= end_time))
                       .select(EmployeeCheckin.shift, EmployeeCheckin.log_type, EmployeeCheckin.time, EmployeeCheckin.device_id, ShiftType.start_time, ShiftType.end_time).run(as_dict=True)
                       )
-        message = translations.get("successfully").get(get_language())
-        gen_response(200, message, shift_type)
+        gen_response(200, i18n.t('translate.successfully', locale=get_language()), shift_type)
     except Exception as e:
-        message = translations.get("error").get(get_language())
-        gen_response(500, message, [])
+        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
 
 # danh sách đơn từ nhân viên
 
@@ -99,11 +97,9 @@ def get_list_don_tu(**kwargs):
                                               start=start,
                                               page_length=page_size,
                                               )
-        message = translations.get("successfully").get(get_language())
-        gen_response(200, message, leave_allocation)
+        gen_response(200, i18n.t('translate.successfully', locale=get_language()), leave_allocation)
     except Exception as e:
-        message = translations.get("error").get(get_language())
-        gen_response(500, message, [])
+        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
 
 # lay danh sach nhan vien
 
@@ -132,16 +128,14 @@ def get_list_employee(**kwargs):
             user_image = doc.get('image')
             doc['image'] = validate_image(user_image)
 
-        message = "Thành công"
         result = {
             "data": list_employee,
             "total_doc": total_doc
         }
-        gen_response(200, message, result)
+        gen_response(200, i18n.t('translate.successfully', locale=get_language()), result)
     except Exception as e:
         print(e)
-        message = "Có lỗi xảy ra"
-        gen_response(500, message, [])
+        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
 
 
 # chi tiết ddwon từ nhân viên
@@ -149,8 +143,7 @@ def get_list_employee(**kwargs):
 def get_don_chi_tiet(name):
     data = frappe.get_doc('Leave Allocation', name
                           )
-    message = translations.get("successfully").get(get_language())
-    gen_response(200, message, data)
+    gen_response(200, i18n.t('translate.successfully', locale=get_language()), data)
 
 # thông tin nhân viên
 
@@ -172,12 +165,10 @@ def get_info_employee():
         last_checkin_type = frappe.get_last_doc("Employee Checkin")
         info['shift_status'] = last_checkin_type.get(
             'log_type') if last_checkin_type else "OUT"
-        message = translations.get("successfully").get(get_language())
-        gen_response(200, message, info)
+        gen_response(200, i18n.t('translate.successfully', locale=get_language()), info)
 
     except Exception as e:
-        message = translations.get("error").get(get_language())
-        gen_response(500, message, [])
+        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
 
 # Dịch vụ chấm công
 
@@ -205,10 +196,8 @@ def checkin_shift(**data):
         for field, value in dict(data).items():
             setattr(new_check, field, value)
         new_check.insert()
-        message = translations.get("successfully").get(get_language())
-        gen_response(200, message, new_check)
+        gen_response(200, i18n.t('translate.successfully', locale=get_language()), new_check)
     except frappe.DoesNotExistError:
         frappe.local.response["http_status_code"] = 404
         frappe.clear_messages()
-        message = translations.get("error").get(get_language())
-        gen_response(500, message, [])
+        gen_response(500, i18n.t('translate.error', locale=get_language()), [])

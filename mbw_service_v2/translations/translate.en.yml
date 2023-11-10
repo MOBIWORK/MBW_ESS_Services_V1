@@ -28,3 +28,8 @@ en:
   no_location_shift: You can't clock in here
   error_network: Network error
   no_shift: You don't have a shift
+  user_not_found: Not found user
+  cmt_correct: The comment type is incorrect
+  leave_not_found: Leave type not found
+  invalid_value: Invalid value
+  update_success: Update success

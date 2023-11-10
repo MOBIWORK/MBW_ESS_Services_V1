@@ -12,7 +12,7 @@ from mbw_service_v2.api.common import (
 
 from datetime import datetime
 
-from mbw_service_v2.translations.language import translations
+from mbw_service_v2.config_translate import i18n
 
 # lấy cấc doctype
 TimeSheetPosition = frappe.qb.DocType('TimeSheet Position')
@@ -49,11 +49,9 @@ def get_list_ca(**kwargs):
                                         start=start,
                                         page_length=page_size,
                                         )
-        message = translations.get("successfully").get(get_language())
-        gen_response(200, message, shift_type)
+        gen_response(200, i18n.t('translate.successfully', locale=get_language()), shift_type)
     except Exception as e:
-        message = translations.get("error").get(get_language())
-        gen_response(500, message, [])
+        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
 
 # Danh sách địa điểm chấm công
 
@@ -96,15 +94,13 @@ def get_list_timesheet_location(**kwargs):
                 x["distance"] = distance
                 x["wifi"] = wifi
             timesheet_position = sorted(timesheet_position, key=lambda x: x['distance'])
-        message = translations.get("successfully").get(get_language())
-        gen_response(200, message, {
+        gen_response(200, i18n.t('translate.successfully', locale=get_language()), {
             "timesheet_position": timesheet_position,
             "shift_type": shift_type
         })
 
     except Exception as e:
-        message = translations.get("error").get(get_language())
-        gen_response(500, message, [])
+        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
 
 # wifi địa điểm chấm công
 

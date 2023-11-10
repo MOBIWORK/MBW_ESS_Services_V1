@@ -24,8 +24,7 @@ from mbw_service_v2.api.file import (
     verify,
     my_minio
 )
-from mbw_service_v2.translations.language import translations
-
+from mbw_service_v2.config_translate import i18n
 
 """Begin FaceID"""
 @frappe.whitelist(methods="GET")
@@ -43,11 +42,10 @@ def get_faceid_employee(**kwargs):
 
             faceids = []
 
-        message = translations.get("successfully").get(get_language())
-        gen_response(200, message, faceids)
+        gen_response(200, i18n.t('translate.successfully', locale=get_language()), faceids)
     except Exception as e:
         message = e
-        gen_response(500, message)
+        gen_response(500, i18n.t('translate.error', locale=get_language()))
 
 
 @frappe.whitelist(methods="POST")
@@ -80,9 +78,7 @@ def register_faceid_employee(**kwargs):
         if response.status_code == 200:
             data = json.loads(response.text)
             if int(data.get('status')) == 4:
-                message = translations.get(
-                    "not_face_recognition").get(get_language())
-                gen_response(404, message, {})
+                gen_response(404, i18n.t('translate.not_face_recognition', locale=get_language()), {})
                 return None
 
             # insert Employee FaceID
@@ -117,14 +113,10 @@ def register_faceid_employee(**kwargs):
             data['faceid_name'] = doc_face_name
             data['file_url'] = file_url
 
-            message = translations.get(
-                "faceid_register_success").get(get_language())
-            gen_response(200, message, data)
+            gen_response(200, i18n.t('translate.faceid_register_success', locale=get_language()), data)
             return None
         else:
-            message = translations.get(
-                "error").get(get_language())
-            gen_response(404, message)
+            gen_response(404, i18n.t('translate.error', locale=get_language()))
             return None
 
     except Exception as e:
@@ -135,7 +127,7 @@ def register_faceid_employee(**kwargs):
             frappe.delete_doc('File', doc_file_name)
 
         message = e
-        gen_response(500, message)
+        gen_response(500, i18n.t('translate.error', locale=get_language()))
 
 
 @frappe.whitelist(methods="POST")
@@ -150,10 +142,7 @@ def update_faceid_employee(**kwargs):
         # check doc exists
         check_faceid = frappe.db.exists("Employee FaceID", doc_face_name)
         if not check_faceid:
-            message = translations.get(
-                "face_not_found").get(get_language())
-
-            gen_response(404, message, [])
+            gen_response(404, i18n.t('translate.face_not_found', locale=get_language()), [])
             return None
 
         # get doc
@@ -179,9 +168,7 @@ def update_faceid_employee(**kwargs):
         if response.status_code == 200:
             data = json.loads(response.text)
             if int(data.get('status')) == 4:
-                message = translations.get(
-                    "not_face_recognition").get(get_language())
-                gen_response(404, message, [])
+                gen_response(404, i18n.t('translate.not_face_recognition', locale=get_language()), [])
                 return None
 
             # save file and insert Doctype File
@@ -211,22 +198,16 @@ def update_faceid_employee(**kwargs):
             data['faceid_name'] = doc_face_name
             data['file_url'] = file_url
 
-            message = translations.get(
-                "faceid_success").get(get_language())
-            gen_response(200, message, data)
+            gen_response(200, i18n.t('translate.faceid_success', locale=get_language()), data)
             return None
         else:
-            message = translations.get(
-                "error").get(get_language())
-            gen_response(404, message)
+            gen_response(404, i18n.t('translate.error', locale=get_language()))
     except Exception as e:
         # delete when error
         if doc_file_name:
             frappe.delete_doc('File', doc_file_name)
 
-        message = translations.get(
-            "error").get(get_language())
-        gen_response(500, message)
+        gen_response(500, i18n.t('translate.error', locale=get_language()))
 
 
 @frappe.whitelist(methods="POST")
@@ -251,9 +232,7 @@ def verify_faceid_employee(**kwargs):
         }, fields=['vector'])
 
         if not len(employee_faces):
-            message = translations.get(
-                "face_not_found").get(get_language())
-            gen_response(404, message, [])
+            gen_response(404, i18n.t('translate.face_not_found', locale=get_language()), [])
             return None
 
         # call api get vector
@@ -269,9 +248,7 @@ def verify_faceid_employee(**kwargs):
         if response.status_code == 200:
             data = json.loads(response.text)
             if int(data.get('status')) == 4:
-                message = translations.get(
-                    "not_face_recognition").get(get_language())
-                gen_response(404, message, data)
+                gen_response(404, i18n.t('translate.not_face_recognition', locale=get_language()), data)
                 return None
 
             image_check = data.get("uploaded_faces")
@@ -295,25 +272,17 @@ def verify_faceid_employee(**kwargs):
                 data = {}
                 data["file_url"] = f"https://{endpoint_s3}/{bucket_name_s3}/{object_name}"
                 data['status'] = True
-                message = translations.get(
-                    "faceid_verify_success").get(get_language())
-                gen_response(200, message, data)
+                gen_response(200, i18n.t('translate.faceid_verify_success', locale=get_language()), data)
                 return None
             else:
-                message = translations.get(
-                    "faceid_verify_fail").get(get_language())
                 data = {}
                 data['status'] = False
-                gen_response(200, message, data)
+                gen_response(200, i18n.t('translate.faceid_verify_fail', locale=get_language()), data)
                 return None
         else:
-            message = translations.get(
-                "error").get(get_language())
-            gen_response(404, message)
+            gen_response(404, i18n.t('translate.error', locale=get_language()))
     except Exception as e:
         print(e)
-        message = translations.get(
-            "error").get(get_language())
-        gen_response(500, message)
+        gen_response(500, i18n.t('translate.error', locale=get_language()))
 
 # End FaceID

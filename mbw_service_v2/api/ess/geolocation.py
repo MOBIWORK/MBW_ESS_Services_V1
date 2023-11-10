@@ -2,9 +2,11 @@ import frappe
 from mbw_service_v2.utils import CONFIG_GEO_ADDRESS, CONFIG_GEO_LOCATION
 import requests
 from mbw_service_v2.api.common import (
-    gen_response
+    gen_response,
+    get_language
 )
 import json
+from mbw_service_v2.config_translate import i18n
 
 
 @frappe.whitelist(methods="GET", allow_guest=True)
@@ -25,7 +27,7 @@ def get_address_location(**kwargs):
         # call geolocation
 
         response = requests.get(url)
-        return gen_response(200, "", json.loads(response.text))
+        return gen_response(200, i18n.t('translate.successfully', locale=get_language()), json.loads(response.text))
     except Exception as e:
         return e
 
@@ -43,6 +45,6 @@ def get_coordinates_location(**kwargs):
             key = settings.get("api_key_google")
             url = f"{CONFIG_GEO_ADDRESS.get('GOOGLE')}?address={address}&gg=1&api_key={key}"
         response = requests.get(url)
-        return gen_response(200, "", json.loads(response.text))
+        return gen_response(200, i18n.t('translate.successfully', locale=get_language()), json.loads(response.text))
     except Exception as e:
         return e

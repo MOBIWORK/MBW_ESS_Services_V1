@@ -6,14 +6,14 @@ from mbw_service_v2.api.common import (
     BASE_URL,
     get_user_id,
     get_employee_by_user,
-
+    get_language
 )
 from frappe.query_builder import DocType
 from frappe.query_builder.functions import Count
 from datetime import datetime
 from pypika import Order, CustomFunction
 import json
-
+from mbw_service_v2.config_translate import i18n
 
 @frappe.whitelist(methods='GET')
 def get_list_sync(**kwargs):
@@ -24,9 +24,7 @@ def get_list_sync(**kwargs):
             "data": list_sync
         }
 
-        message = "Thành công."
-        gen_response(200, message, result)
+        gen_response(200, i18n.t('translate.successfully', locale=get_language()), result)
     except Exception as e:
         print(e)
-        message = "Có lỗi xảy ra"
-        gen_response(500, message, [])
+        gen_response(500, i18n.t('translate.error', locale=get_language()), [])

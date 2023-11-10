@@ -28,3 +28,8 @@ vi:
   no_location_shift: Bạn không thể chấm công tại đây
   error_network: Lỗi mạng
   no_shift: Bạn không có ca
+  user_not_found: Không tìm thấy người dùng
+  cmt_correct: Loại bình luận không đúng
+  leave_not_found: Không tìm thấy đơn từ
+  invalid_value: Giá trị không hợp lệ
+  update_success: Cập nhật thành công

@@ -12,8 +12,7 @@ from mbw_service_v2.api.common import (
     get_shift_type_now,
     exception_handel
 )
-from mbw_service_v2.translations.language import translations
-
+from mbw_service_v2.config_translate import i18n
 # Đăng nhập
 
 
@@ -83,14 +82,12 @@ def login(**kwargs):
         add_device = add_device_notification(
             login_manager.user, device_name, device_id)
 
-        message = translations.get("login_success").get(get_language())
-        gen_response(200, message, {
+        gen_response(200, i18n.t('translate.login_success', locale=get_language()), {
             "key_details": generate_key(login_manager.user),
         })
 
     except frappe.AuthenticationError:
-        message = translations.get("login_error").get(get_language())
-        gen_response(401, message, [])
+        gen_response(401, i18n.t('translate.login_error', locale=get_language()), [])
         return None
     except Exception as e:
         exception_handel(e)
@@ -110,10 +107,9 @@ def logout(device_id=None):
         remove_device_notification(auth_manager.user, device_id)
         auth_manager.logout()
         frappe.response["message"] = "Logged Out"
-        gen_response(200, frappe.response["message"])
+        gen_response(200, i18n.t('translate.logout_success', locale=get_language()))
     except frappe.AuthenticationError:
-        message = translations.get("logout_error").get(get_language())
-        gen_response(204, message, [])
+        gen_response(204, i18n.t('translate.logout_error', locale=get_language()), [])
         return None
     except Exception as e:
         gen_response(500, e, [])
@@ -124,25 +120,21 @@ def logout(device_id=None):
 @frappe.whitelist(allow_guest=True)
 def reset_password(user):
     if user == "Administrator":
-        message = translations.get("not_allow").get(get_language())
-        gen_response(500, message, [])
+        gen_response(500, i18n.t('translate.not_allow', locale=get_language()), [])
 
     try:
         user = frappe.get_doc("User", user)
         if not user.enabled:
-            message = translations.get("email_send_fail").get(get_language())
-            gen_response(500, message, [])
+            gen_response(500, i18n.t('translate.email_send_fail', locale=get_language()), [])
 
         user.validate_reset_password()
         user.reset_password(send_email=True)
 
-        message = translations.get("email_send_success").get(get_language())
-        gen_response(200, message)
+        gen_response(200, i18n.t('translate.email_send_success', locale=get_language()))
     except frappe.DoesNotExistError:
         frappe.local.response["http_status_code"] = 404
         frappe.clear_messages()
-        message = translations.get("error").get(get_language())
-        gen_response(404, message, [])
+        gen_response(404, i18n.t('translate.error', locale=get_language()), [])
 
 
 @frappe.whitelist()
@@ -159,9 +151,9 @@ def checkin_shift(**data):
         last_checkin = frappe.get_last_doc("Employee Checkin", filters={
                                            "employee": data.get("employee")})
         if last_checkin.get("log_type") == data.get("log_type"):
-            message = translations.get("title_1").get(get_language())
-            message1 = translations.get("check_in").get(get_language())
-            message2 = translations.get("check_out").get(get_language())
+            message = i18n.t('translate.title_1', locale=get_language())
+            message1 = i18n.t('translate.check_in', locale=get_language())
+            message2 = i18n.t('translate.check_out', locale=get_language())
             return gen_response(500, message + "" + message1 if data.get("log_type") == "OUT" else message2)
         new_check = frappe.new_doc("Employee Checkin")
         for field, value in dict(data).items():
@@ -171,8 +163,7 @@ def checkin_shift(**data):
     except frappe.DoesNotExistError:
         frappe.local.response["http_status_code"] = 404
         frappe.clear_messages()
-        message = translations.get("error").get(get_language())
-        gen_response(404, message, [])
+        gen_response(404, i18n.t('translate.error', locale=get_language()), [])
 
 
 @frappe.whitelist()
@@ -182,5 +173,4 @@ def get_list_checkin(**data):
     except frappe.DoesNotExistError:
         frappe.local.response["http_status_code"] = 404
         frappe.clear_messages()
-        message = translations.get("error").get(get_language())
-        gen_response(404, message, [])
+        gen_response(404, i18n.t('translate.error', locale=get_language()), [])

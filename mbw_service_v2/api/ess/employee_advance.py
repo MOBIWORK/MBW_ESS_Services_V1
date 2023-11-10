@@ -5,8 +5,9 @@ from calendar import monthrange
 from mbw_service_v2.api.common import (
     gen_response,
     get_employee_id,
+    get_language
 )
-
+from mbw_service_v2.config_translate import i18n
 
 @frappe.whitelist(methods='GET')
 def get_list_employee_advance(**kwargs):
@@ -51,13 +52,12 @@ def get_list_employee_advance(**kwargs):
             page_length=page_size
         )
 
-        message = "Thành công"
         result = {
             "data": lst_employee_advance,
             "total_doc": total_doc
         }
 
-        return gen_response(200, message, result)
+        return gen_response(200, i18n.t('translate.successfully', locale=get_language()), result)
     except Exception as e:
         message = e
-        gen_response(500, message, [])
+        gen_response(500, i18n.t('translate.error', locale=get_language()), [])

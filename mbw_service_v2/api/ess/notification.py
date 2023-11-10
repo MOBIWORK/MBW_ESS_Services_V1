@@ -6,14 +6,15 @@ from mbw_service_v2.api.common import (
     get_user_id,
     get_employee_by_name,
     validate_image,
-    BASE_URL
+    BASE_URL,
+    get_language
 )
 from frappe.query_builder import DocType
 from frappe.query_builder.functions import Count
 from datetime import datetime
 from pypika import Order, CustomFunction
 import json
-
+from mbw_service_v2.config_translate import i18n
 
 @frappe.whitelist(methods="GET")
 def get_list_notification(**kwargs):
@@ -80,16 +81,14 @@ def get_list_notification(**kwargs):
             del doc['employee_watched']
             del doc['image']
 
-        message = "Thành công"
         result = {
             "data": list_doc,
             # "total_doc": total_doc
         }
-        gen_response(200, message, result)
+        gen_response(200, i18n.t('translate.successfully', locale=get_language()), result)
     except Exception as e:
         print(e)
-        message = "Có lỗi xảy ra"
-        gen_response(500, message, [])
+        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
 
 
 @frappe.whitelist(methods="GET")
@@ -155,16 +154,14 @@ def get_info_notification(**kwargs):
             info['user_image'] = validate_image(user_image)
             del info['image']
 
-            message = "Thành công"
-            gen_response(200, message, info)
+            gen_response(200, i18n.t('translate.successfully', locale=get_language()), info)
         else:
             message = "Không tồn tại tài liệu"
-            gen_response(404, message, list_doc)
+            gen_response(404, i18n.t('translate.error', locale=get_language()), list_doc)
             return None
     except Exception as e:
         print(e)
-        message = "Có lỗi xảy ra"
-        gen_response(500, message, [])
+        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
 
 
 @frappe.whitelist(methods="GET")
@@ -226,13 +223,11 @@ def get_list_notification_system(**kwargs):
             del doc['_seen']
             del doc['image']
 
-        message = "Thành công"
         result = {
             "data": list_doc,
             # "total_doc": total_doc
         }
-        gen_response(200, message, result)
+        gen_response(200, i18n.t('translate.successfully', locale=get_language()), result)
     except Exception as e:
         print(e)
-        message = "Có lỗi xảy ra"
-        gen_response(500, message, [])
+        gen_response(500, i18n.t('translate.error', locale=get_language()), [])

@@ -1,8 +1,8 @@
 import frappe
 from mbw_service_v2.api.common import (gen_response,exception_handel,get_info_employee,get_employee_id,get_language, post_image)
 from datetime import datetime
-from mbw_service_v2.translations.language import translations 
 import base64
+from mbw_service_v2.config_translate import i18n
 # cập nhật tài khoản
 @frappe.whitelist()
 def update_profile(**kwargs):
@@ -54,10 +54,10 @@ def update_profile(**kwargs):
                     kwargs['date_of_birth'] = dob
             doc.save()
         
-        gen_response(200, "Cập nhật thành công",kwargs)
+        gen_response(200, i18n.t('translate.update_success', locale=get_language()),kwargs)
 
     except Exception as e:
-        gen_response(500, "", [])
+        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
         return exception_handel(e)
 
 
@@ -76,6 +76,6 @@ def get_employee_info() :
         if user_info['image']:
             user_info['image'] = base_url + user_info['image']
 
-        gen_response(200,"",user_info)
+        gen_response(200,i18n.t('translate.successfully', locale=get_language()),user_info)
     except Exception as e:
-        gen_response(500,e, [])
+        gen_response(500,i18n.t('translate.error', locale=get_language()), [])

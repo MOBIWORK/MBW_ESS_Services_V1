@@ -11,7 +11,9 @@ from mbw_service_v2.api.common import (
     get_report_doc,
     get_employee_id,
     last_day_of_month,
-    exception_handel
+    exception_handel,
+    get_language
+
 )
 from frappe.desk.query_report import generate_report_result as reportDefault
 from datetime import datetime, timedelta
@@ -24,6 +26,7 @@ from frappe.utils import (
 )
 
 from frappe.client import validate_link
+from mbw_service_v2.config_translate import i18n
 
 @frappe.whitelist()
 @frappe.read_only()
@@ -64,7 +67,7 @@ def get_report_monthly(
 
         
     add_data_to_monitor(report=report.reference_report or report.name)
-    gen_response(200, " ", result)
+    gen_response(200, i18n.t('translate.successfully', locale=get_language()), result)
 
 
 @frappe.whitelist()
@@ -93,7 +96,7 @@ def get_report_salary(**data):
         if result:
             result = result[0]
         add_data_to_monitor(report=report.reference_report or report.name)
-        gen_response(200, " ", result)
+        gen_response(200, i18n.t('translate.successfully', locale=get_language()), result)
     except Exception as e:
         exception_handel(e)
 
@@ -146,11 +149,10 @@ def get_statistic_vacation_fund():
             }
             result.append(leave_allocation)
 
-        message = "Thành công"
-        gen_response(200, message, result)
+        gen_response(200, i18n.t('translate.successfully', locale=get_language()), result)
     except Exception as e:
         message = str(e)
-        gen_response(500, message, [])
+        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
 
 @frappe.whitelist()
 def get_report_advance(**data):
@@ -188,6 +190,6 @@ def get_report_advance(**data):
             }
 
             
-        gen_response(200, " ", result)
+        gen_response(200, i18n.t('translate.successfully', locale=get_language()), result)
     except Exception as e:
         exception_handel(e)

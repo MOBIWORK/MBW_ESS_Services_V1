@@ -5,7 +5,8 @@ from mbw_service_v2.api.common import (
     get_report_doc,
     get_employee_id,
     last_day_of_month,
-    exception_handel
+    exception_handel,
+    get_language
 )
 
 from frappe.desk.search import search_link
@@ -14,6 +15,7 @@ from hrms.hr.doctype.employee_advance.employee_advance import get_pending_amount
 from datetime import datetime
 from frappe.client import validate_link
 import json
+from mbw_service_v2.config_translate import i18n
 
 @frappe.whitelist(methods="POST")
 def create_employee_advance(**data):
@@ -44,7 +46,7 @@ def create_employee_advance(**data):
         new_advance.insert()
 
         # return (company,department,employee_name,currency,pedding_amount,account_advance)
-        gen_response(201,"",new_advance)
+        gen_response(201,i18n.t('translate.create_success', locale=get_language()),new_advance)
 
     except Exception as e:
         exception_handel(e) 
