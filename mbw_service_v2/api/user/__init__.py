@@ -68,7 +68,7 @@ def get_employee_info() :
         employee_id = get_employee_id()
         print("dữ liệu user",employee_id)
         if not employee_id:
-            gen_response(500 ,"Lỗi gì đó",[])
+            gen_response(404 ,i18n.t('translate.user_not_found', locale=get_language()),[])
             return 
         user_info = get_info_employee(name= employee_id,fields=["employee", "employee_name","gender", "date_of_birth", "date_of_joining" ,"salutation", "image","user_id","department", "designation","cell_number", "current_address"])
         user_info['date_of_birth'] = user_info['date_of_birth']
