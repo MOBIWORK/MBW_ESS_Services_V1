@@ -1,4 +1,7 @@
 en:
+  not_found_shift: Shift not Assignment.
+  time_not_in: Inappropriate time.
+  shift_not_out: Not yet clocked out.
   successfully: Success.
   error: Error.
   faceid_success: Updated FaceID successfully.

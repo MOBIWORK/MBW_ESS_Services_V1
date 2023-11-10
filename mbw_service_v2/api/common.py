@@ -20,14 +20,51 @@ import array
 
 BASE_URL = frappe.utils.get_request_site_address()
 
-
-
-
-
 # ==================================================================================================
 ShiftType = frappe.qb.DocType('Shift Type')
 ShiftAssignment = frappe.qb.DocType('Shift Assignment')
-# lấy ca hiện tại và trạng thái của nó
+EmployeeCheckin = frappe.qb.DocType("Employee Checkin")
+
+#Lấy ca cuối
+def get_last_check(employee):
+    time_now = datetime.now()
+    last_check = (frappe.qb.from_(EmployeeCheckin)
+                              .inner_join(ShiftType)
+                              .on(EmployeeCheckin.shift == ShiftType.name)
+                              .limit(1)
+                              .where(EmployeeCheckin.employee ==  employee)
+                              .orderby(EmployeeCheckin.time,order= Order.desc)
+                              .select('*')
+                              .run(as_dict=True))
+    if not last_check:
+        return False
+    last_check = last_check[0]
+    # return last_check
+    before_a_day = (time_now - timedelta(1)).replace(hour=0,minute=0,second=0)
+    if last_check.get("start_time") > last_check.get('end_time'):
+        if  last_check.get("time") > before_a_day :
+            return last_check
+        return false
+    else :
+        if last_check.get("time") > time_now.replace(hour=0,minute=0,second=0) :
+            return last_check
+        return False
+
+# kiểm tra ca nhân viên
+def enable_check_shift(employee,shift,time_now):
+    shift_employee = (frappe.qb.from_(ShiftAssignment)
+                      .inner_join(ShiftType)
+                      .on(ShiftAssignment.shift_type == ShiftType.name)
+                      .where((ShiftAssignment.employee == employee) & (ShiftType.name == shift) & (
+                                ((time_now.date() >= ShiftAssignment.start_date) & (time_now.date() <= ShiftAssignment.end_date)) |
+                                ((time_now.date() >= ShiftAssignment.start_date) | (ShiftAssignment.end_date == False))
+                            ))
+                       .select('*')
+                       .run(as_dict=True)
+                      )
+    if len(shift_employee) >0: 
+        return True
+    return False
 
 
 def get_shift_type_now(employee_name):
@@ -38,7 +75,6 @@ def get_shift_type_now(employee_name):
     time_query = time_now.replace(hour=0, minute=0, second=0)
     time_query_next_day =  time_now.replace(hour=23, minute=59, second=59)
     if len(shift_type_now) > 0:
-        EmployeeCheckin = frappe.qb.DocType("Employee Checkin")
         last_checkin_today = (frappe.qb.from_(EmployeeCheckin)
                               .limit(4)
                               .where((EmployeeCheckin.time >= time_query) & (EmployeeCheckin.time <= time_query_next_day))
@@ -79,6 +115,8 @@ def today_list_shift(employee_name, time_now):
             .run(as_dict=True)
             )
 
+
+# đang trong ca
 def inshift(employee_name,time_now) :
     data = (frappe.qb.from_(ShiftType)
                       .inner_join(ShiftAssignment)
@@ -95,17 +133,24 @@ def inshift(employee_name,time_now) :
                       .select(ShiftType.name, ShiftType.start_time, ShiftType.end_time, ShiftType.allow_check_out_after_shift_end_time, ShiftType.begin_check_in_before_shift_start_time)
                       .run(as_dict=True)
                 )
-    print("trong ca",data)
     if len(data) == 0:
         return False
     return data[0]
 
-    
+# ca tiếp theo
 def nextshift(employee_name,time_now) :
     data = (frappe.qb.from_(ShiftType)
                         .inner_join(ShiftAssignment)
                         .on(ShiftType.name == ShiftAssignment.shift_type)
-                        .where((ShiftAssignment.employee == employee_name) & (time_now.time() <= ShiftType.start_time) & (time_now.date() >= ShiftAssignment.start_date) & (time_now.date() <= ShiftAssignment.end_date))
+                        .where(
+                            (ShiftAssignment.employee == employee_name) 
+                            & (time_now.time() <= ShiftType.start_time) 
+                            &
+                            (
+                                ((time_now.date() >= ShiftAssignment.start_date) & (time_now.date() <= ShiftAssignment.end_date)) |
+                                ((time_now.date() >= ShiftAssignment.start_date) | (ShiftAssignment.end_date == False))
+                            )
+                            )
                         .select(ShiftType.name, ShiftType.start_time, ShiftType.end_time, ShiftType.allow_check_out_after_shift_end_time, ShiftType.begin_check_in_before_shift_start_time)
                         .run(as_dict=True)
                         )
@@ -114,7 +159,7 @@ def nextshift(employee_name,time_now) :
         return False
     return data[0]
 
-
+# ca hiện tại
 def shift_now(employee_name, time_now):
     in_shift = inshift(employee_name, time_now)
 
@@ -156,8 +201,6 @@ def get_report_doc(report_name):
 
 
 # Tính khoảng cách giữa hai vị trí
-R = 6373.0
-
 from geopy.distance import great_circle
 def distance_of_two(long_client, lat_client, long_compare, lat_compare):
     point1 = ( lat_client,long_client)
@@ -185,7 +228,7 @@ def exception_handel(e):
     else:
         return gen_response(500, cstr(e))
 
-
+#xuất key nhân viên
 def generate_key(user):
     user_details = frappe.get_doc("User", user)
     api_secret = api_key = ""

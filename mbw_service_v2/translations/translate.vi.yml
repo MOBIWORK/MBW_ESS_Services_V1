@@ -1,4 +1,7 @@
 vi:
+  not_found_shift: Ca này chưa đăng ký.
+  time_not_in: Thời gian không phù hợp.
+  shift_not_out: Chưa chấm công ra.
   successfully: Thành công.
   error: Có lỗi xảy ra.
   faceid_success: Cập nhật FaceID thành công.
