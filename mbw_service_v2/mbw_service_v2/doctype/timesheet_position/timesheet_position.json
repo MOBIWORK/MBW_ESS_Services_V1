@@ -106,12 +106,12 @@
    "fieldname": "mac",
    "fieldtype": "Table",
    "label": "Set up Mac attendance",
-   "options": "TimeSheet Wifi  mac intermediate"
+   "options": "TimeSheet Wifi mac intermediate"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-11-10 17:06:30.943175",
+ "modified": "2023-11-11 09:59:48.293447",
  "modified_by": "Administrator",
  "module": "Mbw Service V2",
  "name": "TimeSheet Position",
