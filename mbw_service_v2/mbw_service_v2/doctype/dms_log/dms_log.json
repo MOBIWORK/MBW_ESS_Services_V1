@@ -19,7 +19,7 @@
   {
    "fieldname": "ma_nv",
    "fieldtype": "Data",
-   "label": "M\u00e3 nh\u00e2n vi\u00ean"
+   "label": "Employee Code"
   },
   {
    "fieldname": "checkin_start",
@@ -34,29 +34,29 @@
   {
    "fieldname": "total_records",
    "fieldtype": "Int",
-   "label": "T\u1ed5ng s\u1ed1 b\u1ea3n ghi"
+   "label": "Total Records"
   },
   {
    "default": "\u0110ang ti\u1ebfn h\u00e0nh",
    "fieldname": "status",
    "fieldtype": "Select",
-   "label": "Tr\u1ea1ng th\u00e1i",
+   "label": "Status",
    "options": "\u0110ang ti\u1ebfn h\u00e0nh\nTh\u00e0nh c\u00f4ng\nTh\u1ea5t b\u1ea1i"
   },
   {
    "fieldname": "total_import",
    "fieldtype": "Int",
-   "label": "T\u1ed5ng s\u1ed1 b\u1ea3n ghi \u0111\u00e3 nh\u1eadp"
+   "label": "Total Records Entered"
   },
   {
    "fieldname": "message",
    "fieldtype": "Text",
-   "label": "L\u00fd do"
+   "label": "Reason"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-11-04 11:33:42.871159",
+ "modified": "2023-11-11 08:49:52.996280",
  "modified_by": "Administrator",
  "module": "Mbw Service V2",
  "name": "DMS Log",

@@ -15,20 +15,20 @@
    "fieldname": "wifi_name",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "T\u00ean wifi",
+   "label": "Wifi name",
    "reqd": 1
   },
   {
    "fieldname": "wifi_ip",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "\u0110\u1ecba ch\u1ec9 ip",
+   "label": "Address ip",
    "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-11-01 11:06:23.506188",
+ "modified": "2023-11-11 09:06:12.052901",
  "modified_by": "Administrator",
  "module": "Mbw Service V2",
  "name": "TimeSheet Wifi",

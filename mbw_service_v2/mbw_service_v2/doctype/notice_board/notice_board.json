@@ -25,13 +25,13 @@
    "fieldname": "notice_title",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Ti\u00eau \u0111\u1ec1",
+   "label": "Title",
    "reqd": 1
   },
   {
    "fieldname": "description",
    "fieldtype": "Text",
-   "label": "M\u00f4 t\u1ea3"
+   "label": "Descriptive"
   },
   {
    "fieldname": "column_break_3",
@@ -41,35 +41,35 @@
    "fieldname": "from_date",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "T\u1eeb ng\u00e0y",
+   "label": "From Date",
    "reqd": 1
   },
   {
    "fieldname": "to_date",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "\u0110\u1ebfn ng\u00e0y",
+   "label": "To Date",
    "reqd": 1
   },
   {
    "default": "B\u00ecnh th\u01b0\u1eddng",
    "fieldname": "priority_level",
    "fieldtype": "Select",
-   "label": "M\u1ee9c \u0111\u1ed9 \u01b0u ti\u00ean",
+   "label": "Priority Level",
    "options": "B\u00ecnh th\u01b0\u1eddng\nCao"
   },
   {
    "default": "All Employee",
    "fieldname": "apply_for",
    "fieldtype": "Select",
-   "label": "\u00c1p d\u1ee5ng cho",
+   "label": "Apply to",
    "options": "All Employee\nSpecific Employees"
   },
   {
    "depends_on": "eval:doc.apply_for == \"Specific Employees\"",
    "fieldname": "employees",
    "fieldtype": "Table MultiSelect",
-   "label": "Danh s\u00e1ch nh\u00e2n vi\u00ean",
+   "label": "List Employee",
    "mandatory_depends_on": "eval:doc.apply_for == \"Specific Employees\"",
    "options": "Notice Board Employee"
   },
@@ -81,20 +81,20 @@
    "fieldname": "message",
    "fieldtype": "Text Editor",
    "in_list_view": 1,
-   "label": "N\u1ed9i dung",
+   "label": "Issue",
    "reqd": 1
   },
   {
    "fieldname": "employee_watched",
    "fieldtype": "Long Text",
    "hidden": 1,
-   "label": "Ng\u01b0\u1eddi \u0111\u00e3 xem",
+   "label": "Viewers",
    "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-11-01 14:31:05.372319",
+ "modified": "2023-11-11 09:05:00.308127",
  "modified_by": "Administrator",
  "module": "Mbw Service V2",
  "name": "Notice Board",
