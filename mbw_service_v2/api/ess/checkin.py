@@ -64,20 +64,20 @@ def checkin_shift(**data):
                 if not is_enable_checkin :
                     gen_response(500, i18n.t('translate.no_location_shift', locale=get_language()),[])
                     return
-                
-            in_wf = False
-            in_mac = False
-            for wf in wifi_position: 
-                if ip_network == wf.get("wifi_address") or wifi_mac == wf.get("wifi_address"):
-                    in_wf = True
-                    break
-            for mc in mac_position: 
-                if ip_network == mc.get("mac_address") or wifi_mac == mc.get("mac_address"):
-                    in_mac = True
-                    break
-            if not in_mac and not in_wf :
-                gen_response(500, i18n.t('translate.error_network', locale=get_language()),[])
-                return
+            if not (len(wifi_position) > 0 and len(mac_position) > 0) :
+                in_wf = False
+                in_mac = False
+                for wf in wifi_position: 
+                    if ip_network == wf.get("wifi_address") or wifi_mac == wf.get("wifi_address"):
+                        in_wf = True
+                        break
+                for mc in mac_position: 
+                    if ip_network == mc.get("mac_address") or wifi_mac == mc.get("mac_address"):
+                        in_mac = True
+                        break
+                if not in_mac and not in_wf :
+                    gen_response(500, i18n.t('translate.error_network', locale=get_language()),[])
+                    return
     
             
             shift_now = get_shift_type_now(name) 
