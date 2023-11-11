@@ -9,7 +9,6 @@ from mbw_service_v2.config_translate import i18n
 @frappe.whitelist(methods="POST")
 def checkin_data(**data):
     try:
-
         from_date = data.get('from_date') if data.get('from_date') else False
         to_date = data.get('to_date') if data.get('to_date') else False
         id_dms = data.get('id_dms') if data.get('id_dms') else False
@@ -24,7 +23,6 @@ def checkin_data(**data):
         if ma_nv:
             params['ma_nv'] = ma_nv
         url = f"https://dev.mobiwork.vn:4036/OpenAPI/V1/TimesheetData"
-        # url = f"https://openapi.mobiwork.vn/OpenAPI/V1/TimesheetData"
         dataTimeSheet = requests.get(url=url, params=params,
                                      headers={
                                          "Authorization": basic_auth(id_dms, token_key),
@@ -70,7 +68,6 @@ def checkin_data(**data):
                         setattr(new_log, fiel, value)
 
                     new_log.insert()
-                    # employee_log = frappe.get_doc()
                     for field, value in employee.items():
                         if (field not in field_not_loop):
                             dataCheckShift = value.get('data_cc')
@@ -112,9 +109,6 @@ def checkin_data(**data):
                                     if len(that_shift_now) == 0 :
                                         continue
                                     that_shift_now = that_shift_now[0]
-                                    # print("data in",data,'\n')
-                                    # print("data del",that_shift_now.get('name'),data['log_type'],'\n')
-                                    # print("end=================="'\n')
 
                                     countDelete = frappe.db.delete('Employee Checkin',{
                                         "employee": emp_data,
@@ -141,5 +135,4 @@ def checkin_data(**data):
         new_log.status = "Thất bại"
         new_log.message = cstr(e)
         new_log.save()
-        print(e)
         exception_handel(e)

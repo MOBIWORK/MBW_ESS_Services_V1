@@ -65,7 +65,6 @@ def get_list_comment_leave(**kwargs):
         }
         gen_response(200, i18n.t('translate.successfully', locale=get_language()), result)
     except Exception as e:
-        print(e)
         gen_response(500, i18n.t('translate.error', locale=get_language()), [])
 
 
@@ -89,7 +88,7 @@ def post_comment_leave(**kwargs):
             gen_response(404, i18n.t('translate.leave_not_found', locale=get_language()), [])
             return None
 
-        # them moi comment
+        # add any comments
         doc_comment = frappe.new_doc('Comment')
         doc_comment.reference_doctype = type_comment
         doc_comment.reference_name = name_doc
@@ -101,5 +100,4 @@ def post_comment_leave(**kwargs):
 
         gen_response(200, i18n.t('translate.create_success', locale=get_language()), doc_comment.as_dict(True))
     except Exception as e:
-        print(e)
         gen_response(500, i18n.t('translate.error', locale=get_language()), [])

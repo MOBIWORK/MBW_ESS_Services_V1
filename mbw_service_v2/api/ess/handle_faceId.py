@@ -35,7 +35,7 @@ def get_faceid_employee(**kwargs):
                                      "employee": employee_id}, fields=["name", "url"])
 
         if len(faceids) != 4 and len(faceids) > 0:
-            # xoa cac faceid cu
+            # Delete old faceids
             for face in faceids:
                 frappe.delete_doc('Employee FaceID', face.name)
             frappe.db.commit()
@@ -282,7 +282,6 @@ def verify_faceid_employee(**kwargs):
         else:
             gen_response(404, i18n.t('translate.error', locale=get_language()))
     except Exception as e:
-        print(e)
         gen_response(500, i18n.t('translate.error', locale=get_language()))
 
 # End FaceID

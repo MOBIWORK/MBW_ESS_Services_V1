@@ -25,7 +25,6 @@ def get_address_location(**kwargs):
             url = f"{CONFIG_GEO_LOCATION.get('GOOGLE')}?latlng={lat},{lon}&gg=1&api_key={key}"
         
         # call geolocation
-
         response = requests.get(url)
         return gen_response(200, i18n.t('translate.successfully', locale=get_language()), json.loads(response.text))
     except Exception as e:

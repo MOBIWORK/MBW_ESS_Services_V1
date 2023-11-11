@@ -105,7 +105,6 @@ def create_leave(**kwargs):
         UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
         from_date = kwargs.get('from_date')
         to_date = kwargs.get('to_date')
-        # half_day = kwargs.get('half_day')
         new_doc = frappe.new_doc("Leave Application")
         new_doc.employee = employee_id
         new_doc.leave_type = validate_empty(kwargs.get("leave_type"))
@@ -119,7 +118,6 @@ def create_leave(**kwargs):
             new_doc.half_day_date = validate_datetime(from_date)
         elif(from_date < to_date and kwargs.get('half_day') == True):
             if(kwargs.get('half_day_date') >= from_date and kwargs.get('half_day_date') <= to_date):
-                print("====", kwargs.get('half_day_date') >= from_date and kwargs.get('half_day_date') <= to_date)
                 new_doc.half_day = True
                 new_doc.half_day_date = validate_datetime(kwargs.get('half_day_date'))
             else: 

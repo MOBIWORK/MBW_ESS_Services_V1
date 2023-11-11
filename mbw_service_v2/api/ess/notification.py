@@ -38,19 +38,6 @@ def get_list_notification(**kwargs):
             end_day = datetime.fromtimestamp(int(end_time))
             query_code = query_code & (NoticeBoard.creation <= end_day) & (NoticeBoard.creation >= start_day)
 
-        # count_all = Count('*').as_("count")
-        # total_doc = (
-        #     frappe.qb.from_(NoticeBoard)
-        #     .left_join(EmployeeJoin)
-        #     .on(NoticeBoard.name == EmployeeJoin.parent)
-        #     .inner_join(Employee)
-        #     .on(NoticeBoard.owner == Employee.user_id)
-        #     .select(count_all)
-        #     .where((NoticeBoard.from_date <= end_day))
-        #     .where((NoticeBoard.to_date >= start_day))
-        #     .where((EmployeeJoin.employee == employee_id) | (NoticeBoard.apply_for == "All Employee"))
-        # ).run(as_dict=True)[0].get('count')
-
         list_doc = (
             frappe.qb.from_(NoticeBoard)
             .left_join(EmployeeJoin)
@@ -83,11 +70,9 @@ def get_list_notification(**kwargs):
 
         result = {
             "data": list_doc,
-            # "total_doc": total_doc
         }
         gen_response(200, i18n.t('translate.successfully', locale=get_language()), result)
     except Exception as e:
-        print(e)
         gen_response(500, i18n.t('translate.error', locale=get_language()), [])
 
 
@@ -103,7 +88,7 @@ def get_info_notification(**kwargs):
         UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
         Concat = CustomFunction('CONCAT', ['str_root', 'str_concat'])
 
-        # lay thong bao
+        # get notification
         list_doc = (
             frappe.qb.from_(NoticeBoard)
             .inner_join(Employee)
@@ -113,16 +98,16 @@ def get_info_notification(**kwargs):
             .limit(1)
         ).run(as_dict=True)
 
-        # kiem thong bao tra co ton tai khong
+        # Check if the return notification exists
         if len(list_doc):
             info = list_doc[0]
-            # xu ly add nhan vien da xem
+            # handle adding viewed employees
             employee_watched_json = info.get('employee_watched')
             employee_watched = []
             if employee_watched_json:
                 employee_watched = json.loads(employee_watched_json)
 
-            #  kiem tra nhan vien da xem chua
+            # Check if the staff has seen it or not
             if not any(d['name'] == employee_id for d in employee_watched):
                 employee_info = get_employee_by_name(
                     employee_id, ["name", "image", "employee_name"])
@@ -137,14 +122,14 @@ def get_info_notification(**kwargs):
                 employee_watched.append(employee_add)
                 employee_watched_json = json.dumps(employee_watched)
 
-                # cap nhat nhan vien da xem cho thong bao
+                # Viewed employee updates for notifications
                 doc = frappe.get_doc('Notice Board', name_doc)
                 doc.employee_watched = employee_watched_json
                 doc.save(ignore_permissions=True)
                 frappe.db.commit()
 
             info["employee_watched"] = employee_watched
-            # xu ly tra ve file dinh kem
+            # handle returns the attached file
             info['files'] = (frappe.qb.from_(FileDoc)
                              .select(Concat(BASE_URL, FileDoc.file_url).as_("file_url"), FileDoc.name)
                              .where(FileDoc.attached_to_name == name_doc)
@@ -156,10 +141,10 @@ def get_info_notification(**kwargs):
 
             gen_response(200, i18n.t('translate.successfully', locale=get_language()), info)
         else:
+            message = "Không tồn tại tài liệu"
             gen_response(404, i18n.t('translate.not_found', locale=get_language()), list_doc)
             return None
     except Exception as e:
-        print(e)
         gen_response(500, i18n.t('translate.error', locale=get_language()), [])
 
 
@@ -185,15 +170,6 @@ def get_list_notification_system(**kwargs):
             start_day = datetime.fromtimestamp(int(start_time))
             end_day = datetime.fromtimestamp(int(end_time))
             query_code = query_code & (NotificationLog.creation <= end_day) & (NotificationLog.creation >= start_day)
-
-        # count_all = Count('*').as_("count")
-        # total_doc = (
-        #     frappe.qb.from_(NotificationLog)
-        #     .inner_join(Employee)
-        #     .on(NotificationLog.owner == Employee.user_id)
-        #     .select(count_all)
-        #     .where((NotificationLog.for_user == user_id))
-        # ).run(as_dict=True)[0].get('count')
 
         list_doc = (
             frappe.qb.from_(NotificationLog)
@@ -224,9 +200,7 @@ def get_list_notification_system(**kwargs):
 
         result = {
             "data": list_doc,
-            # "total_doc": total_doc
         }
         gen_response(200, i18n.t('translate.successfully', locale=get_language()), result)
     except Exception as e:
-        print(e)
         gen_response(500, i18n.t('translate.error', locale=get_language()), [])

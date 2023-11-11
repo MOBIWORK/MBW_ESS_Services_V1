@@ -32,7 +32,7 @@ def calculate_late_working_hours(doc, method):
             'start_time', 'end_time', 'late_entry_grace_period', 'early_exit_grace_period'], as_dict=True)
 
         if shift_type:
-            # thoi gian cham cong muon checkin
+            # Late check-in time
             start_time = shift_type.get('start_time')
             late_entry_grace_period = shift_type.get(
                 'late_entry_grace_period') if shift_type.get('late_entry_grace_period') else 0
@@ -43,7 +43,7 @@ def calculate_late_working_hours(doc, method):
             else:
                 doc.late_check_in = 0
 
-            # thoi gian cham cong som checkout
+            # Early check-out time
             end_time = shift_type.get('end_time')
             early_exit_grace_period = shift_type.get(
                 'early_exit_grace_period') if shift_type.get('early_exit_grace_period') else 0

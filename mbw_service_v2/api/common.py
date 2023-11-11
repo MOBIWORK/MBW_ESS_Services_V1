@@ -25,7 +25,7 @@ ShiftType = frappe.qb.DocType('Shift Type')
 ShiftAssignment = frappe.qb.DocType('Shift Assignment')
 EmployeeCheckin = frappe.qb.DocType("Employee Checkin")
 
-#Lấy ca cuối
+# Take the last shift
 def get_last_check(employee):
     time_now = datetime.now()
     last_check = (frappe.qb.from_(EmployeeCheckin)
@@ -50,7 +50,7 @@ def get_last_check(employee):
             return last_check
         return False
 
-# kiểm tra ca nhân viên
+# Check staff shifts
 def enable_check_shift(employee,shift,time_now):
     shift_employee = (frappe.qb.from_(ShiftAssignment)
                       .inner_join(ShiftType)
@@ -100,9 +100,8 @@ def get_shift_type_now(employee_name):
         "shift_status": shift_status
     }
 
-# lấy danh sách ca theo từng ngày
 
-
+# Get a list of shifts by day
 def today_list_shift(employee_name, time_now):
     query = (ShiftAssignment.employee == employee_name) & (time_now.date() >= ShiftAssignment.start_date)
     if not ShiftAssignment.end_date.isnull() :
@@ -116,7 +115,7 @@ def today_list_shift(employee_name, time_now):
             )
 
 
-# đang trong ca
+# is in shift
 def inshift(employee_name,time_now) :
     data = (frappe.qb.from_(ShiftType)
                       .inner_join(ShiftAssignment)
@@ -137,7 +136,7 @@ def inshift(employee_name,time_now) :
         return False
     return data[0]
 
-# ca tiếp theo
+# next shift
 def nextshift(employee_name,time_now) :
     data = (frappe.qb.from_(ShiftType)
                         .inner_join(ShiftAssignment)
@@ -155,12 +154,11 @@ def nextshift(employee_name,time_now) :
                         .select(ShiftType.name, ShiftType.start_time, ShiftType.end_time, ShiftType.allow_check_out_after_shift_end_time, ShiftType.begin_check_in_before_shift_start_time)
                         .run(as_dict=True)
                         )
-    print("ca tiep",data)
     if len(data) == 0:
         return False
     return data[0]
 
-# ca hiện tại
+# current shift
 def shift_now(employee_name, time_now):
     in_shift = inshift(employee_name, time_now)
 
@@ -170,13 +168,10 @@ def shift_now(employee_name, time_now):
             return False
         return next_shift
     return in_shift
-
-
 # ======================================================================================
 
 
-# lấy báo cáo nhân viên
-
+# Get employee reports
 def get_report_doc(report_name):
     doc = frappe.get_doc("Report", report_name)
     doc.custom_columns = []
@@ -201,16 +196,14 @@ def get_report_doc(report_name):
     return doc
 
 
-# Tính khoảng cách giữa hai vị trí
+# Calculate the distance between two locations
 from geopy.distance import great_circle
 def distance_of_two(long_client, lat_client, long_compare, lat_compare):
     point1 = ( lat_client,long_client)
     point2 = (lat_compare,long_compare)
     return great_circle(point1, point2).meters
 
-# định nghĩa trả về
-
-
+# return definition
 def gen_response(status, message, result=[]):
     frappe.response["http_status_code"] = status
     if status == 500:
@@ -229,7 +222,7 @@ def exception_handel(e):
     else:
         return gen_response(500, cstr(e))
 
-#xuất key nhân viên
+# export employee key
 def generate_key(user):
     user_details = frappe.get_doc("User", user)
     api_secret = api_key = ""
@@ -433,7 +426,7 @@ def last_day_of_month(any_day):
 
 def group_fields(data,fields):
     list_fields = []
-    print(list_fields)
+
     for x in data:
         if not x[fields] in list_fields: list_fields.append(x[fields])
     new_group = {}
@@ -460,16 +453,12 @@ def basic_auth(username, password):
 
 def get_ip_network():
     try:
-        # # Lấy địa chỉ IP của người dùng từ tiêu đề HTTP "X-Forwarded-For"
+        # # Get the user's IP address from the "X-Forwarded-For" HTTP header
         remote_ip = frappe.get_request_header("X-Forwarded-For")
 
-        if remote_ip:
-            # Nếu có giá trị X-Forwarded-For, nó chứa địa chỉ IP của người dùng
-            print(f"Địa chỉ IP của người dùng 1: {remote_ip}")
-        else:
-            # Nếu không có X-Forwarded-For, thử lấy từ REMOTE_ADDR
+        if not remote_ip:
+            # If X-Forwarded-For is not available, try getting it from REMOTE_ADDR
             remote_ip = frappe.local.request.environ.get('REMOTE_ADDR')
-            print(f"Địa chỉ IP của người dùng 2: {remote_ip}")
 
         return remote_ip        
     except Exception as e:

@@ -14,7 +14,7 @@ from datetime import datetime
 
 from mbw_service_v2.config_translate import i18n
 
-# lấy cấc doctype
+# Get the doctype
 TimeSheetPosition = frappe.qb.DocType('TimeSheet Position')
 TimeSheetWifi = frappe.qb.DocType('TimeSheet Wifi')
 TimeSheetWifiIntermediate = frappe.qb.DocType('TimeSheet Wifi intermediate')
@@ -22,9 +22,8 @@ EmployeeChild = frappe.qb.DocType('Employee Child')
 ShiftAssignment = frappe.qb.DocType('Shift Assignment')
 ShiftType = frappe.qb.DocType('Shift Type')
 
-# Lấy danh sách ca
 
-
+# Get the list of cases
 @frappe.whitelist()
 def get_list_ca(**kwargs):
     try:
@@ -53,15 +52,12 @@ def get_list_ca(**kwargs):
     except Exception as e:
         gen_response(500, i18n.t('translate.error', locale=get_language()), [])
 
-# Danh sách địa điểm chấm công
 
-
+# Get list of attendance locations
 @frappe.whitelist(methods="GET")
 def get_list_timesheet_location(**kwargs):
     try:
         employee_id = get_employee_id()
-        print("employee ",kwargs)      
-
         mobile_long = False if not kwargs.get(
             'longitude') else float(kwargs.get('longitude'))
         mobile_lat = False if not kwargs.get(
@@ -102,9 +98,8 @@ def get_list_timesheet_location(**kwargs):
     except Exception as e:
         gen_response(500, i18n.t('translate.error', locale=get_language()), [])
 
-# wifi địa điểm chấm công
 
-
+# wifi attendance location
 def get_wifi_timesheet(name):
     data = (frappe.qb.from_(TimeSheetPosition)
             .inner_join(TimeSheetWifiIntermediate)

@@ -9,15 +9,14 @@ from mbw_service_v2.api.common import  (get_last_check, gen_response,get_employe
     inshift,
     enable_check_shift
     )
-    
 
 
 from datetime import datetime
 from pypika import  Order, CustomFunction
 from mbw_service_v2.config_translate import i18n
-# Dịch vụ chấm công
 
 
+# Timekeeping service
 @frappe.whitelist(methods="POST")
 def checkin_shift(**data):
     try:
@@ -35,12 +34,12 @@ def checkin_shift(**data):
         if not enable_check_shift(name, shift,time_now) : 
             gen_response(500, i18n.t('translate.not_found_shift', locale=get_language()),[])
             return
-        # lấy bản ghi ca cuối hôm nay hoặc ca xuyên ngày gần nhất
+        # Get the record of today's last shift or the most recent cross-day shift
         last_check = get_last_check(name)
 
-        # lấy thông tin ca truyền vào
+        # Get the transmitted shift information
         shift_detail = frappe.get_doc("Shift Type",shift)
-        #kiểm tra trạng thái bản ghi 
+        # Check the record status 
         if last_check :
             if last_check.get("log_type") == "OUT": 
                 time_enable = delta_to_time_now(shift_detail.get("start_time"))
@@ -50,7 +49,7 @@ def checkin_shift(**data):
             elif last_check.get('shift').lower() != shift.lower()  :
                 gen_response(500, i18n.t('translate.shift_not_out', locale=get_language()),[])
                 return
-        # kiểm tra vị trí
+        # check location
         if timesheet_position_detail:
             wifi_position = timesheet_position_detail.get('wifi')
             mac_position = timesheet_position_detail.get('mac')
@@ -98,8 +97,8 @@ def checkin_shift(**data):
     except frappe.DoesNotExistError:
         gen_response(404, i18n.t('translate.error', locale=get_language()), []) 
 
-# danh sách chấm công nhân viên
 
+# employee attendance list
 @frappe.whitelist(methods='GET')
 def get_list_cham_cong(**kwargs):
     try:
@@ -134,7 +133,7 @@ def get_shift_now():
             "shift_type_now" : False,
             "shift_status" : False
                 }
-        # lấy ca cuối
+        # take the last shift
         last_check = get_last_check(name)
         # return last_check
         if last_check  :  
@@ -270,7 +269,7 @@ def create_shift_request(**data) :
     except Exception as e:
         exception_handel(e)
 
-# tất cả các ca
+# all shifts
 @frappe.whitelist(methods='GET')
 def all_shift():
     try:
@@ -292,7 +291,9 @@ def all_shift():
 
 from frappe.client import validate_link
 import json
-# thông tin người phê duyệt
+
+
+# approver information
 @frappe.whitelist(methods='GET')
 def get_approved():
     try:

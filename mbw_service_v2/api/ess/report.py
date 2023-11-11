@@ -30,13 +30,7 @@ from mbw_service_v2.config_translate import i18n
 
 @frappe.whitelist()
 @frappe.read_only()
-def get_report_monthly(
-        filters={},
-        overview=True
-):
-    
-    # rs = frappe.getdoc("Report","Monthly Attendance Sheet")
-    # return rs
+def get_report_monthly(filters={},overview=True):
     report = get_report_doc("MBW Monthly Attendance Sheet vi v2")
     user = frappe.session.user
     filters = json.loads(filters)
@@ -55,7 +49,6 @@ def get_report_monthly(
             if key not in const_fiel :
                 if filters["summarized_view"]: 
                     leave_type =  frappe.db.get_value("Leave Type", key.replace("_"," "),['*'],as_dict=1)
-                    print("value",leave_type)
                     if leave_type: 
                         vacation.append({leave_type.get("leave_type_name"):value})
                 else :    vacation.append({key:value})
@@ -83,15 +76,13 @@ def get_report_salary(**data):
 
         year = this_year if not data.get('year') else int(data.get('year'))
         currency = "VND" if not data.get("currency") else data.get("currency")
-        # end_day = last_day_of_month(this_time).date()
-        # from_day = (end_day - relativedelta(months = this_month-7)).replace(day=1)
+
         from_day = datetime(year=year, month=1, day=1)
         end_day = datetime(year=year, month=12, day=31)
         filters = {"from_date": from_day, "to_date": end_day,
                    "docstatus": "Submitted", "currency": currency}
         filters["summarized_view"] = True
         filters["docname"] = username
-        # print(filters)
         result = generate_report_result(report, filters, user, False, None)
         if result:
             result = result[0]
@@ -130,21 +121,11 @@ def get_statistic_vacation_fund():
             )
 
             end_date = allocation.to_date
-            # leaves_taken = get_leaves_for_period(
-            #     employee_id, d, allocation.from_date, end_date) * -1
-            # leaves_pending = get_leaves_pending_approval_for_period(
-            #     employee_id, d, allocation.from_date, end_date
-            # )
-            # expired_leaves = allocation.total_leaves_allocated - \
-            #     (remaining_leaves + leaves_taken)
 
             leave_allocation = {
                 "name": d,
                 "leave_type_name": leave_type.get('leave_type_name'),
                 "total_allocated_leaves": flt(allocation.total_leaves_allocated, precision),
-                # "expired_leaves": flt(expired_leaves, precision) if expired_leaves > 0 else 0,
-                # "used_leaves": flt(leaves_taken, precision),
-                # "pending_leaves": flt(leaves_pending, precision),
                 "available_leaves": flt(remaining_leaves, precision),
             }
             result.append(leave_allocation)
@@ -173,7 +154,6 @@ def get_report_advance(**data):
         report_info = reportDefault(report, filters, user, False, None).get('result')
         
         result = {
-            # 'data': [],
             'total_advance_amount': 0,
             'total_paid_amount': 0,
             'total_claimed_amount': 0,
@@ -183,7 +163,6 @@ def get_report_advance(**data):
             total_paid_amount = report_info[-1][5] if report_info[-1][5] else 0 
             total_claimed_amount = report_info[-1][6] if report_info[-1][6] else 0
             result = {
-                # 'data': report_info[0:-1],
                 'total_advance_amount': total_advance_amount,
                 'total_paid_amount': total_paid_amount,
                 'total_claimed_amount': total_claimed_amount,

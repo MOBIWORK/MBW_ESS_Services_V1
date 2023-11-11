@@ -21,14 +21,12 @@ from mbw_service_v2.config_translate import i18n
 def create_employee_advance(**data):
     try:
         employee = get_employee_id()
-        print(employee)
         posting_date = datetime.now().date()
         ok = validate_link("Employee",employee,json.dumps(["company","employee_name","department", "employee"]))
-        # expense_approved = validate_link("Employee",{"user_id":ok.get("expense_approved")},json.dumps(["image","employee_name", "employee"]))
         currency = get_employee_currency(employee=ok.get("employee"))
         pedding_amount = get_pending_amount(employee=ok.get("employee"),posting_date = posting_date)
         account_advance = validate_link(doctype="Company",docname=ok.get('company'), fields= json.dumps(["default_employee_advance_account"]) )
-        # data = json.loads(data)
+
         data['docstatus'] = 0
         data["posting_date"] = posting_date
         data['currency'] = currency
@@ -45,8 +43,7 @@ def create_employee_advance(**data):
             setattr(new_advance, field, value)
         new_advance.insert()
 
-        # return (company,department,employee_name,currency,pedding_amount,account_advance)
         gen_response(201,i18n.t('translate.create_success', locale=get_language()),new_advance)
 
     except Exception as e:
-        exception_handel(e) 
+        gen_response(500, i18n.t('translate.error', locale=get_language()), [])

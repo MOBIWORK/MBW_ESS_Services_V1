@@ -28,9 +28,8 @@ from frappe.utils import get_files_path
 
 from mbw_service_v2.config_translate import i18n
 
-# chấm công nhân viên trong khoảng thời gian
 
-
+# Take employee timekeeping for a period of time
 @frappe.whitelist()
 def get_list_cham_cong(**kwargs):
     try:
@@ -47,14 +46,6 @@ def get_list_cham_cong(**kwargs):
             kwargs.get('page')) <= 0 else int(kwargs.get('page')) - 1
         start = page * page_size
 
-        # shift_type = frappe.db.get_list('Employee Checkin',
-        #     filters=my_filter,
-        #     fields=['employee_name', 'log_type', 'time', "shift",'device_id',"shift_start","shift_end"],
-        #     order_by='time desc',
-        #     start=start,
-        #     page_length=page_size,
-        # )
-
         EmployeeCheckin = frappe.qb.DocType("Employee Checkin")
         ShiftType = frappe.qb.DocType("Shift Type")
 
@@ -68,9 +59,8 @@ def get_list_cham_cong(**kwargs):
     except Exception as e:
         gen_response(500, i18n.t('translate.error', locale=get_language()), [])
 
-# danh sách đơn từ nhân viên
 
-
+# list of applications from employees
 @frappe.whitelist()
 def get_list_don_tu(**kwargs):
     try:
@@ -101,9 +91,8 @@ def get_list_don_tu(**kwargs):
     except Exception as e:
         gen_response(500, i18n.t('translate.error', locale=get_language()), [])
 
-# lay danh sach nhan vien
 
-
+# List of employees
 @frappe.whitelist(methods='GET')
 def get_list_employee(**kwargs):
     try:
@@ -134,20 +123,18 @@ def get_list_employee(**kwargs):
         }
         gen_response(200, i18n.t('translate.successfully', locale=get_language()), result)
     except Exception as e:
-        print(e)
         gen_response(500, i18n.t('translate.error', locale=get_language()), [])
 
 
-# chi tiết ddwon từ nhân viên
+# application details from staff
 @frappe.whitelist(methods='GET')
 def get_don_chi_tiet(name):
     data = frappe.get_doc('Leave Allocation', name
                           )
     gen_response(200, i18n.t('translate.successfully', locale=get_language()), data)
 
-# thông tin nhân viên
 
-
+# Get employee information
 @frappe.whitelist()
 def get_info_employee():
     try:
@@ -170,9 +157,8 @@ def get_info_employee():
     except Exception as e:
         gen_response(500, i18n.t('translate.error', locale=get_language()), [])
 
-# Dịch vụ chấm công
 
-
+# Timekeeping service
 @frappe.whitelist()
 def checkin_shift(**data):
     try:
@@ -180,16 +166,6 @@ def checkin_shift(**data):
         time_check = datetime.strptime(
             data.get('time'), "%Y-%m-%d %H:%M:%S").time()
 
-        # EmployeeCheckin = frappe.qb.DocType('Employee Checkin')
-        # ShiftType = frappe.qb.DocType('Shift Type')
-
-        # last_checkin = (frappe.qb.from_()
-
-        # )
-        print(datetime.strptime(data.get('time'), "%Y-%m-%d %H:%M:%S").time())
-        # last_checkin = frappe.get_last_doc("Employee Checkin",filters = {"employee": employee.name,"shift": data.get})
-        # if last_checkin.get("log_type") == data.get("log_type"):
-        #      return gen_response(500, "You have to " + "checkin first" if data.get("log_type") == "OUT" else "checkout first")
         new_check = frappe.new_doc("Employee Checkin")
         data["device_id"] = json.dumps({"longitude": data.get(
             "longitude"), "latitude": data.get("latitude")})

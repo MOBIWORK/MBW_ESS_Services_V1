@@ -84,7 +84,7 @@ def insert(**kwargs):
             if not kwargs.get(key):
                 kwargs[key] = field.get("default")
 
-        # them moi kpi
+        # add new kpi
         doc_new = frappe.new_doc('KPI Integration Data')
         doc_new.parenttype = "Employee"
         doc_new.parentfield = "kpi_data"
