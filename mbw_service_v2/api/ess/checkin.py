@@ -129,6 +129,7 @@ def get_list_cham_cong(**kwargs):
 def get_shift_now():
     try:
         name= get_employee_id()
+        time_now = datetime.now()
         shift_now = {
             "shift_type_now" : False,
             "shift_status" : False
@@ -138,7 +139,6 @@ def get_shift_now():
         # return last_check
         if last_check  :  
             if last_check.get("log_type") == "OUT" : 
-                time_now = datetime.now()
                 shift_suggest = False
                 in_shift = inshift(name, time_now)
                 if in_shift and in_shift.get("name") != last_check.get("shift"):
