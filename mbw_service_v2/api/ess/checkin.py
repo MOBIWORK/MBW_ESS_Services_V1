@@ -69,10 +69,12 @@ def checkin_shift(**data):
                 in_mac = False
                 for wf in wifi_position: 
                     if ip_network == wf.get("wifi_address") or wifi_mac == wf.get("wifi_address"):
+                        data['wifi'] = wf.get("wifi_name")
                         in_wf = True
                         break
                 for mc in mac_position: 
                     if ip_network == mc.get("mac_address") or wifi_mac == mc.get("mac_address"):
+                        data['wifi'] = wf.get("mac_name")
                         in_mac = True
                         break
                 if not in_mac and not in_wf :
