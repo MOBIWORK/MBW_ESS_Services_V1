@@ -44,7 +44,7 @@ def get_last_check(employee):
     if last_check.get("start_time") > last_check.get('end_time'):
         if  last_check.get("time") > before_a_day :
             return last_check
-        return false
+        return False
     else :
         if last_check.get("time") > time_now.replace(hour=0,minute=0,second=0) :
             return last_check
