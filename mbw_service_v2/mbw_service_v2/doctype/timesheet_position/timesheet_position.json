@@ -26,32 +26,32 @@
   {
    "fieldname": "tab_break1",
    "fieldtype": "Tab Break",
-   "label": "Th\u00f4ng tin \u0111\u1ecba \u0111i\u1ec3m"
+   "label": "Location Information"
   },
   {
    "fieldname": "name_address",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "T\u00ean \u0111\u1ecba \u0111i\u1ec3m",
+   "label": "Location Name",
    "reqd": 1
   },
   {
    "fieldname": "address",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "\u0110\u1ecba \u0111i\u1ec3m",
+   "label": "Addresses",
    "reqd": 1
   },
   {
    "fieldname": "geofence",
    "fieldtype": "Float",
-   "label": "B\u00e1n k\u00ednh"
+   "label": "Radius"
   },
   {
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "Tr\u1ea1ng th\u00e1i",
+   "label": "Status",
    "options": "Active\nLock",
    "reqd": 1
   },
@@ -62,56 +62,56 @@
   {
    "fieldname": "map",
    "fieldtype": "Geolocation",
-   "label": "B\u1ea3n \u0111\u1ed3"
+   "label": "Map"
   },
   {
    "fieldname": "longitude",
    "fieldtype": "Float",
    "hidden": 1,
    "in_list_view": 1,
-   "label": "Kinh \u0111\u1ed9"
+   "label": "Longitude"
   },
   {
    "fieldname": "latitude",
    "fieldtype": "Float",
    "hidden": 1,
-   "label": "V\u0129 \u0111\u1ed9"
+   "label": "Latitude"
   },
   {
    "fieldname": "tab_break2",
    "fieldtype": "Tab Break",
-   "label": "C\u1ea5u h\u00ecnh"
+   "label": "Configure"
   },
   {
    "default": "Setting Employee",
    "fieldname": "is_limited",
    "fieldtype": "Select",
-   "label": "Gi\u1edbi h\u1ea1n nh\u00e2n vi\u00ean",
+   "label": "Employee Limit",
    "options": "All employee\nSetting Employee"
   },
   {
    "depends_on": "eval:doc.is_limited !==\"All employee\"",
    "fieldname": "employees",
    "fieldtype": "Table",
-   "label": "Nh\u00e2n vi\u00ean ",
+   "label": "Employee",
    "options": "Employee Child"
   },
   {
    "fieldname": "wifi",
    "fieldtype": "Table",
-   "label": "Thi\u1ebft l\u1eadp ch\u1ea5m c\u00f4ng theo IP",
+   "label": "Set up IP attendance",
    "options": "TimeSheet Wifi intermediate"
   },
   {
    "fieldname": "mac",
    "fieldtype": "Table",
-   "label": "Thi\u1ebft l\u1eadp ch\u1ea5m c\u00f4ng theo MAC",
+   "label": "Set up Mac attendance",
    "options": "TimeSheet Wifi  mac intermediate"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-11-09 15:09:32.543220",
+ "modified": "2023-11-10 17:06:30.943175",
  "modified_by": "Administrator",
  "module": "Mbw Service V2",
  "name": "TimeSheet Position",
