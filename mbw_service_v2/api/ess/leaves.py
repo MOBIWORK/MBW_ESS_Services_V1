@@ -9,6 +9,7 @@ from frappe.utils import ( cint, flt )
 from hrms.hr.doctype.leave_application.leave_application import (get_leave_allocation_records, get_leave_balance_on, get_leaves_for_period, get_leaves_pending_approval_for_period, get_leave_approver)
 base_url = frappe.utils.get_request_site_address()
 
+#detail of leave
 @frappe.whitelist(methods='GET')
 def get_detail_leave(name):
     employee_id = get_employee_id()
@@ -32,6 +33,7 @@ def get_detail_leave(name):
         "avata_employee": avata_employee
     })
 
+#list of leaves
 @frappe.whitelist()
 def get_list_leave(**kwargs):
     try:
@@ -96,6 +98,7 @@ def get_list_leave(**kwargs):
     except Exception as e:
         gen_response(500, i18n.t('translate.error', locale=get_language()), [])
 
+#create a leave
 @frappe.whitelist(methods="POST")
 def create_leave(**kwargs):
     try:
@@ -151,6 +154,22 @@ def create_leave(**kwargs):
         if hasattr(e, "http_status_code") and e.http_status_code == 417:
             gen_response(417, f"{i18n.t('translate.employee', locale=get_language())} {employee_id} {i18n.t('translate.title_2', locale=get_language())} {new_doc.leave_type} {i18n.t('translate.from_date', locale=get_language())} {(new_doc.from_date).strftime('%d-%m-%Y')} {i18n.t('translate.to_date', locale=get_language())} {(new_doc.to_date).strftime('%d-%m-%Y')}")
         else:   exception_handel(e)
+
+#update a leave
+@frappe.whitelist(methods="PATCH")
+def update_leave():
+    try:
+        print("update info a leave")
+    except Exception as e:
+        exception_handel(e)
+
+#delete a leave
+@frappe.whitelist(methods="DELETE")
+def delete_leave():
+    try:
+        print("update info a leave")
+    except Exception as e:
+        exception_handel(e)
 
 @frappe.whitelist(methods="GET")
 def get_list_leave_type(**kwargs):

@@ -75,8 +75,10 @@ def get_approved_amount():
             return
         info_approve = frappe.db.get_value("Employee",{"user_id": expense_approver},['employee_name',"user_id", "image"],as_dict=1)
         info_approve['image'] = validate_image(info_approve['image'])
-        info_approve['name'] = info_approve['employee_name']
+        info_approve['full_name'] = info_approve['employee_name']
+        info_approve['email'] = info_approve['user_id']
         del info_approve['employee_name']
+        del info_approve['user_id']
         gen_response(200,"",info_approve) 
     except Exception as e:
         exception_handel(e)
