@@ -93,6 +93,6 @@ def get_approved_amount():
         info_approve['image'] = validate_image(info_approve['image'])
         info_approve['name'] = info_approve['employee_name']
         del info_approve['employee_name']
-        return info_approve
+        gen_response(200,"",info_approve) 
     except Exception as e:
         exception_handel(e)
