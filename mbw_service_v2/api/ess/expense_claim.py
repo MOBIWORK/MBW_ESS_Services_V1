@@ -77,6 +77,7 @@ def get_approved_amount():
         info_approve['image'] = validate_image(info_approve['image'])
         info_approve['full_name'] = info_approve['employee_name']
         info_approve['email'] = info_approve['user_id']
+        
         del info_approve['employee_name']
         del info_approve['user_id']
         gen_response(200,"",info_approve) 
