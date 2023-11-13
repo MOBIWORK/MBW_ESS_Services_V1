@@ -64,22 +64,6 @@ def get_pedding_amount():
         exception_handel(e)
 
 @frappe.whitelist(methods="GET")
-def get_pedding_amount():
-    try: 
-        today = datetime.now().date()
-        employee = get_employee_id()
-        employee_due_amount = frappe.get_all(
-		"Employee Advance",
-		filters={"employee": employee, "docstatus": 1, "posting_date": ("<=", today)},
-		fields=["advance_amount", "paid_amount"],
-        )
-        total =  sum([(emp.advance_amount - emp.paid_amount) for emp in employee_due_amount])
-        gen_response(200, "",total)
-    except Exception as e:
-        exception_handel(e)
-
-
-@frappe.whitelist(methods="GET")
 def get_approved_amount():
     try:
         EmployeeD = frappe.qb.DocType("Employee")
