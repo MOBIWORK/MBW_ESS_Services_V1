@@ -3,7 +3,7 @@ import frappe
 from mbw_service_v2.api.common import (gen_response,exception_handel, get_language, get_employee_id, validate_datetime, validate_empty,get_user_id, get_employee_by_user, validate_image)
 from pypika import Order, CustomFunction, Tuple
 from datetime import datetime
-
+import json
 from mbw_service_v2.config_translate import i18n
 from frappe.utils import ( cint, flt )
 from hrms.hr.doctype.leave_application.leave_application import (get_leave_allocation_records, get_leave_balance_on, get_leaves_for_period, get_leaves_pending_approval_for_period, get_leave_approver)
@@ -157,15 +157,18 @@ def create_leave(**kwargs):
 
 #update a leave
 @frappe.whitelist(methods="PATCH")
-def update_leave():
+def update_leave(**data):
     try:
+        data = json.loads(data)
+        doc = frappe.get_doc(data)
+        doc.save()
         print("update info a leave")
     except Exception as e:
         exception_handel(e)
 
 #delete a leave
 @frappe.whitelist(methods="DELETE")
-def delete_leave():
+def delete_leave(name):
     try:
         print("update info a leave")
     except Exception as e:

@@ -59,7 +59,7 @@ def get_pedding_amount():
 		fields=["advance_amount", "paid_amount"],
         )
         total =  sum([(emp.advance_amount - emp.paid_amount) for emp in employee_due_amount])
-        gen_response(200, "",total)
+        gen_response(200, "",{"total":total})
     except Exception as e:
         exception_handel(e)
 
