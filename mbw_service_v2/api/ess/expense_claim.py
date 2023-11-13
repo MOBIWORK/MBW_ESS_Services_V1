@@ -1,12 +1,10 @@
 import frappe
 from mbw_service_v2.api.common import (
     gen_response,
-    generate_report_result,
-    get_report_doc,
     get_employee_id,
-    last_day_of_month,
     exception_handel,
-    get_language
+    get_language,
+    validate_image
 )
 
 from frappe.desk.search import search_link
@@ -47,3 +45,54 @@ def create_employee_advance(**data):
 
     except Exception as e:
         gen_response(500, i18n.t('translate.error', locale=get_language()), [])
+
+
+
+@frappe.whitelist(methods="GET")
+def get_pedding_amount():
+    try: 
+        today = datetime.now().date()
+        employee = get_employee_id()
+        employee_due_amount = frappe.get_all(
+		"Employee Advance",
+		filters={"employee": employee, "docstatus": 1, "posting_date": ("<=", today)},
+		fields=["advance_amount", "paid_amount"],
+        )
+        total =  sum([(emp.advance_amount - emp.paid_amount) for emp in employee_due_amount])
+        gen_response(200, "",total)
+    except Exception as e:
+        exception_handel(e)
+
+@frappe.whitelist(methods="GET")
+def get_pedding_amount():
+    try: 
+        today = datetime.now().date()
+        employee = get_employee_id()
+        employee_due_amount = frappe.get_all(
+		"Employee Advance",
+		filters={"employee": employee, "docstatus": 1, "posting_date": ("<=", today)},
+		fields=["advance_amount", "paid_amount"],
+        )
+        total =  sum([(emp.advance_amount - emp.paid_amount) for emp in employee_due_amount])
+        gen_response(200, "",total)
+    except Exception as e:
+        exception_handel(e)
+
+
+@frappe.whitelist(methods="GET")
+def get_approved_amount():
+    try:
+        EmployeeD = frappe.qb.DocType("Employee")
+        employee_id = get_employee_id()
+        employee_detail = frappe.get_doc("Employee",employee_id)
+        expense_approver = employee_detail.get('expense_approver')
+        if not expense_approver :
+            gen_response(404,i18n.t('translate.notfound', locale=get_language()),False)
+            return
+        info_approve = frappe.db.get_value("Employee",{"user_id": expense_approver},['employee_name',"user_id", "image"],as_dict=1)
+        info_approve['image'] = validate_image(info_approve['image'])
+        info_approve['name'] = info_approve['employee_name']
+        del info_approve['employee_name']
+        return info_approve
+    except Exception as e:
+        exception_handel(e)
