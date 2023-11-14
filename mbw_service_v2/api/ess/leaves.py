@@ -159,8 +159,13 @@ def create_leave(**kwargs):
 @frappe.whitelist(methods="PATCH")
 def update_leave(**data):
     try:
+        regex_date = "%Y/%m/%d"
         list_fields_valid = ["name","leave_type","from_date","to_date","half_day","half_day_date","leave_approver","description"]
         del data['cmd']
+        if data['from_date'] : 
+            data['from_date'] = datetime.fromtimestamp(int(data.get('from_date'))).strftime(regex_date)
+        if data['to_date'] : 
+            data['to_date'] = datetime.fromtimestamp(int(data.get('to_date'))).strftime(regex_date)
         for ind, value in dict(data).items():
             if ind not in list_fields_valid:
                 gen_response(500,i18n.t('translate.invalid_value', locale=get_language()),[])
@@ -171,6 +176,8 @@ def update_leave(**data):
         if data.get("half_day") == 1 and data.get("half_day_date") == "":
             gen_response(500,i18n.t('translate.must_has_hafl_date', locale=get_language()),[])
             return
+        if data['half_day_date'] : 
+            data['half_day_date'] = datetime.fromtimestamp(int(data.get('half_day_date'))).strftime(regex_date)
         
         application_name = data.get('name')
         doc = frappe.get_doc('Leave Application', application_name)
@@ -180,6 +187,13 @@ def update_leave(**data):
         for field, value in dict(data).items():
             setattr(doc, field, value)
         doc.save()
+        if doc.get("half_day_date") :
+            setattr(doc,"half_day_date",datetime.strptime(doc.get("half_day_date"), regex_date).timestamp() )
+        if doc.get("from_date") :
+            setattr(doc,"from_date",datetime.strptime(doc.get("from_date"), regex_date).timestamp() ) 
+        if doc.get("to_date") :
+            setattr(doc,"to_date",datetime.strptime(doc.get("to_date"), regex_date).timestamp() )          
+        print("type",type(doc.get("from_date")))
         gen_response(200, i18n.t('translate.update_success', locale=get_language()),doc)
 
         return
