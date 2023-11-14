@@ -34,6 +34,10 @@ vi:
   user_not_found: Không tìm thấy người dùng
   cmt_correct: Loại bình luận không đúng
   leave_not_found: Không tìm thấy đơn từ
+  doc_not_found: Không tìm thấy dữ liệu
+  must_has_hafl_date: Phải có ngày nghỉ nủa ngày
+  name_require: Trường name là bắt buộc
   invalid_value: Giá trị không hợp lệ
   update_success: Cập nhật thành công
+  delete_success: Xóa thành công
   not_found: Không tìm thấy

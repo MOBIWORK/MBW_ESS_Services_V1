@@ -34,6 +34,10 @@ en:
   user_not_found: Not found user
   cmt_correct: The comment type is incorrect
   leave_not_found: Leave type not found
+  doc_not_found: Not found doc
+  must_has_hafl_date: must has value hafl date
+  name_require: Field name is require
   invalid_value: Invalid value
   update_success: Update success
+  delete_success: Delete success
   not_found: Not found

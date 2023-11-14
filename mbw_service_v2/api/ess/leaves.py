@@ -155,14 +155,34 @@ def create_leave(**kwargs):
             gen_response(417, f"{i18n.t('translate.employee', locale=get_language())} {employee_id} {i18n.t('translate.title_2', locale=get_language())} {new_doc.leave_type} {i18n.t('translate.from_date', locale=get_language())} {(new_doc.from_date).strftime('%d-%m-%Y')} {i18n.t('translate.to_date', locale=get_language())} {(new_doc.to_date).strftime('%d-%m-%Y')}")
         else:   exception_handel(e)
 
-#update a leave
+##update a leave
 @frappe.whitelist(methods="PATCH")
 def update_leave(**data):
     try:
-        data = json.loads(data)
-        doc = frappe.get_doc(data)
+        employee_id = get_employee_id()
+        list_fields_valid = ["name","leave_type","from_date","to_date","half_day","half_day_date","leave_approver","description"]
+        for ind, value in dict(data).items():
+            if ind not in list_fields_valid:
+                gen_response(500,i18n.t('translate.invalid_value', locale=get_language()),[])
+                return
+        if not data.get('name') :
+            gen_response(500,i18n.t('translate.name_require', locale=get_language()),[])
+            return
+        if data.get("half_day") == 1 and data.get("half_day_date") == "":
+            gen_response(500,i18n.t('translate.must_has_hafl_date', locale=get_language()),[])
+            return
+        
+        application_name = data.get('name')
+        doc = frappe.get_doc('Leave Application', application_name)
+        if not doc:
+            gen_response(500,i18n.t('translate.doc_not_found', locale=get_language()),[])
+            return
+        for field, value in dict(data).items():
+            setattr(doc, field, value)
         doc.save()
-        print("update info a leave")
+        gen_response(200, i18n.t('translate.update_success', locale=get_language()),doc)
+
+        return
     except Exception as e:
         exception_handel(e)
 
@@ -170,7 +190,8 @@ def update_leave(**data):
 @frappe.whitelist(methods="DELETE")
 def delete_leave(name):
     try:
-        print("update info a leave")
+        frappe.delete_doc('Leave Application',name)
+        gen_response(200, i18n.t('translate.delete_success', locale=get_language()),[])
     except Exception as e:
         exception_handel(e)
 
