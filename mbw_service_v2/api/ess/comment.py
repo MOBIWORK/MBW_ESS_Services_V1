@@ -31,16 +31,6 @@ def get_list_comment_leave(**kwargs):
         Employee = frappe.qb.DocType('Employee')
         Comment = frappe.qb.DocType('Comment')
         UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
-        count_all = Count('*').as_("count")
-
-        total_doc = (
-            frappe.qb.from_(Comment)
-            .inner_join(Employee)
-            .on(Comment.owner == Employee.user_id)
-            .select(count_all)
-            .where((Comment.reference_doctype == type_comment) & (Comment.reference_name == name))
-            .where((Comment.comment_type == 'Comment'))
-        ).run(as_dict=True)[0].get('count')
 
         list_employee = (
             frappe.qb.from_(Comment)
@@ -60,8 +50,7 @@ def get_list_comment_leave(**kwargs):
             del doc['image']
 
         result = {
-            "data": list_employee,
-            "total_doc": total_doc
+            "data": list_employee
         }
         gen_response(200, i18n.t('translate.successfully', locale=get_language()), result)
     except Exception as e:
