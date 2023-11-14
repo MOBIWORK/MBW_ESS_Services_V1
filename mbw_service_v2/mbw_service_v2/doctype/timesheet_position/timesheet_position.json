@@ -111,7 +111,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-11-11 09:59:48.293447",
+ "modified": "2023-11-14 14:57:08.713260",
  "modified_by": "Administrator",
  "module": "Mbw Service V2",
  "name": "TimeSheet Position",
@@ -130,7 +130,9 @@
    "write": 1
   }
  ],
+ "show_title_field_in_link": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "states": []
+ "states": [],
+ "title_field": "name_address"
 }

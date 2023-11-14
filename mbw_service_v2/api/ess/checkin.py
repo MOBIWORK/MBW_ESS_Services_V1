@@ -22,6 +22,7 @@ def checkin_shift(**data):
     try:
         ip_network = get_ip_network()
         id_position = dict(data).get("timesheet_position")
+        
         wifi_mac = dict(data).get("wifi_mac")
         shift = dict(data).get("shift")
         timesheet_position_detail = frappe.get_doc("TimeSheet Position",id_position)
@@ -53,6 +54,7 @@ def checkin_shift(**data):
         if timesheet_position_detail:
             wifi_position = timesheet_position_detail.get('wifi')
             mac_position = timesheet_position_detail.get('mac')
+            print()
             is_limited = timesheet_position_detail.get("is_limited")
             employees = timesheet_position_detail.get("employees")
             if is_limited != "All employee" :
@@ -60,11 +62,12 @@ def checkin_shift(**data):
                 for employee in employees:
                     if employee.get("employee_id") == name:
                         is_enable_checkin = True
+                        data['timesheet_position'] = id_position
                         break
                 if not is_enable_checkin :
                     gen_response(500, i18n.t('translate.no_location_shift', locale=get_language()),[])
                     return
-            if not (len(wifi_position) > 0 and len(mac_position) > 0) :
+            if (len(wifi_position) > 0 and len(mac_position) > 0) :
                 in_wf = False
                 in_mac = False
                 for wf in wifi_position: 
@@ -161,6 +164,7 @@ def get_shift_now():
                         "begin_check_in_before_shift_start_time": last_check.get("begin_check_in_before_shift_start_time"),
                         "start_time_today": last_check.get("start_time_today"),
                         "end_time_today": last_check.get("end_time_today"),
+                        "timesheet_position": last_check.get("timesheet_position"),
                     },
                     "shift_status" : "IN"
                     }
