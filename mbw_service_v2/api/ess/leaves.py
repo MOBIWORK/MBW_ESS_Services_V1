@@ -161,7 +161,7 @@ def update_leave(**data):
     try:
         employee_id = get_employee_id()
         list_fields_valid = ["name","leave_type","from_date","to_date","half_day","half_day_date","leave_approver","description"]
-        del data.get('cmd')
+        del dict(data).get('cmd')
         for ind, value in dict(data).items():
             if ind not in list_fields_valid:
                 gen_response(500,i18n.t('translate.invalid_value', locale=get_language()),[])
