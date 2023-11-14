@@ -1,7 +1,7 @@
 {
  "charts": [],
- "content": "[{\"id\":\"AeviaecfvI\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Services of Mobiwork Next</span>\",\"col\":12}},{\"id\":\"kczV8SY6ZC\",\"type\":\"card\",\"data\":{\"card_name\":\"Configuration\",\"col\":4}},{\"id\":\"R-O2fXf_fK\",\"type\":\"card\",\"data\":{\"card_name\":\"Timekeeping\",\"col\":4}},{\"id\":\"6jp_bmSeE6\",\"type\":\"card\",\"data\":{\"card_name\":\"Work shift\",\"col\":4}},{\"id\":\"Uw1xsmU6rk\",\"type\":\"card\",\"data\":{\"card_name\":\"Employee attendance sheet\",\"col\":4}},{\"id\":\"SJiraN3PX8\",\"type\":\"card\",\"data\":{\"card_name\":\"Face recognition\",\"col\":4}},{\"id\":\"Om-e7-EVJl\",\"type\":\"card\",\"data\":{\"card_name\":\"Internal announcement\",\"col\":4}},{\"id\":\"cf0qpkUF7P\",\"type\":\"card\",\"data\":{\"card_name\":\"System notification\",\"col\":4}},{\"id\":\"ehONV0_R1J\",\"type\":\"card\",\"data\":{\"card_name\":\"Department\",\"col\":4}},{\"id\":\"FdbHDcqETT\",\"type\":\"card\",\"data\":{\"card_name\":\"Integrate DMS synchronization\",\"col\":4}}]",
- "creation": "2023-11-13 14:07:44.238337",
+ "content": "[{\"id\":\"khuhskjHsk\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">Services of Mobiwork Next</span>\",\"col\":12}},{\"id\":\"RrNHkWxVFq\",\"type\":\"card\",\"data\":{\"card_name\":\"Configuration\",\"col\":4}},{\"id\":\"4pL-gXlZ-O\",\"type\":\"card\",\"data\":{\"card_name\":\"Timekeeping\",\"col\":4}},{\"id\":\"VY5vHcfhrV\",\"type\":\"card\",\"data\":{\"card_name\":\"Work shift\",\"col\":4}},{\"id\":\"sMT4OMw3hh\",\"type\":\"card\",\"data\":{\"card_name\":\"Employee attendance sheet\",\"col\":4}},{\"id\":\"fazQzL4grx\",\"type\":\"card\",\"data\":{\"card_name\":\"Face recognition\",\"col\":4}},{\"id\":\"RkcnPsWx5-\",\"type\":\"card\",\"data\":{\"card_name\":\"Internal announcement\",\"col\":4}},{\"id\":\"8Nh-pFoyY8\",\"type\":\"card\",\"data\":{\"card_name\":\"System notification\",\"col\":4}},{\"id\":\"ogu4JqYNDn\",\"type\":\"card\",\"data\":{\"card_name\":\"Department\",\"col\":4}},{\"id\":\"QBGGHkq7RA\",\"type\":\"card\",\"data\":{\"card_name\":\"Integrate DMS synchronization\",\"col\":4}}]",
+ "creation": "2023-11-14 10:45:15.711648",
  "custom_blocks": [],
  "docstatus": 0,
  "doctype": "Workspace",
@@ -15,98 +15,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Ch\u1ea5m c\u00f4ng",
-   "link_count": 2,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Danh s\u00e1ch ch\u1ea5m c\u00f4ng",
-   "link_count": 0,
-   "link_to": "Employee Checkin",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Danh s\u00e1ch nh\u00e2n vi\u00ean",
-   "link_count": 0,
-   "link_to": "Employee",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "B\u1ea3ng c\u00f4ng nh\u00e2n vi\u00ean",
-   "link_count": 2,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "B\u1ea3ng c\u00f4ng",
-   "link_count": 0,
-   "link_to": "Attendance",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "B\u00e1o c\u00e1o ch\u1ea5m c\u00f4ng",
-   "link_count": 0,
-   "link_to": "MBW Monthly Attendance Sheet vi v2",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Th\u00f4ng b\u00e1o n\u1ed9i b\u1ed9",
-   "link_count": 1,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Danh s\u00e1ch th\u00f4ng b\u00e1o",
-   "link_count": 0,
-   "link_to": "Notice Board",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Ph\u00f2ng ban",
-   "link_count": 1,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "C\u00e2y \u0111\u01a1n v\u1ecb",
-   "link_count": 0,
-   "link_to": "Department",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Configuration",
    "link_count": 1,
    "onboard": 0,
@@ -115,7 +23,7 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Attendance location",
+   "label": "TimeSheet position",
    "link_count": 0,
    "link_to": "TimeSheet Position",
    "link_type": "DocType",
@@ -133,7 +41,7 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Attendance list",
+   "label": "Employee Checkin",
    "link_count": 0,
    "link_to": "Employee Checkin",
    "link_type": "DocType",
@@ -143,7 +51,7 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Employee list",
+   "label": "Employee",
    "link_count": 0,
    "link_to": "Employee",
    "link_type": "DocType",
@@ -161,7 +69,7 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "List of work shifts",
+   "label": "Shift Type",
    "link_count": 0,
    "link_to": "Shift Type",
    "link_type": "DocType",
@@ -171,7 +79,7 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Employee shift allocation",
+   "label": "Shift Assignment",
    "link_count": 0,
    "link_to": "Shift Assignment",
    "link_type": "DocType",
@@ -189,7 +97,7 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Attendance sheet",
+   "label": "Attendance",
    "link_count": 0,
    "link_to": "Attendance",
    "link_type": "DocType",
@@ -217,7 +125,7 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "FaceID list",
+   "label": "Employee FaceID",
    "link_count": 0,
    "link_to": "Employee FaceID",
    "link_type": "DocType",
@@ -347,7 +255,7 @@
    "type": "Link"
   }
  ],
- "modified": "2023-11-14 09:02:53.644535",
+ "modified": "2023-11-14 11:19:29.829750",
  "modified_by": "Administrator",
  "module": "Mbw Service V2",
  "name": "Quick Link",
@@ -357,7 +265,7 @@
  "public": 1,
  "quick_lists": [],
  "roles": [],
- "sequence_id": 42.0,
+ "sequence_id": 33.0,
  "shortcuts": [],
  "title": "Quick Link"
 }
