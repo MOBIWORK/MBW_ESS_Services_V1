@@ -190,6 +190,7 @@ def update_leave(**data):
 @frappe.whitelist(methods="DELETE")
 def delete_leave(name):
     try:
+        
         frappe.delete_doc('Leave Application',name)
         gen_response(200, i18n.t('translate.delete_success', locale=get_language()),[])
     except Exception as e:
