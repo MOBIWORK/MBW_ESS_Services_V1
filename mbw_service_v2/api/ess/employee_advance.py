@@ -41,12 +41,10 @@ def get_list_employee_advance(**kwargs):
         if status:
             my_filter['status'] = status
 
-        total_doc = frappe.db.count('Employee Advance', my_filter)
         lst_employee_advance = frappe.db.get_list(
             'Employee Advance',
             filters=my_filter,
-            fields=['name', 'purpose', 'advance_amount',
-                    'UNIX_TIMESTAMP(creation) as creation', 'status'],
+            fields=["*", 'UNIX_TIMESTAMP(creation) as creation'],
             order_by='creation desc',
             start=start,
             page_length=page_size
@@ -54,7 +52,6 @@ def get_list_employee_advance(**kwargs):
 
         result = {
             "data": lst_employee_advance,
-            "total_doc": total_doc
         }
 
         return gen_response(200, i18n.t('translate.successfully', locale=get_language()), result)

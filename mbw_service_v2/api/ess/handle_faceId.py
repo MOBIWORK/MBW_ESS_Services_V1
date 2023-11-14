@@ -32,15 +32,27 @@ def get_faceid_employee(**kwargs):
     try:
         employee_id = get_employee_id()
         faceids = frappe.db.get_list('Employee FaceID', filters={
-                                     "employee": employee_id}, fields=["name", "url"])
+                                     "employee": employee_id}, fields=["name", "url"], order_by='creation asc',)
 
-        if len(faceids) != 4 and len(faceids) > 0:
+        if len(faceids) < 4:
             # Delete old faceids
             for face in faceids:
                 frappe.delete_doc('Employee FaceID', face.name)
             frappe.db.commit()
-
             faceids = []
+        elif len(faceids) > 4:
+            if len(faceids) < 8:
+                for i in range(len(faceids)):
+                    if i > 3:
+                        frappe.delete_doc('Employee FaceID', faceids[i].name)
+                frappe.db.commit()
+                faceids = faceids[0:4]
+            elif len(faceids) == 8:
+                for i in range(len(faceids)):
+                    if i <= 3:
+                        frappe.delete_doc('Employee FaceID', faceids[i].name)
+                frappe.db.commit()
+                faceids = faceids[4:]
 
         gen_response(200, i18n.t('translate.successfully', locale=get_language()), faceids)
     except Exception as e:
