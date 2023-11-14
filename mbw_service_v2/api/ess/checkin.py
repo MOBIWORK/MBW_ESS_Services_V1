@@ -90,6 +90,8 @@ def checkin_shift(**data):
                 new_check = frappe.new_doc("Employee Checkin")
                 data["device_id"] = json.dumps({"longitude": data.get(
                     "longitude"), "latitude": data.get("latitude")})
+                data['on_map'] = json.dumps({"type":"Feature","properties":{},"geometry":{"type":"Point","coordinates":[data.get(
+                    "longitude"),data.get("latitude")]}})
                 for field, value in dict(data).items():
                     setattr(new_check, field, value)
                 log_type = "IN" if shift_now.get('shift_status') == False or shift_now.get('shift_status') == "OUT" else "OUT"
