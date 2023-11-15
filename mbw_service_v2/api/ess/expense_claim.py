@@ -25,7 +25,6 @@ def create_employee_advance(**data):
         pedding_amount = get_pending_amount(employee=ok.get("employee"),posting_date = posting_date)
         account_advance = validate_link(doctype="Company",docname=ok.get('company'), fields= json.dumps(["default_employee_advance_account"]) )
         if account_advance:
-            print("====", account_advance)
             data['docstatus'] = 0
             data["posting_date"] = posting_date
             data['currency'] = currency
