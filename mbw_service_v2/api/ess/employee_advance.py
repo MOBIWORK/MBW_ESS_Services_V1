@@ -41,7 +41,7 @@ def get_list_employee_advance(**kwargs):
         start = (page - 1) * page_size
         
         # get report
-        report = get_report_doc("Employee Advance Summary")
+        report = get_report_doc("Employee Advance Summary MBW")
         user = frappe.session.user
         filters = {"from_date": from_day_year, "to_date": end_day_year,
                    "status": status, "employee": employee_id}
@@ -50,10 +50,14 @@ def get_list_employee_advance(**kwargs):
             total_advance_amount = report_info[-1][4] if report_info[-1][4] else 0
             total_paid_amount = report_info[-1][5] if report_info[-1][5] else 0 
             total_claimed_amount = report_info[-1][6] if report_info[-1][6] else 0
+            total_pending_amount = report_info[-1][7] if report_info[-1][7] else 0
+            total_return_amount = report_info[-1][8] if report_info[-1][8] else 0
         else:
             total_advance_amount = 0
             total_paid_amount = 0
             total_claimed_amount = 0
+            total_pending_amount = 0
+            total_return_amount = 0
             
         # get approver
         employee_detail = frappe.get_doc("Employee",employee_id)
@@ -96,7 +100,9 @@ def get_list_employee_advance(**kwargs):
             "data": employee_advances,
             "total_advance_amount": total_advance_amount,
             "total_paid_amount":  total_paid_amount,
-            "total_claimed_amount":  total_claimed_amount,
+            "total_pending_amount": total_pending_amount,
+            "total_return_amount": total_return_amount
+
         }
 
         return gen_response(200, i18n.t('translate.successfully', locale=get_language()), result)

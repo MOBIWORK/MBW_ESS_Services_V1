@@ -138,7 +138,7 @@ def get_statistic_vacation_fund():
 @frappe.whitelist()
 def get_report_advance(**data):
     try:
-        report = get_report_doc("Employee Advance Summary")
+        report = get_report_doc("Employee Advance Summary MBW")
         user = frappe.session.user
         username = get_employee_id()
         this_time = datetime.now()
@@ -157,15 +157,21 @@ def get_report_advance(**data):
             'total_advance_amount': 0,
             'total_paid_amount': 0,
             'total_claimed_amount': 0,
+            'total_pending_amount': 0,
+            'total_return_amount': 0,
         }
         if report_info:
             total_advance_amount = report_info[-1][4] if report_info[-1][4] else 0
             total_paid_amount = report_info[-1][5] if report_info[-1][5] else 0 
             total_claimed_amount = report_info[-1][6] if report_info[-1][6] else 0
+            total_pending_amount = report_info[-1][7] if report_info[-1][7] else 0
+            total_return_amount = report_info[-1][8] if report_info[-1][8] else 0
             result = {
                 'total_advance_amount': total_advance_amount,
                 'total_paid_amount': total_paid_amount,
                 'total_claimed_amount': total_claimed_amount,
+                'total_pending_amount': total_pending_amount,
+                'total_return_amount': total_return_amount,
             }
 
             
