@@ -7,7 +7,9 @@ from mbw_service_v2.api.common import  (get_last_check, gen_response,get_employe
     get_ip_network,
     nextshift,
     inshift,
-    enable_check_shift
+    enable_check_shift,
+    validate_datetime,
+    validate_empty
     )
 
 
@@ -320,3 +322,46 @@ def get_approved():
         gen_response(200,i18n.t('translate.successfully', locale=get_language()),approver_info)
     except Exception as e:
         exception_handel(e)
+
+
+# list reason
+@frappe.whitelist(methods='GET')
+def get_list_reason():
+    try:
+        attandance_reason = frappe.db.get_list('Attendance Reason', fields=["name", "reason_name"])
+        gen_response(200, i18n.t('translate.successfully', locale=get_language()), attandance_reason)
+    except Exception as e:
+        return exception_handel(e)
+
+#create attendance request
+@frappe.whitelist(methods='POST')
+def create_attendance_request(**kwargs):
+    try:
+        employee = get_employee_id()
+        from_date = kwargs.get('from_date')
+        to_date = kwargs.get('to_date')
+        company = validate_link("Employee",employee,json.dumps(["company"]))
+        
+        new_doc = frappe.new_doc("Attendance Request")
+        if from_date > to_date:
+            gen_response(500, i18n.t('translate.title_3', locale=get_language()))
+            return None
+        
+        if from_date == to_date and kwargs.get('half_day') == True:
+            new_doc.half_day = True
+            new_doc.half_day_date = validate_datetime(from_date)
+        elif(from_date < to_date and kwargs.get('half_day') == True):
+            if(kwargs.get('half_day_date') >= from_date and kwargs.get('half_day_date') <= to_date):
+                new_doc.half_day = True
+                new_doc.half_day_date = validate_datetime(kwargs.get('half_day_date'))
+            else: 
+                return gen_response(500, i18n.t('translate.title_4', locale=get_language()), [])
+        new_doc.from_date = validate_datetime(from_date)
+        new_doc.to_date = validate_datetime(to_date)
+        new_doc.employee = employee
+        new_doc.company = company
+        new_doc.reason = validate_empty(kwargs.get('reason'))
+        new_doc.insert()
+        gen_response(201, i18n.t('translate.create_success', locale=get_language()))
+    except Exception as e:
+        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
