@@ -24,24 +24,27 @@ def create_employee_advance(**data):
         currency = get_employee_currency(employee=ok.get("employee"))
         pedding_amount = get_pending_amount(employee=ok.get("employee"),posting_date = posting_date)
         account_advance = validate_link(doctype="Company",docname=ok.get('company'), fields= json.dumps(["default_employee_advance_account"]) )
+        if account_advance:
+            print("====", account_advance)
+            data['docstatus'] = 0
+            data["posting_date"] = posting_date
+            data['currency'] = currency
+            data['company'] = ok.get('company')
+            data['employee'] = ok.get('employee')
+            data['exchange_rate'] = 1
+            data['advance_account'] = account_advance['default_employee_advance_account']
+            data['employee_name'] = ok.get('employee_name')
+            data['department'] = ok.get('department')
+            data["pending_amount"] =pedding_amount
+            new_advance =frappe.new_doc("Employee Advance")
 
-        data['docstatus'] = 0
-        data["posting_date"] = posting_date
-        data['currency'] = currency
-        data['company'] = ok.get('company')
-        data['employee'] = ok.get('employee')
-        data['exchange_rate'] = 1
-        data['advance_account'] = account_advance['default_employee_advance_account']
-        data['employee_name'] = ok.get('employee_name')
-        data['department'] = ok.get('department')
-        data["pending_amount"] =pedding_amount
-        new_advance =frappe.new_doc("Employee Advance")
+            for field, value in dict(data).items():
+                setattr(new_advance, field, value)
+            new_advance.insert()
 
-        for field, value in dict(data).items():
-            setattr(new_advance, field, value)
-        new_advance.insert()
-
-        gen_response(201,i18n.t('translate.create_success', locale=get_language()),new_advance)
+            gen_response(201,i18n.t('translate.create_success', locale=get_language()),new_advance)
+            return
+        gen_response(500, i18n.t('translate.error', locale=get_language()), False)
 
     except Exception as e:
         gen_response(500, i18n.t('translate.error', locale=get_language()), [])
