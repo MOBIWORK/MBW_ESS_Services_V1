@@ -33,6 +33,7 @@ def execute(filters: Optional[Filters] = None) -> Tuple:
 		frappe.throw(_("Please select month and year."))
 
 	attendance_map = get_attendance_map(filters)
+	print("attendance_map",attendance_map)
 	if not attendance_map:
 		frappe.msgprint(_("No attendance records found."), alert=True, indicator="orange")
 		return [], [], None, None
@@ -44,7 +45,10 @@ def execute(filters: Optional[Filters] = None) -> Tuple:
 			_("No attendance records found for this criteria."), alert=True, indicator="orange"
 		)
 		return columns, [], None, None
-
+	for row in data:
+		for field, value_att in row.items():
+			if field not in ["employee", "shift"]:
+				row[field] = f'<p  onclick="frappe.open_dialog(`{value_att}`,{field})">{value_att}</p>'
 	message = get_message() if not filters.summarized_view else ""
 	chart = get_chart_data(attendance_map, filters)
 
@@ -206,10 +210,9 @@ def get_data(filters: Filters, attendance_map: Dict) -> List[Dict]:
 				data.extend(records)
 	else:
 		data = get_rows(employee_details, filters, holiday_map, attendance_map)
-
 	return data
 
-
+# get attedance syntax
 def get_attendance_map(filters: Filters) -> Dict:
 	"""Returns a dictionary of employee wise attendance map as per shifts for all the days of the month like
 	{
@@ -253,6 +256,7 @@ def get_attendance_map(filters: Filters) -> Dict:
 
 def get_attendance_records(filters: Filters) -> List[Dict]:
 	Attendance = frappe.qb.DocType("Attendance")
+	#lay thong tin ban danh dau cham cong
 	query = (
 		frappe.qb.from_(Attendance)
 		.select(
@@ -272,7 +276,7 @@ def get_attendance_records(filters: Filters) -> List[Dict]:
 	if filters.employee:
 		query = query.where(Attendance.employee == filters.employee)
 	query = query.orderby(Attendance.employee, Attendance.attendance_date)
-
+	print("query.run(as_dict=1)",query.run(as_dict=1))
 	return query.run(as_dict=1)
 
 
@@ -396,10 +400,12 @@ def get_rows(
 			employee_attendance = attendance_map.get(employee)
 			if not employee_attendance:
 				continue
-
+			# lay thong tinh cham cong cua nhan vien
 			attendance_for_employee = get_attendance_status_for_detailed_view(
 				employee, filters, employee_attendance, holidays
 			)
+
+			# print("attendance_for_employee",attendance_for_employee)
 			# set employee details in the first row
 			attendance_for_employee[0].update(
 				{"employee": employee, "employee_name": details.employee_name}
@@ -504,7 +510,7 @@ def get_attendance_summary_and_days(employee: str, filters: Filters) -> Tuple[Di
 
 	return summary[0], days
 
-
+# xu ly lay thong tin cham cong
 def get_attendance_status_for_detailed_view(
 	employee: str, filters: Filters, employee_attendance: Dict, holidays: List
 ) -> List[Dict]:
@@ -524,8 +530,8 @@ def get_attendance_status_for_detailed_view(
 			status = status_dict.get(day)
 			if status is None and holidays:
 				status = get_holiday_status(day, holidays)
-
 			abbr = status_map.get(status, "")
+
 			row[day] = abbr
 
 		attendance_values.append(row)

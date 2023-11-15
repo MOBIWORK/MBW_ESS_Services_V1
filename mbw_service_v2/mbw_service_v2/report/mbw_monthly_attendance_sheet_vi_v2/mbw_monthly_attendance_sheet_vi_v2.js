@@ -66,7 +66,43 @@ frappe.query_reports["MBW Monthly Attendance Sheet vi v2"] = {
 			"Default": 0,
 		}
 	],
-	onload: function() {
+	onload: async function(report) {
+		frappe.open_dialog = function (value,day) {
+			console.log(value,day);
+			let d = new frappe.ui.Dialog({
+				title: __('My Custom Multi-Tab Dialog'),
+				fields: [
+					{
+						label: __('Items'),
+						fieldname: "st_b_1",
+						fieldtype:'Section Break',
+						collapsible: 1
+					},
+					{
+						label: __('Tab 1'),
+						fieldtype: 'HTML',
+						options: '<div id="tab1-content">Content for Tab 1</div>'
+					},
+					{
+						label: __('Items'),
+						fieldname: "st_b_1",
+						fieldtype:'Section Break',
+						collapsible: 1
+					},
+					{
+						label: __('Tab 2'),
+						fieldtype: 'HTML',
+						options: '<div id="tab2-content">Content for Tab 2</div>'
+					},
+					// Add more tabs as needed
+				],
+				primary_action: function() {
+					// Handle primary action if needed
+					d.hide();
+				}
+			});
+			d.show();
+		}
 		return  frappe.call({
 			method: "mbw_service_v2.mbw_service_v2.report.mbw_monthly_attendance_sheet_vi_v2.mbw_monthly_attendance_sheet_vi_v2.get_attendance_years",
 			callback: function(r) {
