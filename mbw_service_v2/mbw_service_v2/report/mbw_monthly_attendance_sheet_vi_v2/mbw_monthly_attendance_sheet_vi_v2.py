@@ -14,7 +14,7 @@ from frappe.utils import cint, cstr, getdate
 Filters = frappe._dict
 
 status_map = {
-	"Present": "P",
+	# "Present": "P",
 	"Absent": "A",
 	"Half Day": "HD",
 	"Work From Home": "WFH",
@@ -33,26 +33,28 @@ def execute(filters: Optional[Filters] = None) -> Tuple:
 		frappe.throw(_("Please select month and year."))
 
 	attendance_map = get_attendance_map(filters)
-	print("attendance_map",attendance_map)
 	if not attendance_map:
 		frappe.msgprint(_("No attendance records found."), alert=True, indicator="orange")
 		return [], [], None, None
 
 	columns = get_columns(filters)
 	data = get_data(filters, attendance_map)
+	data_service_mobile = []
+
 	if not data:
 		frappe.msgprint(
 			_("No attendance records found for this criteria."), alert=True, indicator="orange"
 		)
 		return columns, [], None, None
 	for row in data:
-		for field, value_att in row.items():
-			if field not in ["employee", "shift"]:
+		data_service_mobile.append(row.copy())
+		for field, value_att in row.items() :
+			if field not in ["employee", "shift"] and not bool(filters.summarized_view):
 				row[field] = f'<p  onclick="frappe.open_dialog(`{value_att}`,{field})">{value_att}</p>'
 	message = get_message() if not filters.summarized_view else ""
 	chart = get_chart_data(attendance_map, filters)
-
-	return columns, data, message, chart
+	
+	return columns, data, message, chart,data_service_mobile
 
 
 def get_message() -> str:
@@ -154,7 +156,7 @@ def get_columns(filters: Filters) -> List[Dict]:
 		)
 		columns.extend(get_columns_for_leave_types())
 	else:
-		columns.append({"label": _("Shift"), "fieldname": "shift", "fieldtype": "Data", "width": 120})
+		# columns.append({"label": _("Shift"), "fieldname": "shift", "fieldtype": "Data", "width": 120})
 		columns.extend(get_columns_for_days(filters))
 
 	return columns
@@ -208,6 +210,7 @@ def get_data(filters: Filters, attendance_map: Dict) -> List[Dict]:
 			if records:
 				data.append({group_by_column: frappe.bold(value)})
 				data.extend(records)
+
 	else:
 		data = get_rows(employee_details, filters, holiday_map, attendance_map)
 	return data
@@ -234,12 +237,21 @@ def get_attendance_map(filters: Filters) -> Dict:
 	leave_map = {}
 
 	for d in attendance_list:
+		# print("d",d)
 		if d.status == "On Leave":
 			leave_map.setdefault(d.employee, []).append(d.day_of_month)
 			continue
+		if d.status not in status_map : 
+			attendance_map.setdefault(d.employee, {}).setdefault(d.shift, {})
+			if d.total_shift_time == 0 :
+				attendance_map[d.employee][d.shift][d.day_of_month] = 0
+			else :
+				# print("d",d.exchange_to_working_day)
+				attendance_map[d.employee][d.shift][d.day_of_month] = round((d.working_hours/d.total_shift_time)*d.exchange_to_working_day,2) 
 
-		attendance_map.setdefault(d.employee, {}).setdefault(d.shift, {})
-		attendance_map[d.employee][d.shift][d.day_of_month] = d.status
+		else:
+			attendance_map.setdefault(d.employee, {}).setdefault(d.shift, {})
+			attendance_map[d.employee][d.shift][d.day_of_month] = d.status	
 
 	# leave is applicable for the entire day so all shifts should show the leave entry
 	for employee, leave_days in leave_map.items():
@@ -250,20 +262,27 @@ def get_attendance_map(filters: Filters) -> Dict:
 		for day in leave_days:
 			for shift in attendance_map[employee].keys():
 				attendance_map[employee][shift][day] = "On Leave"
-
 	return attendance_map
 
 
 def get_attendance_records(filters: Filters) -> List[Dict]:
 	Attendance = frappe.qb.DocType("Attendance")
+	shiftType = frappe.qb.DocType("Shift Type")
 	#lay thong tin ban danh dau cham cong
 	query = (
 		frappe.qb.from_(Attendance)
+		.inner_join(shiftType)
+		.on(Attendance.shift == shiftType.name)
 		.select(
 			Attendance.employee,
 			Extract("day", Attendance.attendance_date).as_("day_of_month"),
 			Attendance.status,
 			Attendance.shift,
+			Attendance.working_hours,
+			Attendance.late_check_in,
+			Attendance.early_check_out,
+			shiftType.total_shift_time,
+			shiftType.exchange_to_working_day
 		)
 		.where(
 			(Attendance.docstatus == 1)
@@ -404,15 +423,18 @@ def get_rows(
 			attendance_for_employee = get_attendance_status_for_detailed_view(
 				employee, filters, employee_attendance, holidays
 			)
+			detail_checkin = {
 
-			# print("attendance_for_employee",attendance_for_employee)
+			}
+			for att in range(0,len(attendance_for_employee)): 
+				# attendance_for_employee[att]  = {}
+				print(f"attendance_for_employee{att}",attendance_for_employee[att])
+				attendance_for_employee[att].update(
+					{"employee": employee, "employee_name": details.employee_name}
+				)
 			# set employee details in the first row
-			attendance_for_employee[0].update(
-				{"employee": employee, "employee_name": details.employee_name}
-			)
 
 			records.extend(attendance_for_employee)
-
 	return records
 
 
@@ -524,6 +546,7 @@ def get_attendance_status_for_detailed_view(
 	attendance_values = []
 
 	for shift, status_dict in employee_attendance.items():
+		print("shift, status_dict",shift, status_dict)
 		row = {"shift": shift}
 
 		for day in range(1, total_days + 1):
@@ -531,7 +554,10 @@ def get_attendance_status_for_detailed_view(
 			if status is None and holidays:
 				status = get_holiday_status(day, holidays)
 			abbr = status_map.get(status, "")
-
+			if status not in status_map:
+				abbr = 0
+				if status :
+					abbr = status
 			row[day] = abbr
 
 		attendance_values.append(row)

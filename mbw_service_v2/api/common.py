@@ -369,14 +369,14 @@ def generate_report_result(
         filters = json.loads(filters)
 
     res = get_report_result(report, filters) or []
-
-    columns, result, message, chart, report_summary, skip_total_row = ljust_list(
-        res, 6)
-
-    report_column_names = [col["fieldname"] for col in columns]
+    columns, result, message, chart, report_summary = ljust_list(
+        res,5)
+    print("res",report_summary)
+    
+    # report_column_names = [col["fieldname"] for col in columns]
 
     # convert to list of dicts
-    result = normalize_result(result, columns)
+    result = normalize_result(report_summary, columns)
 
     return result
 
