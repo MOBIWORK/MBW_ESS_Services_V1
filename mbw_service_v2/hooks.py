@@ -129,6 +129,9 @@ app_license = "MIT"
 doc_events = {
     "Attendance": {
         "before_insert": "mbw_service_v2.attendance.calculate_late_working_hours"
+    },
+    "Shift Type": {
+        "before_insert": "mbw_service_v2.attendance.calc_total_shift_time"
     }
 }
 

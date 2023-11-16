@@ -59,3 +59,12 @@ def calculate_late_working_hours(doc, method):
     else:
         doc.late_check_in = 0
         doc.early_check_out = 0
+
+
+def calc_total_shift_time(doc, method):
+    fmt = '%H:%M:%S'
+    d1 = datetime.strptime(str(doc.start_time), fmt)
+    d2 = datetime.strptime(str(doc.end_time), fmt)
+    d1_ts = time.mktime(d1.timetuple())
+    d2_ts = time.mktime(d2.timetuple())
+    doc.total_shift_time = round((d2_ts-d1_ts) / (60*60), 2)
