@@ -131,7 +131,7 @@ doc_events = {
         "before_insert": "mbw_service_v2.attendance.calculate_late_working_hours"
     },
     "Shift Type": {
-        "on_update": "mbw_service_v2.attendance.calc_total_shift_time"
+        "before_save": "mbw_service_v2.attendance.calc_total_shift_time"
     }
 }
 
