@@ -50,7 +50,17 @@ def execute(filters: Optional[Filters] = None) -> Tuple:
 		data_service_mobile.append(row.copy())
 		for field, value_att in row.items() :
 			if field not in ["employee", "shift"] and not bool(filters.summarized_view):
-				row[field] = f'<p  onclick="frappe.open_dialog(`{value_att}`,{field})">{value_att}</p>'
+				print("value_att",value_att)
+				if type(value_att) == dict:
+					w= value_att['w']
+					l= value_att['l']
+					detail_check = {
+						"employee": row['employee'],
+						"date": field,
+						"month": filters.get("month"),
+						"year": filters.get('year')
+					}
+					row[field] = f'<p  onclick="frappe.open_dialog({detail_check})">{w} {f"<sup>{l}</sup>" if l else ""} </p>' if l != "WO" else "WO"
 	message = get_message() if not filters.summarized_view else ""
 	chart = get_chart_data(attendance_map, filters)
 	
@@ -423,18 +433,27 @@ def get_rows(
 			attendance_for_employee = get_attendance_status_for_detailed_view(
 				employee, filters, employee_attendance, holidays
 			)
-			detail_checkin = {
-
-			}
+			detail_checkin = {}
 			for att in range(0,len(attendance_for_employee)): 
 				# attendance_for_employee[att]  = {}
-				print(f"attendance_for_employee{att}",attendance_for_employee[att])
-				attendance_for_employee[att].update(
-					{"employee": employee, "employee_name": details.employee_name}
-				)
-			# set employee details in the first row
-
-			records.extend(attendance_for_employee)
+				for field_att, value_att in attendance_for_employee[att].items():
+					if field_att != 'shift':
+						if detail_checkin.get(str(field_att)): 
+							if type(value_att) == str :
+								detail_checkin[str(field_att)]['l'] = value_att
+							else:
+								detail_checkin[str(field_att)]['w'] += value_att
+						else:
+							detail_checkin[str(field_att)] = {
+								"w": value_att if type(value_att) == float or type(value_att) == int else 0,
+								"l":value_att if type(value_att) == str else False
+							}
+			detail_checkin.update(
+				{"employee": employee, "employee_name": details.employee_name}
+			)
+			# set employee details in the detail_checkin
+			print("detail_checkin",detail_checkin)
+			records.extend([detail_checkin])
 	return records
 
 
