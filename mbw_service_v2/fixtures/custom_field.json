@@ -60,7 +60,6 @@
   "collapsible": 0,
   "collapsible_depends_on": null,
   "columns": 0,
-<<<<<<< HEAD
   "default": "",
   "depends_on": null,
   "description": null,
@@ -169,8 +168,6 @@
   "collapsible": 0,
   "collapsible_depends_on": null,
   "columns": 0,
-=======
->>>>>>> 2c15de1 (update)
   "default": null,
   "depends_on": null,
   "description": null,
