@@ -361,6 +361,8 @@ def create_attendance_request(**kwargs):
         new_doc.employee = employee
         new_doc.company = company
         new_doc.reason = validate_empty(kwargs.get('reason'))
+        new_doc.explanation = kwargs.get('explanation')
+        new_doc.custom_shift = validate_empty(kwargs.get("custom_shift"))
         new_doc.insert()
         gen_response(201, i18n.t('translate.create_success', locale=get_language()))
     except Exception as e:
