@@ -50,7 +50,6 @@ def execute(filters: Optional[Filters] = None) -> Tuple:
 		data_service_mobile.append(row.copy())
 		for field, value_att in row.items() :
 			if field not in ["employee", "shift"] and not bool(filters.summarized_view):
-				print("value_att",value_att)
 				if type(value_att) == dict:
 					w= value_att['w']
 					l= value_att['l']
@@ -111,33 +110,16 @@ def get_columns(filters: Filters) -> List[Dict]:
 	)
 
 	if filters.summarized_view:
+		# cau hinh column tong quan
 		columns.extend(
 			[
+				{"label": _("Total Hour"), "fieldname": "total_hours", "fieldtype": "Float", "width": 110},
 				{
 					"label": _("Total Present"),
 					"fieldname": "total_present",
 					"fieldtype": "Float",
 					"width": 110,
 				},
-				{"label": _("Total Leaves"), "fieldname": "total_leaves", "fieldtype": "Float", "width": 110},
-				{"label": _("Total Hour"), "fieldname": "total_hours", "fieldtype": "Float", "width": 110},
-				{"label": _("Total Absent"), "fieldname": "total_absent", "fieldtype": "Float", "width": 110},
-				{
-					"label": _("Total Holidays"),
-					"fieldname": "total_holidays",
-					"fieldtype": "Float",
-					"width": 120,
-				},
-				{
-					"label": _("Unmarked Days"),
-					"fieldname": "unmarked_days",
-					"fieldtype": "Float",
-					"width": 130,
-				},
-			]
-		)
-		columns.extend(
-			[
 				{
 					"label": _("Total Late Entries"),
 					"fieldname": "total_late_entries",
@@ -145,26 +127,49 @@ def get_columns(filters: Filters) -> List[Dict]:
 					"width": 140,
 				},
 				{
-					"label": _("Time Late Entries"),
+					"label": _("Time Late Entries (minute)"),
 					"fieldname": "time_late_entries",
 					"fieldtype": "Float",
 					"width": 140,
 				},
 				{
-					"label": _("Total Early Exits"),
+					"label": _("Time Late Entries to work"),
+					"fieldname": "time_late_entries_work",
+					"fieldtype": "Float",
+					"width": 140,
+				},
+				{
+					"label": _("Total Early Exits "),
 					"fieldname": "total_early_exits",
 					"fieldtype": "Float",
 					"width": 140,
 				},
 				{
-					"label": _("Time Early Exits"),
+					"label": _("Time Early Exits (minute)"),
 					"fieldname": "time_early_exits",
 					"fieldtype": "Float",
 					"width": 140,
 				},
+				{
+					"label": _("Time Early Exits to work"),
+					"fieldname": "time_early_exits_work",
+					"fieldtype": "Float",
+					"width": 140,
+				},
+				{"label": _("Total Leaves "), "fieldname": "total_leaves", "fieldtype": "Float", "width": 110},
+				{"label": _("Total Leaves to work"), "fieldname": "total_leaves_work", "fieldtype": "Float", "width": 110},
+
+				{"label": _("Total Absent"), "fieldname": "total_absent", "fieldtype": "Float", "width": 110},
+				{"label": _("Total Absent to work"), "fieldname": "total_absent_to_work", "fieldtype": "Float", "width": 110},
+				
+				{"label": _("Shift OT"), "fieldname": "shift_ot", "fieldtype": "Float", "width": 110},
+				{"label": _("Shift OT time(Hour)"), "fieldname": "shift_ot_time", "fieldtype": "Float", "width": 110},
+
+				{"label": _("OT time (Hour)"), "fieldname": "ot_time", "fieldtype": "Float", "width": 110},
 			]
 		)
-		columns.extend(get_columns_for_leave_types())
+
+		# columns.extend(get_columns_for_leave_types())
 	else:
 		# columns.append({"label": _("Shift"), "fieldname": "shift", "fieldtype": "Data", "width": 120})
 		columns.extend(get_columns_for_days(filters))
@@ -207,7 +212,7 @@ def get_data(filters: Filters, attendance_map: Dict) -> List[Dict]:
 	employee_details, group_by_param_values = get_employee_related_details(filters)
 	holiday_map = get_holiday_map(filters)
 	data = []
-
+	print("getdata",attendance_map)
 	if filters.group_by:
 		group_by_column = frappe.scrub(filters.group_by)
 
@@ -222,6 +227,7 @@ def get_data(filters: Filters, attendance_map: Dict) -> List[Dict]:
 				data.extend(records)
 
 	else:
+
 		data = get_rows(employee_details, filters, holiday_map, attendance_map)
 	return data
 
@@ -245,11 +251,14 @@ def get_attendance_map(filters: Filters) -> Dict:
 	attendance_list = get_attendance_records(filters)
 	attendance_map = {}
 	leave_map = {}
-
 	for d in attendance_list:
 		# print("d",d)
 		if d.status == "On Leave":
 			leave_map.setdefault(d.employee, []).append(d.day_of_month)
+			attendance_map[d.employee][d.shift][d.day_of_month] = {
+				"status" :d.status, 
+				"exchange_to_working_day": d.exchange_to_working_day	
+				}
 			continue
 		if d.status not in status_map : 
 			attendance_map.setdefault(d.employee, {}).setdefault(d.shift, {})
@@ -261,8 +270,10 @@ def get_attendance_map(filters: Filters) -> Dict:
 
 		else:
 			attendance_map.setdefault(d.employee, {}).setdefault(d.shift, {})
-			attendance_map[d.employee][d.shift][d.day_of_month] = d.status	
-
+			attendance_map[d.employee][d.shift][d.day_of_month] = {
+				"status" :d.status, 
+				"exchange_to_working_day": d.exchange_to_working_day	
+				}
 	# leave is applicable for the entire day so all shifts should show the leave entry
 	for employee, leave_days in leave_map.items():
 		# no attendance records exist except leaves
@@ -274,7 +285,7 @@ def get_attendance_map(filters: Filters) -> Dict:
 				attendance_map[employee][shift][day] = "On Leave"
 	return attendance_map
 
-
+# lay thong tin danh dau com cong/ban ghi tho
 def get_attendance_records(filters: Filters) -> List[Dict]:
 	Attendance = frappe.qb.DocType("Attendance")
 	shiftType = frappe.qb.DocType("Shift Type")
@@ -305,7 +316,7 @@ def get_attendance_records(filters: Filters) -> List[Dict]:
 	if filters.employee:
 		query = query.where(Attendance.employee == filters.employee)
 	query = query.orderby(Attendance.employee, Attendance.attendance_date)
-	print("query.run(as_dict=1)",query.run(as_dict=1))
+	# print("query.run(as_dict=1)",query.run(as_dict=1))
 	return query.run(as_dict=1)
 
 
@@ -398,7 +409,7 @@ def get_holiday_map(filters: Filters) -> Dict[str, List[Dict]]:
 
 	return holiday_map
 
-
+# xuat ra row hien thi tren table
 def get_rows(
 	employee_details: Dict, filters: Filters, holiday_map: Dict, attendance_map: Dict
 ) -> List[Dict]:
@@ -417,13 +428,12 @@ def get_rows(
 			leave_summary = get_leave_summary(employee, filters)
 			# Xu ly thoi gian ra vao muon
 			entry_exits_summary = get_entry_exits_summary(employee, filters)
-			print("employee",employee,"entry_exits_summary",entry_exits_summary,"attendance",attendance,'\n')
 			row = {"employee": employee, "employee_name": details.employee_name}
 			set_defaults_for_summarized_view(filters, row)
 			row.update(attendance)
 			row.update(leave_summary)
 			row.update(entry_exits_summary)
-
+			print("row",row)
 			records.append(row)
 		else:
 			employee_attendance = attendance_map.get(employee)
@@ -490,7 +500,9 @@ def get_attendance_status_for_summarized_view(
 		"total_present": summary.total_present + summary.total_half_days,
 		"total_hours": summary.total_hours,
 		"total_leaves": summary.total_leaves + summary.total_half_days,
+		"total_leaves_work": summary.sum_leave_shift + (summary.total_half_days_shift if summary.total_half_days_shift else 0),
 		"total_absent": summary.total_absent,
+		"total_absent_to_work": summary.sum_absent_shift,
 		"total_holidays": total_holidays,
 		"unmarked_days": total_unmarked_days,
 	}
@@ -498,6 +510,7 @@ def get_attendance_status_for_summarized_view(
 
 def get_attendance_summary_and_days(employee: str, filters: Filters) -> Tuple[Dict, List]:
 	Attendance = frappe.qb.DocType("Attendance")
+	ShiftType = frappe.qb.DocType("Shift Type")
 
 	present_case = (
 		frappe.qb.terms.Case()
@@ -511,21 +524,35 @@ def get_attendance_summary_and_days(employee: str, filters: Filters) -> Tuple[Di
 
 	absent_case = frappe.qb.terms.Case().when(Attendance.status == "Absent", 1).else_(0)
 	sum_absent = Sum(absent_case).as_("total_absent")
+	#tong cong vang mat theo ca
+	absent_case_shift = frappe.qb.terms.Case().when((Attendance.status == "Absent"), ShiftType.exchange_to_working_day).else_(0)
+	sum_absent_shift = Sum(absent_case_shift).as_("sum_absent_shift")
 
 	leave_case = frappe.qb.terms.Case().when(Attendance.status == "On Leave", 1).else_(0)
 	sum_leave = Sum(leave_case).as_("total_leaves")
+	#tong thoi  cong co phep theo ca
+	leave_case_shift = frappe.qb.terms.Case().when(Attendance.status == "On Leave", ShiftType.exchange_to_working_day).else_(0)
+	sum_leave_shift = Sum(leave_case_shift).as_("sum_leave_shift")
 
 	half_day_case = frappe.qb.terms.Case().when(Attendance.status == "Half Day", 0.5).else_(0)
 	sum_half_day = Sum(half_day_case).as_("total_half_days")
+	#tong cong theo nua ngay
+	half_day_case_shift = frappe.qb.terms.Case().when(Attendance.status == "Half Day", ShiftType.exchange_to_working_day).else_(0)
+	sum_half_day_shift = Sum(half_day_case_shift).as_("total_half_days")
 
 	summary = (
 		frappe.qb.from_(Attendance)
+		.inner_join(ShiftType)
+		.on(ShiftType.name == Attendance.shift)
 		.select(
 			sum_present,
 			sum_absent,
+			sum_absent_shift,
 			sum_hours,
 			sum_leave,
+			sum_leave_shift,
 			sum_half_day,
+			sum_half_day_shift
 		)
 		.where(
 			(Attendance.docstatus == 1)
@@ -535,7 +562,7 @@ def get_attendance_summary_and_days(employee: str, filters: Filters) -> Tuple[Di
 			& (Extract("year", Attendance.attendance_date) == filters.year)
 		)
 	).run(as_dict=True)
-
+	print("summary",summary[0])
 	days = (
 		frappe.qb.from_(Attendance)
 		.select(Extract("day", Attendance.attendance_date).as_("day_of_month"))
@@ -565,13 +592,16 @@ def get_attendance_status_for_detailed_view(
 	attendance_values = []
 
 	for shift, status_dict in employee_attendance.items():
-		print("shift, status_dict",shift, status_dict)
 		row = {"shift": shift}
 
 		for day in range(1, total_days + 1):
 			status = status_dict.get(day)
+			print("status_map",status)
+			if type(status) == dict:
+				status = status.get('status')
 			if status is None and holidays:
 				status = get_holiday_status(day, holidays)
+			
 			abbr = status_map.get(status, "")
 			if status not in status_map:
 				abbr = 0
@@ -602,11 +632,14 @@ def get_leave_summary(employee: str, filters: Filters) -> Dict[str, float]:
 	{'leave_without_pay': 1.0, 'sick_leave': 2.0}
 	"""
 	Attendance = frappe.qb.DocType("Attendance")
+	ShiftType = frappe.qb.DocType("Shift Type")
 	day_case = frappe.qb.terms.Case().when(Attendance.status == "Half Day", 0.5).else_(1)
 	sum_leave_days = Sum(day_case).as_("leave_days")
 
 	leave_details = (
 		frappe.qb.from_(Attendance)
+		.inner_join(ShiftType)
+		.on(Attendance.shift == ShiftType.name )
 		.select(Attendance.leave_type, sum_leave_days)
 		.where(
 			(Attendance.employee == employee)
@@ -623,7 +656,7 @@ def get_leave_summary(employee: str, filters: Filters) -> Dict[str, float]:
 	for d in leave_details:
 		leave_type = frappe.scrub(d.leave_type)
 		leaves[leave_type] = d.leave_days
-
+	print("leave",leaves)
 	return leaves
 
 
@@ -632,6 +665,7 @@ def get_entry_exits_summary(employee: str, filters: Filters) -> Dict[str, float]
 	{'total_late_entries': 5, 'total_early_exits': 2}
 	"""
 	Attendance = frappe.qb.DocType("Attendance")
+	ShiftType = frappe.qb.DocType("Shift Type")
 	# so lan va thoi gian vao muon
 	late_entry_case = frappe.qb.terms.Case().when(Attendance.late_entry == "1", 1)
 	count_late_entries = Count(late_entry_case).as_("total_late_entries")
@@ -644,10 +678,11 @@ def get_entry_exits_summary(employee: str, filters: Filters) -> Dict[str, float]
 
 	time_exit_case = frappe.qb.terms.Case().when(Attendance.early_exit == "1", Attendance.early_check_out)
 	time_early_exits = Sum(time_exit_case).as_("time_early_exits")
-
 	entry_exits = (
 		frappe.qb.from_(Attendance)
-		.select(count_late_entries,time_late_entries, count_early_exits,time_early_exits)
+		.inner_join(ShiftType)
+		.on(Attendance.shift == ShiftType.name)
+		.select(count_late_entries,time_late_entries, count_early_exits,time_early_exits,ShiftType.exchange_to_working_day,ShiftType.total_shift_time)
 		.where(
 			(Attendance.docstatus == 1)
 			& (Attendance.employee == employee)
@@ -657,8 +692,12 @@ def get_entry_exits_summary(employee: str, filters: Filters) -> Dict[str, float]
 		)
 	).run(as_dict=True)
 
-	return entry_exits[0]
+	entry_exits =  entry_exits[0]
+	print("entry_exits",entry_exits)
+	entry_exits['time_early_exits_work'] = 0 if (not entry_exits["time_early_exits"]) or entry_exits['total_shift_time'] == 0 else float(entry_exits["time_early_exits"]/60/entry_exits['total_shift_time']*entry_exits["exchange_to_working_day"] )
+	entry_exits['time_late_entries_work'] = 0 if (not entry_exits["time_late_entries"]) or entry_exits['total_shift_time']==0 else float(entry_exits["time_late_entries"]/60/entry_exits['total_shift_time']*entry_exits["exchange_to_working_day"] )
 
+	return entry_exits
 
 @frappe.whitelist()
 def get_attendance_years() -> str:
