@@ -59,48 +59,80 @@ frappe.query_reports["MBW Monthly Attendance Sheet vi v2"] = {
 			"fieldtype": "Select",
 			"options": ["","Branch","Grade","Department","Designation"]
 		},
-		{
-			"fieldname":"summarized_view",
-			"label": __("Summarized View"),
-			"fieldtype": "Check",
-			"Default": 0,
-		}
 	],
 	onload: async function(report) {
-		frappe.open_dialog = function (value,day) {
-			console.log(value,day);
+		frappe.open_dialog = async function (detail_check) {
 			let d = new frappe.ui.Dialog({
-				title: __('My Custom Multi-Tab Dialog'),
+				title: `${detail_check.employee_name} - Ngày ${detail_check.day}/${detail_check.month}/${detail_check.year}`,
 				fields: [
+					// Tông hợp
 					{
-						label: __('Items'),
-						fieldname: "st_b_1",
+						label: __('Tông hợp'),
 						fieldtype:'Section Break',
 						collapsible: 1
 					},
 					{
 						label: __('Tab 1'),
 						fieldtype: 'HTML',
-						options: '<div id="tab1-content">Content for Tab 1</div>'
+						fieldname: "html_1",
+						options: '<div id="tab1-content">Tông hợp</div>'
 					},
+					// Đơn từ
 					{
-						label: __('Items'),
-						fieldname: "st_b_1",
+						label: __('Đơn từ'),
 						fieldtype:'Section Break',
 						collapsible: 1
 					},
 					{
 						label: __('Tab 2'),
 						fieldtype: 'HTML',
-						options: '<div id="tab2-content">Content for Tab 2</div>'
+						fieldname: "html_2",
+						options: '<div id="tab2-content">Đơn từ</div>'
 					},
-					// Add more tabs as needed
-				],
-				primary_action: function() {
-					// Handle primary action if needed
-					d.hide();
+					// Ngày nghỉ
+					{
+						label: __('Ngày nghỉ'),
+						fieldtype:'Section Break',
+						collapsible: 1
+					},
+					{
+						label: __('Tab 2'),
+						fieldtype: 'HTML',
+						fieldname: "html_3",
+						options: '<div id="tab2-content">Ngày nghỉ</div>'
+					},
+				]
+			});
+			
+			d.$wrapper.find('.modal-dialog').addClass('modal-xl');
+			await frappe.call({
+				type: "GET",
+				method: "mbw_service_v2.api.ess.report.get_report_attendance_sheet",
+				args: detail_check,
+				callback: function(r) {
+					if (!r.exc) {
+						// Tông hợp
+						var result = r.result
+						var html_1 = ""
+						for (const [key, value] of Object.entries(result.info_employee)) {
+							if(typeof(value) === "object"){
+								html_1 += `<div><strong>${key}</strong></div>`
+								for (const [k, v] of Object.entries(value)){
+									html_1 += `<div>${k}: ${v}</div>`
+								}
+							}else{
+								html_1 += `<div><strong>${key}</strong>: ${value}</div>`
+							}
+						}				  
+						d.fields_dict.html_1.$wrapper.html(html_1);
+
+						// Đơn từ
+
+						// Ngày nghỉ
+					}
 				}
 			});
+
 			d.show();
 		}
 		return  frappe.call({
