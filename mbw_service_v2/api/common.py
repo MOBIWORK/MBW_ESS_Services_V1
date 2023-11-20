@@ -463,3 +463,11 @@ def get_ip_network():
         return remote_ip        
     except Exception as e:
         return e
+    
+def doc_status(status):
+    if status == 0:
+        return "Draft"
+    elif status == 1:
+        return "Submitted"
+    else:
+        return "Cancelled"

@@ -9,7 +9,9 @@ from mbw_service_v2.api.common import  (get_last_check, gen_response,get_employe
     inshift,
     enable_check_shift,
     validate_datetime,
-    validate_empty
+    validate_empty,
+    doc_status,
+    validate_image
     )
 
 
@@ -362,8 +364,121 @@ def create_attendance_request(**kwargs):
         new_doc.company = company
         new_doc.reason = validate_empty(kwargs.get('reason'))
         new_doc.explanation = kwargs.get('explanation')
-        new_doc.custom_shift = validate_empty(kwargs.get("custom_shift"))
+        new_doc.custom_shift = kwargs.get("custom_shift")
         new_doc.insert()
         gen_response(201, i18n.t('translate.create_success', locale=get_language()))
     except Exception as e:
         gen_response(500, i18n.t('translate.error', locale=get_language()), [])
+
+
+#list attendance request
+@frappe.whitelist()
+def get_attendance_request(**kwargs):
+    try:
+        employee_id = get_employee_id()
+        approver = validate_link(doctype='Employee',docname= employee_id,fields=json.dumps(["employee_name","department","custom_attendance_request_approver"]))
+        UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
+        page_size = 20 if not kwargs.get(
+            'page_size') else int(kwargs.get('page_size'))
+
+        page = 1 if not kwargs.get('page') or int(
+            kwargs.get('page')) <= 0 else int(kwargs.get('page'))
+        start = (page - 1) * page_size
+        ShiftType = frappe.qb.DocType('Shift Type')
+        AttendanceRequest = frappe.qb.DocType('Attendance Request')
+        query_code = (AttendanceRequest.employee == employee_id)
+        queryShift = (frappe.qb.from_(AttendanceRequest)
+                      .inner_join(ShiftType)
+                      .on(AttendanceRequest.custom_shift == ShiftType.name)
+                      .where(query_code)
+                      .offset(start)
+                      .limit(page_size)
+                      .orderby(AttendanceRequest.creation, order=Order.desc)
+                      .select(AttendanceRequest.name, UNIX_TIMESTAMP(AttendanceRequest.creation).as_("creation"),UNIX_TIMESTAMP(AttendanceRequest.from_date).as_("from_date"), UNIX_TIMESTAMP(AttendanceRequest.to_date).as_("to_date"),AttendanceRequest.docstatus,AttendanceRequest.half_day,UNIX_TIMESTAMP(AttendanceRequest.half_day_date).as_("half_day_date") ,AttendanceRequest.custom_shift.as_("shift_type"), AttendanceRequest.explanation, ShiftType.start_time, ShiftType.end_time).run(as_dict=True)
+                      )        
+        for shift in queryShift:
+            shift["docstatus"] = doc_status(shift.get('docstatus'))
+        
+        Employee = frappe.qb.DocType("Employee")
+        User = frappe.qb.DocType("User")
+        approver_info = (frappe.qb.from_(User)
+                         .inner_join(Employee)
+                         .on(User.email == Employee.user_id)
+                         .where(User.email ==  approver['custom_attendance_request_approver'])
+                         .select(Employee.employee_name,Employee.image,User.email)
+                         .run(as_dict=True)
+                         )
+        for info in approver_info:
+            info['image'] = validate_image(info.get("image"))
+        queryOpen = frappe.db.count('Attendance Request', {'docstatus': 0, 'employee': employee_id})
+        querySubmitted = frappe.db.count('Attendance Request', {'docstatus': 1, 'employee': employee_id})
+        queryCancelled = frappe.db.count('Attendance Request', {'docstatus': 2, 'employee': employee_id})
+        return gen_response(200, i18n.t('translate.successfully', locale=get_language()), {
+            "data": queryShift,
+            "user_approver": approver_info[0],
+            "queryOpen": queryOpen,
+            "querySubmitted": querySubmitted,
+            "queryCancelled": queryCancelled
+        })
+    except Exception as e:
+        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
+
+#detail attendance
+@frappe.whitelist()
+def get_detail_attendance(name):
+    try:
+        employee_id = get_employee_id()
+        approver = validate_link(doctype='Employee',docname= employee_id,fields=json.dumps(["employee_name","department","custom_attendance_request_approver"]))
+        UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
+        ShiftType = frappe.qb.DocType('Shift Type')
+        AttendanceRequest = frappe.qb.DocType('Attendance Request')
+        query_code = (AttendanceRequest.employee == employee_id)
+        queryShift = (frappe.qb.from_(AttendanceRequest)
+                      .inner_join(ShiftType)
+                      .on(AttendanceRequest.custom_shift == ShiftType.name)
+                      .where(query_code & (AttendanceRequest.name == name))
+                      .orderby(AttendanceRequest.creation, order=Order.desc)
+                      .select(AttendanceRequest.name, UNIX_TIMESTAMP(AttendanceRequest.creation).as_("creation"),UNIX_TIMESTAMP(AttendanceRequest.from_date).as_("from_date"), UNIX_TIMESTAMP(AttendanceRequest.to_date).as_("to_date"),AttendanceRequest.docstatus,AttendanceRequest.half_day,UNIX_TIMESTAMP(AttendanceRequest.half_day_date).as_("half_day_date") ,AttendanceRequest.custom_shift.as_("shift_type"), AttendanceRequest.explanation, ShiftType.start_time, ShiftType.end_time).run(as_dict=True)
+                      )        
+        for shift in queryShift:
+            shift["docstatus"] = doc_status(shift.get('docstatus'))
+        
+        Employee = frappe.qb.DocType("Employee")
+        User = frappe.qb.DocType("User")
+        approver_info = (frappe.qb.from_(User)
+                         .inner_join(Employee)
+                         .on(User.email == Employee.user_id)
+                         .where(User.email ==  approver['custom_attendance_request_approver'])
+                         .select(Employee.employee_name,Employee.image,User.email)
+                         .run(as_dict=True)
+                         )
+        for info in approver_info:
+            info['image'] = validate_image(info.get("image"))
+        return gen_response(200, i18n.t('translate.successfully', locale=get_language()), {
+            "data": queryShift,
+            "user_approver": approver_info[0]
+        })
+    except Exception as e:
+        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
+
+# approver attendance information
+@frappe.whitelist(methods='GET')
+def get_approved_attendance():
+    try:
+        employee = get_employee_id()
+        approver = validate_link(doctype='Employee',docname= employee,fields=json.dumps(["employee_name","department","custom_attendance_request_approver"]))
+        Employee = frappe.qb.DocType("Employee")
+        User = frappe.qb.DocType("User")
+        approver_info = (frappe.qb.from_(User)
+                         .inner_join(Employee)
+                         .on(User.email == Employee.user_id)
+                         .where(User.email ==  approver['custom_attendance_request_approver'])
+                         .select(Employee.employee_name,Employee.image,User.email)
+                         .run(as_dict=True)
+                         )
+        for info in approver_info:
+            info['image'] = validate_image(info.get("image"))
+        gen_response(200,i18n.t('translate.successfully', locale=get_language()),approver_info)
+    except Exception as e:
+        exception_handel(e)
+
