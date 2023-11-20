@@ -59,6 +59,12 @@ frappe.query_reports["MBW Monthly Attendance Sheet vi v2"] = {
 			"fieldtype": "Select",
 			"options": ["","Branch","Grade","Department","Designation"]
 		},
+		{
+			"fieldname":"summarized_view",
+			"label": __("Summarized View"),
+			"fieldtype": "Check",
+			"Default": 0,
+		}
 	],
 	onload: async function(report) {
 		frappe.open_dialog = async function (detail_check) {
