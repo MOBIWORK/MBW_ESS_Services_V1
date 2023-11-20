@@ -62,7 +62,14 @@ def execute(filters: Optional[Filters] = None) -> Tuple:
                         "month": month,
                         "year": filters.get('year')
                     }
-                    row[field] = f'<p  onclick="frappe.open_dialog({detail_check})">{w} {f"<sup>{l}</sup>" if l else ""} </p>' if l != "WO" else "WO"
+                    string_show = ''
+                    if l != "WO" and l != False:
+                        string_show = f'<p  onclick="frappe.open_dialog({detail_check})">{w} {f"<sup>{l}</sup>" if l else ""} </p>'
+                    elif w == 0:
+                        string_show = f'<p  onclick="frappe.open_dialog({detail_check})">x</p>'
+                    else:
+                        string_show = f'<p  onclick="frappe.open_dialog({detail_check})">WO</p>'
+                    row[field] = string_show    
     # chart = get_chart_data(attendance_map, filters)
     message = get_message() if not filters.summarized_view else ""
     return columns, data, message, data_service_mobile
