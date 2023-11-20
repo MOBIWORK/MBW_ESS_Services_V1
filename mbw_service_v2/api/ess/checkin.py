@@ -409,7 +409,7 @@ def get_attendance_request(**kwargs):
                       .offset(start)
                       .limit(page_size)
                       .orderby(AttendanceRequest.creation, order=Order.desc)
-                      .select(AttendanceRequest.name, UNIX_TIMESTAMP(AttendanceRequest.creation).as_("creation"),UNIX_TIMESTAMP(AttendanceRequest.from_date).as_("from_date"), UNIX_TIMESTAMP(AttendanceRequest.to_date).as_("to_date"),AttendanceRequest.docstatus,AttendanceRequest.half_day,UNIX_TIMESTAMP(AttendanceRequest.half_day_date).as_("half_day_date") ,AttendanceRequest.custom_shift.as_("shift_type"), AttendanceRequest.explanation, ShiftType.start_time, ShiftType.end_time).run(as_dict=True)
+                      .select(AttendanceRequest.name, UNIX_TIMESTAMP(AttendanceRequest.creation).as_("creation"),UNIX_TIMESTAMP(AttendanceRequest.from_date).as_("from_date"), UNIX_TIMESTAMP(AttendanceRequest.to_date).as_("to_date"),AttendanceRequest.docstatus,AttendanceRequest.half_day,UNIX_TIMESTAMP(AttendanceRequest.half_day_date).as_("half_day_date") ,AttendanceRequest.custom_shift.as_("shift_type"),AttendanceRequest.reason ,AttendanceRequest.explanation, ShiftType.start_time, ShiftType.end_time).run(as_dict=True)
                       )        
         for shift in queryShift:
             shift["docstatus"] = doc_status(shift.get('docstatus'))
