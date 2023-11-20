@@ -65,10 +65,10 @@ def execute(filters: Optional[Filters] = None) -> Tuple:
                     string_show = ''
                     if l != "WO" and l != False:
                         string_show = f'<p  onclick="frappe.open_dialog({detail_check})">{w} {f"<sup>{l}</sup>" if l else ""} </p>'
-                    elif w == 0:
+                    elif w == 0 and l != "WO": 
                         string_show = f'<p  onclick="frappe.open_dialog({detail_check})">x</p>'
                     else:
-                        string_show = f'<p  onclick="frappe.open_dialog({detail_check})">WO</p>'
+                        string_show = f'<p  onclick="frappe.open_dialog({detail_check})">{w if l != "WO" else "WO" }</p>'
                     row[field] = string_show    
     # chart = get_chart_data(attendance_map, filters)
     message = get_message() if not filters.summarized_view else ""
