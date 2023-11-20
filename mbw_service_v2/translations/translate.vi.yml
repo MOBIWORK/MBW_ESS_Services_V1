@@ -41,3 +41,4 @@ vi:
   update_success: Cập nhật thành công
   delete_success: Xóa thành công
   not_found: Không tìm thấy
+  approve_not_setup: Chưa cài đặt người kiểm duyệt

@@ -41,3 +41,4 @@ en:
   update_success: Update success
   delete_success: Delete success
   not_found: Not found
+  approve_not_setup: Approve not setup yet

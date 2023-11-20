@@ -384,6 +384,21 @@ def get_attendance_request(**kwargs):
         page = 1 if not kwargs.get('page') or int(
             kwargs.get('page')) <= 0 else int(kwargs.get('page'))
         start = (page - 1) * page_size
+        Employee = frappe.qb.DocType("Employee")
+        User = frappe.qb.DocType("User")
+        print("====", approver)
+        if approver['custom_attendance_request_approver']:
+            approver_info = (frappe.qb.from_(User)
+                            .inner_join(Employee)
+                            .on(User.email == Employee.user_id)
+                            .where(User.email ==  approver['custom_attendance_request_approver'])
+                            .select(Employee.employee_name.as_("full_name"),Employee.image,User.email)
+                            .run(as_dict=True)
+                            )
+            for info in approver_info:
+                info['image'] = validate_image(info.get("image"))
+        else: 
+            return gen_response(404, i18n.t('translate.approve_not_setup', locale=get_language()))
         ShiftType = frappe.qb.DocType('Shift Type')
         AttendanceRequest = frappe.qb.DocType('Attendance Request')
         query_code = (AttendanceRequest.employee == employee_id)
@@ -399,17 +414,8 @@ def get_attendance_request(**kwargs):
         for shift in queryShift:
             shift["docstatus"] = doc_status(shift.get('docstatus'))
         
-        Employee = frappe.qb.DocType("Employee")
-        User = frappe.qb.DocType("User")
-        approver_info = (frappe.qb.from_(User)
-                         .inner_join(Employee)
-                         .on(User.email == Employee.user_id)
-                         .where(User.email ==  approver['custom_attendance_request_approver'])
-                         .select(Employee.employee_name,Employee.image,User.email)
-                         .run(as_dict=True)
-                         )
-        for info in approver_info:
-            info['image'] = validate_image(info.get("image"))
+        
+
         queryOpen = frappe.db.count('Attendance Request', {'docstatus': 0, 'employee': employee_id})
         querySubmitted = frappe.db.count('Attendance Request', {'docstatus': 1, 'employee': employee_id})
         queryCancelled = frappe.db.count('Attendance Request', {'docstatus': 2, 'employee': employee_id})
@@ -421,6 +427,7 @@ def get_attendance_request(**kwargs):
             "queryCancelled": queryCancelled
         })
     except Exception as e:
+        print(e)
         gen_response(500, i18n.t('translate.error', locale=get_language()), [])
 
 #detail attendance
@@ -449,7 +456,7 @@ def get_detail_attendance(name):
                          .inner_join(Employee)
                          .on(User.email == Employee.user_id)
                          .where(User.email ==  approver['custom_attendance_request_approver'])
-                         .select(Employee.employee_name,Employee.image,User.email)
+                         .select(Employee.employee_name.as_("full_name"),Employee.image,User.email)
                          .run(as_dict=True)
                          )
         for info in approver_info:
@@ -473,7 +480,7 @@ def get_approved_attendance():
                          .inner_join(Employee)
                          .on(User.email == Employee.user_id)
                          .where(User.email ==  approver['custom_attendance_request_approver'])
-                         .select(Employee.employee_name,Employee.image,User.email)
+                         .select(Employee.employee_name.as_("full_name"),Employee.image,User.email)
                          .run(as_dict=True)
                          )
         for info in approver_info:
