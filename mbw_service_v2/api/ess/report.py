@@ -216,7 +216,7 @@ def get_work_shift(name_employee, str_date):
             work_hour = checkin.get('start_time') + ' - ' + checkin.get('end_time')
             reality_hour = checkin.get('in_time') + ' - ' + checkin.get('out_time')
             reality_attendance_work = 0
-            if checkin.get('exchange_to_working_day') != 0:
+            if checkin.get('total_shift_time') != 0:
                 reality_attendance_work = round(checkin.get('working_hours') / checkin.get('total_shift_time') * checkin.get('exchange_to_working_day'), 2)
             
             dict_checkin[attendance_name] = {
@@ -396,7 +396,7 @@ def get_report_attendance_sheet(**data):
         so_cong_tang_ca_trong_ngay = 0
         so_gio_tang_ca_trong_ngay = 0
         for att in attendances:
-            if att.get('exchange_to_working_day') != 0:
+            if att.get('total_shift_time') != 0:
                 cong_lam_viec_trong_ngay += round(att.get('working_hours') / att.get('total_shift_time') * att.get('exchange_to_working_day'), 2)
             thoi_gian_lam_viec_trong_ngay += att.get('working_hours')
             so_phut_di_muon_trong_ngay += att.get('late_check_in')

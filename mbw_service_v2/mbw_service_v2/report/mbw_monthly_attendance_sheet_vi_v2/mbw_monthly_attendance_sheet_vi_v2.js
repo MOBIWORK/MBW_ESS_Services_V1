@@ -121,7 +121,6 @@ frappe.query_reports["MBW Monthly Attendance Sheet vi v2"] = {
 						var html_1 = ""
 						var html_2 = ""
 						var html_3 = ""
-						console.log(result)
 
 						// Tông hợp
 						var info_synthesis = result.info_synthesis
