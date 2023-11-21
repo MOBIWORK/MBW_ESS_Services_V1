@@ -29,6 +29,10 @@ from frappe.utils import (
 from frappe.client import validate_link
 from mbw_service_v2.config_translate import i18n
 
+FORMAT_DAY = '%d-%m-%Y'
+FORMAT_HOUR = '%H:%m:%s'
+DATE_FORMAT = CustomFunction('DATE_FORMAT', ['date', 'format'])
+    
 @frappe.whitelist()
 @frappe.read_only()
 def get_report_monthly(filters={},overview=True):
@@ -185,22 +189,197 @@ def get_report_advance(**data):
 def valid_value(value):
     return value if value else ""
 
+def get_work_shift(name_employee, str_date):
+    EmployeeCheckin = frappe.qb.DocType('Employee Checkin')
+    Attendance = frappe.qb.DocType('Attendance')
+    LeaveApplication = frappe.qb.DocType('Leave Application')
+    LeaveType = frappe.qb.DocType('Leave Type')
+    ShiftType = frappe.qb.DocType('Shift Type')
+    AttendanceRequest = frappe.qb.DocType('Attendance Request')
+    
+    employee_checkin = (frappe.qb.from_(EmployeeCheckin)
+                .inner_join(Attendance)
+                .on(EmployeeCheckin.attendance == Attendance.name)
+                .inner_join(ShiftType)
+                .on(EmployeeCheckin.shift == ShiftType.name)
+                .where((Attendance.employee == name_employee) & (Attendance.attendance_date == str_date))
+                .select(EmployeeCheckin.name.as_("name_checkin"), DATE_FORMAT(ShiftType.start_time, FORMAT_HOUR).as_("start_time"), DATE_FORMAT(ShiftType.end_time, FORMAT_HOUR).as_("end_time"), ShiftType.name.as_("name_shift_type"),ShiftType.exchange_to_working_day, DATE_FORMAT(Attendance.in_time, FORMAT_HOUR).as_("in_time"), DATE_FORMAT(Attendance.out_time, FORMAT_HOUR).as_("out_time"), Attendance.working_hours, ShiftType.total_shift_time, EmployeeCheckin.log_type, EmployeeCheckin.attendance)
+                .run(as_dict=True))
+
+    dict_checkin = {}
+    for checkin in employee_checkin:
+        attendance_name = checkin.get('attendance')
+        name_checkin = checkin.get('name_checkin')
+        log_type = checkin.get('log_type')
+        data_check = dict_checkin.get(attendance_name)
+        if not data_check:
+            work_hour = checkin.get('start_time') + ' - ' + checkin.get('end_time')
+            reality_hour = checkin.get('in_time') + ' - ' + checkin.get('out_time')
+            reality_attendance_work = 0
+            if checkin.get('exchange_to_working_day') != 0:
+                reality_attendance_work = round(checkin.get('working_hours') / checkin.get('total_shift_time') * checkin.get('exchange_to_working_day'), 2)
+            
+            dict_checkin[attendance_name] = {
+                "attendance": attendance_name,
+                "shift_name": checkin.get('name_shift_type'),
+                "work_hour": work_hour,
+                "attendance_work": checkin.get('exchange_to_working_day'),
+                "reality_hour": reality_hour,
+                "reality_attendance_work": reality_attendance_work,
+                "checkin": [
+                    {
+                        "label": f"{log_type}: {name_checkin}",
+                        "link": f"/app/employee-checkin/{name_checkin}"
+                    }
+                ]
+            }
+        else:
+            data_check['checkin'].append({
+                        "label": f"{log_type}: {name_checkin}",
+                        "link": f"/app/employee-checkin/{name_checkin}"
+                    })
+            dict_checkin[attendance_name] = data_check
+            log_type = checkin.get('log_type')
+
+    return dict_checkin.values()
+
+def get_leaves(name_employee, str_date):
+    Attendance = frappe.qb.DocType('Attendance')
+    LeaveApplication = frappe.qb.DocType('Leave Application')
+    LeaveType = frappe.qb.DocType('Leave Type')
+    ShiftType = frappe.qb.DocType('Shift Type')
+    AttendanceRequest = frappe.qb.DocType('Attendance Request')
+    data_leave = []
+    leave_application = (frappe.qb.from_(LeaveApplication)
+                .inner_join(LeaveType)
+                .on(LeaveApplication.leave_type == LeaveType.name)
+                .inner_join(Attendance)
+                .on(LeaveApplication.name == Attendance.leave_application)
+                .inner_join(ShiftType)
+                .on(Attendance.shift == ShiftType.name)
+                .where((LeaveApplication.employee == name_employee) & (LeaveApplication.from_date <= str_date) & (LeaveApplication.to_date >= str_date))
+                .select(LeaveApplication.name,DATE_FORMAT(LeaveApplication.creation, FORMAT_DAY).as_("creation"), LeaveApplication.leave_type, Attendance.shift,LeaveType.is_lwp,LeaveApplication.status, LeaveApplication.half_day_date, ShiftType.exchange_to_working_day)
+                .run(as_dict=True))
+
+    for leave in leave_application:
+        if leave.get("status") == "Open":
+            status_leave = "Chờ duyệt"
+        elif leave.get("status") == "Approved":
+            status_leave = "Đã duyệt"
+        elif leave.get("status") == "Rejected":
+            status_leave = "Từ chối"
+        else:
+            status_leave = "Đã hủy"
+        
+        name = leave.get("name")
+        data_leave.append({
+            "name": name,
+            "leave_type": leave.get("leave_type"),
+            "creation": leave.get("creation"),
+            "shift": leave.get("shift") if leave.get("shift") else "",
+            "attendance_change": leave.exchange_to_working_day,
+            "status": status_leave,
+            "receive_salary": "Có" if leave.get("is_lwp") == 0 else "Không",
+            "link": f"/app/leave-application/{name}"
+        })
+    
+    attendance_request = (frappe.qb.from_(AttendanceRequest)
+                .inner_join(Attendance)
+                .on(AttendanceRequest.name == Attendance.attendance_request)
+                .inner_join(ShiftType)
+                .on(Attendance.shift == ShiftType.name)
+                .where((AttendanceRequest.employee == name_employee) & (AttendanceRequest.from_date <= str_date) & (AttendanceRequest.to_date >= str_date))
+                .select(AttendanceRequest.name,DATE_FORMAT(AttendanceRequest.creation, FORMAT_DAY).as_("creation"), AttendanceRequest.custom_shift,AttendanceRequest.half_day_date,AttendanceRequest.docstatus, Attendance.shift,ShiftType.exchange_to_working_day)
+                .run(as_dict=True))
+
+    for leave in attendance_request:
+        attendance_change = 1
+        if leave.get("docstatus") == 0:
+            status_leave = "Chờ duyệt"
+        elif leave.get("docstatus") == 1:
+            status_leave = "Đã duyệt"
+        elif leave.get("docstatus") == 2:
+            status_leave = "Đã hủy"
+        
+        name = leave.get("name")
+        data_leave.append({
+            "leave_type": "Giải trình chấm công",
+            "creation": leave.get("creation"),
+            "shift": leave.get("shift") if leave.get("shift") else "",
+            "attendance_change": attendance_change,
+            "status": status_leave,
+            "name": name,
+            "receive_salary": "Có",
+            "link": f"/app/attendance-request/{name}"
+        })
+    return data_leave
+
+def get_holiday(name_employee, str_date, employee):
+    holidays = []
+    new_holidays = []
+    ShiftAssignment = frappe.qb.DocType('Shift Assignment')
+    ShiftType = frappe.qb.DocType('Shift Type')
+    Company = frappe.qb.DocType('Company')
+    Holiday = frappe.qb.DocType('Holiday')
+    
+    shift_assignment = []
+    # end_date has data
+    shift_assignment_1 = (frappe.qb.from_(ShiftAssignment)
+            .inner_join(ShiftType)
+            .on(ShiftAssignment.shift_type == ShiftType.name)
+            .where((ShiftAssignment.employee == name_employee) & (ShiftAssignment.start_date <= str_date) & (ShiftAssignment.end_date >= str_date))
+            .select(ShiftType.name.as_('shift_type'), ShiftType.holiday_list)
+            .run(as_dict=True))
+    shift_assignment.extend(shift_assignment_1)
+    # end_date has data
+    shift_assignment_2 = (frappe.qb.from_(ShiftAssignment)
+            .inner_join(ShiftType)
+            .on(ShiftAssignment.shift_type == ShiftType.name)
+            .where((ShiftAssignment.employee == name_employee) & (ShiftAssignment.start_date <= str_date) & (ShiftAssignment.end_date.isnull() | ShiftAssignment.end_date == ""))
+            .select(ShiftType.name.as_('shift_type'), ShiftType.holiday_list)
+            .run(as_dict=True))
+
+    shift_assignment.extend(shift_assignment_2)
+
+    for shift in shift_assignment:
+        holiday_list = shift.get('holiday_list')
+        if not holiday_list:
+            holiday_list = employee.get('holiday_list')
+            if not holiday_list:
+                company = employee.get('company')
+                if company:
+                    holiday_list = frappe.db.get_value("Company",{"name": company},['default_holiday_list'])
+        holiday = (frappe.qb.from_(Holiday)
+                .where((Holiday.holiday_date == str_date) & (Holiday.parent == holiday_list))
+                .select(DATE_FORMAT(Holiday.holiday_date, FORMAT_DAY).as_('holiday_date'), Holiday.description, Holiday.weekly_off)
+                .run(as_dict=True))
+        holidays.extend(holiday)
+    
+    stt = 0
+    for hld in holidays:
+        hld_check = list(filter(lambda item: item['holiday_date'] == hld.get('holiday_date'), new_holidays))
+        if not hld_check:
+            stt+=1
+            new_holidays.append({
+                "stt": stt,
+                "holiday_date": hld.get('holiday_date'),
+                "description": hld.get('description'),
+                "receive_salary": "Có" if hld.get("weekly_off") == 0 else "Không",
+            })
+    return new_holidays
+
 @frappe.whitelist(methods="GET")
 def get_report_attendance_sheet(**data):
     try:
-        print(data)
         name_employee = data.get('employee')
         str_date = data.get('year') + "-" + data.get('month') + "-" + data.get('day')
-        
-        employee = get_employee_by_name(name_employee, ["name", "employee_name", "company", "department", "designation"])
+        employee = get_employee_by_name(name_employee, ["name", "employee_name", "company", "department", "designation", "holiday_list"])
+        EmployeeCheckin = frappe.qb.DocType('Employee Checkin')
         Attendance = frappe.qb.DocType('Attendance')
-        ShiftAssignment = frappe.qb.DocType('Shift Assignment')
         LeaveApplication = frappe.qb.DocType('Leave Application')
         LeaveType = frappe.qb.DocType('Leave Type')
         ShiftType = frappe.qb.DocType('Shift Type')
         AttendanceRequest = frappe.qb.DocType('Attendance Request')
-        format_day = '%d-%m-%Y'
-        DATE_FORMAT = CustomFunction('DATE_FORMAT', ['date', 'format_day'])
         
         # get Information synthesis
         attendances = (frappe.qb.from_(Attendance)
@@ -217,78 +396,92 @@ def get_report_attendance_sheet(**data):
         so_cong_tang_ca_trong_ngay = 0
         so_gio_tang_ca_trong_ngay = 0
         for att in attendances:
-            cong_lam_viec_trong_ngay += round(att.get('working_hours') / att.get('total_shift_time') * att.get('exchange_to_working_day'), 2)
+            if att.get('exchange_to_working_day') != 0:
+                cong_lam_viec_trong_ngay += round(att.get('working_hours') / att.get('total_shift_time') * att.get('exchange_to_working_day'), 2)
             thoi_gian_lam_viec_trong_ngay += att.get('working_hours')
             so_phut_di_muon_trong_ngay += att.get('late_check_in')
             so_phut_ve_som_trong_ngay += att.get('early_check_out')
-        
-        info_employee = {
-            "Thông tin nhân sự": {
-                "Nhân sự": valid_value(employee.get("name")),
-                "Tên nhân sự": valid_value(employee.get("employee_name")),
-                "Công ty": valid_value(employee.get("company")),
-                "Bộ phận": valid_value(employee.get("department")),
-                "Chức vụ": valid_value(employee.get("designation")),
-            },
-            "Công làm việc trong ngày": cong_lam_viec_trong_ngay,
-            "Thời gian làm việc trong ngày": thoi_gian_lam_viec_trong_ngay,
-            "Số phút đi muộn trong ngày": so_phut_di_muon_trong_ngay,
-            "Số phút về sớm trong ngày": so_phut_ve_som_trong_ngay,
-            "Số công tăng ca trong ngày": so_cong_tang_ca_trong_ngay,
-            "Số giờ tăng ca trong ngày": so_gio_tang_ca_trong_ngay
+
+        # get work shift
+        work_shift = get_work_shift(name_employee, str_date)
+
+        thong_tin_cham_cong = {
+            "head_table": ["Tên ca", "Giờ làm việc", "Công", "Giờ làm thực tế", "Công thực", "Dữ liệu chấm công"],
+            "data": work_shift,
+            "message_empty": "Không có dữ liệu!"
         }
         
-        # get Work shift information
-        shift_information = []
+        info_synthesis = {
+            "thong_tin_nhan_su": {
+                "label": "Thông tin nhân sự",
+                "value": {
+                    "nhan_su": {
+                        "label": "Nhân sự",
+                        "value": valid_value(employee.get("name"))
+                    },
+                    "ten_nhan_su": {
+                        "label": "Tên nhân sự",
+                        "value": valid_value(employee.get("employee_name"))
+                    },
+                    "cong_ty": {
+                        "label": "Công ty",
+                        "value": valid_value(employee.get("company"))
+                    },
+                    "bo_phan": {
+                        "label": "Bộ phận",
+                        "value": valid_value(employee.get("department"))
+                    },
+                    "chuc_vu": {
+                        "label": "Chức vụ",
+                        "value": valid_value(employee.get("designation"))
+                    }
+                }
+            },
+            "cong_lam_viec_trong_ngay": {
+                "label": "Công làm việc trong ngày",
+                "value": cong_lam_viec_trong_ngay
+                },
+            "thoi_gian_lam_viec_trong_ngay": {
+                "label": "Thời gian làm việc trong ngày",
+                "value": thoi_gian_lam_viec_trong_ngay
+                },
+            "so_phut_di_muon_trong_ngay": {
+                "label": "Số phút đi muộn trong ngày",
+                "value": so_phut_di_muon_trong_ngay
+                },
+            "so_phut_ve_som_trong_ngay": {
+                "label": "Số phút về sớm trong ngày",
+                "value": so_phut_ve_som_trong_ngay
+                },
+            "so_cong_tang_ca_trong_ngay": {
+                "label": "Số công tăng ca trong ngày",
+                "value": so_cong_tang_ca_trong_ngay
+                },
+            "so_gio_tang_ca_trong_ngay": {
+                "label": "Số giờ tăng ca trong ngày",
+                "value": so_gio_tang_ca_trong_ngay
+                },
+            "thong_tin_cham_cong": {
+                "label": "Thông tin chấm công",
+                "value": thong_tin_cham_cong
+                },
+        }
         
         # get leaves
-        data_leave = []
-        leave_application = (frappe.qb.from_(LeaveApplication)
-                    .inner_join(LeaveType)
-                    .on(LeaveApplication.leave_type == LeaveType.name)
-                    .where((LeaveApplication.employee == name_employee) & (LeaveApplication.from_date >= str_date) & (LeaveApplication.to_date <= str_date))
-                    .select(LeaveApplication.name,DATE_FORMAT(LeaveApplication.creation, format_day).as_("creation"), LeaveApplication.leave_type, LeaveApplication.custom_shift_type,LeaveType.is_lwp,LeaveApplication.status)
-                    .run(as_dict=True))
-
-        for leave in leave_application:
-            shift_type = leave.get('custom_shift_type') if leave.get('custom_shift_type') else "Cả ngày"
-            attendance_change = 1
-            data_leave.append({
-                "leave_type": leave.get("leave_type"),
-                "creation": leave.get("creation"),
-                "shift_type": shift_type,
-                "attendance_change": attendance_change,
-                "status": leave.get("status"),
-                "name": leave.get("name"),
-                "receive_salary": leave.get("is_lwp"),
-            })
-        
-        attendance_request = (frappe.qb.from_(AttendanceRequest)
-                    .where((AttendanceRequest.employee == name_employee) & (AttendanceRequest.from_date >= str_date) & (AttendanceRequest.to_date <= str_date))
-                    .select(AttendanceRequest.name,DATE_FORMAT(AttendanceRequest.creation, format_day).as_("creation"), AttendanceRequest.custom_shift,AttendanceRequest.docstatus)
-                    .run(as_dict=True))
-        for leave in attendance_request:
-            shift_type = leave.get('custom_shift') if leave.get('custom_shift') else "Cả ngày"
-            attendance_change = 1
-            receive_salary = 1
-            data_leave.append({
-                "leave_type": "Giải trình chấm công",
-                "creation": leave.get("creation"),
-                "shift_type": shift_type,
-                "attendance_change": attendance_change,
-                "status": leave.get("docstatus"),
-                "name": leave.get("name"),
-                "receive_salary": receive_salary,
-            })
-
         leaves = {
             "head_table": ["Loại đơn", "Ngày tạo", "Ca áp dụng", "Công thay đổi", "Trạng thái", "Chi tiết đơn", "Hưởng lương"],
-            "data_leave": data_leave,
+            "data": get_leaves(name_employee, str_date),
+            "message_empty": "Không có dữ liệu!"
         }
         
-        print(leaves)
+        # get holiday
+        holidays = {
+            "head_table": ["STT", "Ngày nghỉ","Loại nghỉ", "Tính lương"],
+            "data": get_holiday(name_employee, str_date, employee),
+            "message_empty": "Không có dữ liệu!"
+        }
         
-        result = {"info_employee": info_employee, "shift_information": shift_information, "leaves": leaves}
+        result = {"info_synthesis": info_synthesis, "leaves": leaves, "holidays": holidays}
         gen_response(200, i18n.t('translate.successfully', locale=get_language()), result)
     except Exception as e:
         print(e)

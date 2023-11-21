@@ -547,7 +547,7 @@ def get_attendance_summary_and_days(employee: str, filters: Filters) -> Tuple[Di
     sum_half_day = Sum(half_day_case).as_("total_half_days")
     #tong cong theo nua ngay
     half_day_case_shift = frappe.qb.terms.Case().when(Attendance.status == "Half Day", ShiftType.exchange_to_working_day).else_(0)
-    sum_half_day_shift = Sum(half_day_case_shift).as_("total_half_days")
+    sum_half_day_shift = Sum(half_day_case_shift).as_("total_half_days_shift")
 
     summary = (
         frappe.qb.from_(Attendance)
