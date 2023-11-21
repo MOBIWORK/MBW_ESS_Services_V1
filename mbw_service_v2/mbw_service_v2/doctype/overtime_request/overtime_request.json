@@ -124,6 +124,7 @@
    "default": "Draft",
    "fieldname": "status",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Tr\u1ea1ng th\u00e1i",
    "options": "Draft\nApproved\nRejected",
    "reqd": 1
@@ -148,7 +149,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2023-11-21 11:19:08.284216",
+ "modified": "2023-11-21 16:08:16.690590",
  "modified_by": "Administrator",
  "module": "Mbw Service V2",
  "name": "Overtime Request",
@@ -198,6 +199,19 @@
    "report": 1,
    "role": "HR User",
    "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],
