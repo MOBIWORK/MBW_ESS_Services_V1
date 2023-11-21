@@ -10,7 +10,6 @@ from mbw_service_v2.api.common import  (get_last_check, gen_response,get_employe
     enable_check_shift,
     validate_datetime,
     validate_empty,
-    doc_status,
     validate_image
     )
 
@@ -409,22 +408,18 @@ def get_attendance_request(**kwargs):
                       .offset(start)
                       .limit(page_size)
                       .orderby(AttendanceRequest.creation, order=Order.desc)
-                      .select(AttendanceRequest.name, UNIX_TIMESTAMP(AttendanceRequest.creation).as_("creation"),UNIX_TIMESTAMP(AttendanceRequest.from_date).as_("from_date"), UNIX_TIMESTAMP(AttendanceRequest.to_date).as_("to_date"),AttendanceRequest.docstatus,AttendanceRequest.half_day,UNIX_TIMESTAMP(AttendanceRequest.half_day_date).as_("half_day_date") ,AttendanceRequest.custom_shift.as_("shift_type"),AttendanceRequest.reason ,AttendanceRequest.explanation, ShiftType.start_time, ShiftType.end_time).run(as_dict=True)
+                      .select(AttendanceRequest.name, UNIX_TIMESTAMP(AttendanceRequest.creation).as_("creation"),UNIX_TIMESTAMP(AttendanceRequest.from_date).as_("from_date"), UNIX_TIMESTAMP(AttendanceRequest.to_date).as_("to_date"),AttendanceRequest.workflow_state,AttendanceRequest.half_day,UNIX_TIMESTAMP(AttendanceRequest.half_day_date).as_("half_day_date") ,AttendanceRequest.custom_shift.as_("shift_type"),AttendanceRequest.reason ,AttendanceRequest.explanation, ShiftType.start_time, ShiftType.end_time).run(as_dict=True)
                       )        
-        for shift in queryShift:
-            shift["docstatus"] = doc_status(shift.get('docstatus'))
-        
-        
 
-        queryOpen = frappe.db.count('Attendance Request', {'docstatus': 0, 'employee': employee_id})
-        querySubmitted = frappe.db.count('Attendance Request', {'docstatus': 1, 'employee': employee_id})
-        queryCancelled = frappe.db.count('Attendance Request', {'docstatus': 2, 'employee': employee_id})
+        queryDraft = frappe.db.count('Attendance Request', {'workflow_state': "Draft", 'employee': employee_id})
+        querryApproved = frappe.db.count('Attendance Request', {'workflow_state': "Approved", 'employee': employee_id})
+        queryRejected = frappe.db.count('Attendance Request', {'workflow_state': "Rejected", 'employee': employee_id})
         return gen_response(200, i18n.t('translate.successfully', locale=get_language()), {
             "data": queryShift,
             "user_approver": approver_info[0],
-            "queryOpen": queryOpen,
-            "querySubmitted": querySubmitted,
-            "queryCancelled": queryCancelled
+            "queryDraft": queryDraft,
+            "querryApproved": querryApproved,
+            "queryRejected": queryRejected
         })
     except Exception as e:
         print(e)
@@ -445,11 +440,9 @@ def get_detail_attendance(name):
                       .on(AttendanceRequest.custom_shift == ShiftType.name)
                       .where(query_code & (AttendanceRequest.name == name))
                       .orderby(AttendanceRequest.creation, order=Order.desc)
-                      .select(AttendanceRequest.name, UNIX_TIMESTAMP(AttendanceRequest.creation).as_("creation"),UNIX_TIMESTAMP(AttendanceRequest.from_date).as_("from_date"), UNIX_TIMESTAMP(AttendanceRequest.to_date).as_("to_date"),AttendanceRequest.docstatus,AttendanceRequest.half_day,UNIX_TIMESTAMP(AttendanceRequest.half_day_date).as_("half_day_date") ,AttendanceRequest.custom_shift.as_("shift_type"), AttendanceRequest.explanation, ShiftType.start_time, ShiftType.end_time).run(as_dict=True)
+                      .select(AttendanceRequest.name, UNIX_TIMESTAMP(AttendanceRequest.creation).as_("creation"),UNIX_TIMESTAMP(AttendanceRequest.from_date).as_("from_date"), UNIX_TIMESTAMP(AttendanceRequest.to_date).as_("to_date"),AttendanceRequest.workflow_state,AttendanceRequest.half_day,UNIX_TIMESTAMP(AttendanceRequest.half_day_date).as_("half_day_date") ,AttendanceRequest.custom_shift.as_("shift_type"), AttendanceRequest.explanation, ShiftType.start_time, ShiftType.end_time).run(as_dict=True)
                       )        
-        for shift in queryShift:
-            shift["docstatus"] = doc_status(shift.get('docstatus'))
-        
+
         Employee = frappe.qb.DocType("Employee")
         User = frappe.qb.DocType("User")
         approver_info = (frappe.qb.from_(User)
