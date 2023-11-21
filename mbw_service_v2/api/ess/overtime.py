@@ -85,8 +85,8 @@ def update_ot_request(**data):
 @frappe.whitelist(methods='GET')
 def get_list_ot_request():
     try:
-        list_ot = frappe.db.get_list("Overtime Request",["name","ot_date", "shift", "ot_start_time", "ot_end_time", "ot_approver", "posting_date","employee","suggested_time"])
-        return list_ot
+        list_ot = frappe.db.get_list("Overtime Request",["name","ot_date", "shift", "ot_start_time", "ot_end_time", "ot_approver", "posting_date","employee","suggested_time","status"])
+        gen_response(200,"",list_ot ) 
     except Exception as e:
         exception_handel(e)
 
