@@ -376,6 +376,7 @@ def get_attendance_request(**kwargs):
     try:
         employee_id = get_employee_id()
         approver = validate_link(doctype='Employee',docname= employee_id,fields=json.dumps(["employee_name","department","custom_attendance_request_approver"]))
+        workflow_state = kwargs.get('status')
         UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
         page_size = 20 if not kwargs.get(
             'page_size') else int(kwargs.get('page_size'))
@@ -385,7 +386,6 @@ def get_attendance_request(**kwargs):
         start = (page - 1) * page_size
         Employee = frappe.qb.DocType("Employee")
         User = frappe.qb.DocType("User")
-        print("====", approver)
         if approver['custom_attendance_request_approver']:
             approver_info = (frappe.qb.from_(User)
                             .inner_join(Employee)
@@ -401,6 +401,8 @@ def get_attendance_request(**kwargs):
         ShiftType = frappe.qb.DocType('Shift Type')
         AttendanceRequest = frappe.qb.DocType('Attendance Request')
         query_code = (AttendanceRequest.employee == employee_id)
+        if workflow_state:
+            query_code = query_code & AttendanceRequest.workflow_state == workflow_state
         queryShift = (frappe.qb.from_(AttendanceRequest)
                       .inner_join(ShiftType)
                       .on(AttendanceRequest.custom_shift == ShiftType.name)
