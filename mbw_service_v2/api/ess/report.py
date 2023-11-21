@@ -210,11 +210,11 @@ def get_work_shift(name_employee, str_date):
     for checkin in employee_checkin:
         attendance_name = checkin.get('attendance')
         name_checkin = checkin.get('name_checkin')
-        log_type = checkin.get('log_type')
+        log_type = str(checkin.get('log_type'))
         data_check = dict_checkin.get(attendance_name)
         if not data_check:
-            work_hour = checkin.get('start_time') + ' - ' + checkin.get('end_time')
-            reality_hour = checkin.get('in_time') + ' - ' + checkin.get('out_time')
+            work_hour = str(checkin.get('start_time')) + ' - ' + str(checkin.get('end_time'))
+            reality_hour = str(checkin.get('in_time')) + ' - ' + str(checkin.get('out_time'))
             reality_attendance_work = 0
             if checkin.get('total_shift_time') != 0:
                 reality_attendance_work = round(checkin.get('working_hours') / checkin.get('total_shift_time') * checkin.get('exchange_to_working_day'), 2)
@@ -239,7 +239,6 @@ def get_work_shift(name_employee, str_date):
                         "link": f"/app/employee-checkin/{name_checkin}"
                     })
             dict_checkin[attendance_name] = data_check
-            log_type = checkin.get('log_type')
 
     return dict_checkin.values()
 
