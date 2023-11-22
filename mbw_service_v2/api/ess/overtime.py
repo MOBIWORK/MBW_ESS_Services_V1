@@ -79,19 +79,64 @@ def update_ot_request(**data):
 
 # ot list
 @frappe.whitelist(methods='GET')
-def get_list_ot_request():
+def get_list_ot_request(**params):
     try:
+        from frappe.client import validate_link
         employee_id = get_employee_id()
+        employee_info = frappe.db.get_value("Employee",employee_id,['*'],as_dict=True)
+        status = params.get("status") if params.get("status") else False
         list_ot = frappe.db.get_list("Overtime Request",["name","ot_date", "shift", "ot_start_time", "ot_end_time", "ot_approver", "posting_date","employee","suggested_time","status"])
-        queryDraft = frappe.db.count('Overtime Request', {'workflow_state': "Draft", 'employee': employee_id})
-        queryApproved = frappe.db.count('Overtime Request', {'workflow_state': "Approved", 'employee': employee_id})
-        queryRejected = frappe.db.count('Overtime Request', {'workflow_state': "Rejected", 'employee': employee_id})
+        OtRequest = frappe.qb.DocType("Overtime Request")
+        field_in = ["ot_date", "shift", "ot_start_time", "ot_end_time", "ot_approver", "posting_date","employee","suggested_time"]
+        query = ((OtRequest.employee == employee_id) | (OtRequest.ot_approver == employee_info.get("user_id")))
+        if status:
+            query = (((OtRequest.employee == employee_id) | (OtRequest.ot_approver == employee_info.get("user_id"))) and status == OtRequest.status)
+        list_ot_rq = (
+            frappe.qb.from_(OtRequest)
+            .where(query)
+            .select(OtRequest.ot_date,OtRequest.shift,OtRequest.ot_date,OtRequest.ot_start_time,OtRequest.ot_end_time,OtRequest.ot_approver,OtRequest.posting_date,OtRequest.suggested_time,OtRequest.status)
+            .run(as_dict=True)
+        )
+
+        approver = validate_link(doctype='Employee',docname= employee_id,fields=json.dumps(["employee_name","department","ot_approver"]))
+        Employee = frappe.qb.DocType("Employee")
+        User = frappe.qb.DocType("User")
+        approver_info = (frappe.qb.from_(User)
+                         .inner_join(Employee)
+                         .on(User.email == Employee.user_id)
+                         .where(User.email ==  approver['ot_approver'])
+                         .select(Employee.employee_name.as_("full_name"),Employee.image,User.email)
+                         .run(as_dict=True)
+                         )
+        
+        if len(approver_info) > 0: 
+            approver_info = approver_info[0]
+            approver_info["image"] = validate_image(approver_info.get("image"))
+        else: 
+            approver_info = None
+        queryDraft = len( frappe.qb.from_(OtRequest)
+            .where(((OtRequest.employee == employee_id) | (OtRequest.ot_approver == employee_info.get("user_id"))) and "Draft" == OtRequest.status)
+            .select(OtRequest.ot_date,OtRequest.shift,OtRequest.ot_date,OtRequest.ot_start_time,OtRequest.ot_end_time,OtRequest.ot_approver,OtRequest.posting_date,OtRequest.suggested_time,OtRequest.status)
+            .run(as_dict=True)
+                         )
+        queryApproved = len( frappe.qb.from_(OtRequest)
+            .where(((OtRequest.employee == employee_id) | (OtRequest.ot_approver == employee_info.get("user_id"))) and "Approved" == OtRequest.status)
+            .select(OtRequest.ot_date,OtRequest.shift,OtRequest.ot_date,OtRequest.ot_start_time,OtRequest.ot_end_time,OtRequest.ot_approver,OtRequest.posting_date,OtRequest.suggested_time,OtRequest.status)
+            .run(as_dict=True)
+                         )
+        queryRejected = len( frappe.qb.from_(OtRequest)
+            .where(((OtRequest.employee == employee_id) | (OtRequest.ot_approver == employee_info.get("user_id"))) and "Rejected" == OtRequest.status)
+            .select(OtRequest.ot_date,OtRequest.shift,OtRequest.ot_date,OtRequest.ot_start_time,OtRequest.ot_end_time,OtRequest.ot_approver,OtRequest.posting_date,OtRequest.suggested_time,OtRequest.status)
+            .run(as_dict=True)
+                         )
+        status = params.get("status") if params.get("status") else False
 
         gen_response(200,"",{
-            "list_ot": list_ot,
-            "Draft": queryDraft,
-            "Approved": queryApproved,
-            "Rejected": queryRejected,
+            "data": list_ot_rq,
+            "user_approver": approver_info,
+            "queryDraft": queryDraft,
+            "queryApproved": queryApproved,
+            "queryRejected": queryRejected,
         } ) 
     except Exception as e:
         exception_handel(e)
