@@ -92,8 +92,7 @@ def get_list_ot_request(**params):
         query = ((OtRequest.employee == employee_id) | (OtRequest.ot_approver == employee_info.get("user_id")))
         UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
         if status:
-            query = (((OtRequest.employee == employee_id) | (OtRequest.ot_approver == employee_info.get("user_id"))) and status == OtRequest.status)
-        print("query",query)
+            query = (((OtRequest.employee == employee_id) | (OtRequest.ot_approver == employee_info.get("user_id"))) & status == OtRequest.status)
         list_ot_rq = (
             frappe.qb.from_(OtRequest)
             .where(query)
