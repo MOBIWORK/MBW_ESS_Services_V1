@@ -31,14 +31,13 @@ def create_ot_request(**data):
         ot_start_time = datetime.strptime(data.get('ot_start_time'), "%H:%M").time()  if data.get('ot_start_time') else False
         ot_end_time = datetime.strptime(data.get('ot_end_time'), "%H:%M").time() if data.get('ot_end_time') else False
         ot_approver = data.get('ot_approver') if data.get('ot_approver') else False
-        posting_date = datetime.fromtimestamp(int(data.get('posting_date'))).date()  if data.get('posting_date') else False
-        if not ( ot_date or shift or ot_start_time or ot_end_time or ot_approver or posting_date ) :
+        if not ( ot_date or shift or ot_start_time or ot_end_time or ot_approver ) :
             gen_response(500, i18n.t('translate.invalid_value', locale=get_language()), []) 
             return
         del data['cmd']
         data['employee'] = employee
         data['ot_date'] = ot_date
-        data['posting_date'] = posting_date
+        data['posting_date'] = datetime.now().date()
         data['suggested_time'] = (ot_end_time.hour*60 + ot_end_time.minute  - (ot_start_time.hour*60 + ot_start_time.minute))/60
         field_in = ["ot_date", "shift", "ot_start_time", "ot_end_time", "ot_approver", "posting_date","employee","suggested_time"]
         for field, value in data.items() :
@@ -58,21 +57,18 @@ def update_ot_request(**data):
         data = dict(data)
         ot_name = data.get("name")
         ot_rq = frappe.get_doc("Overtime Request",ot_name)
-        employee = get_employee_id()
         ot_date = datetime.fromtimestamp(int(data.get('ot_date'))).date()  if data.get('ot_date') else False
         shift = data.get('shift') if data.get('shift') else False
         ot_start_time = datetime.strptime(data.get('ot_start_time'), "%H:%M").time()  if data.get('ot_start_time') else False
         ot_end_time = datetime.strptime(data.get('ot_end_time'), "%H:%M").time() if data.get('ot_end_time') else False
         ot_approver = data.get('ot_approver') if data.get('ot_approver') else False
-        posting_date = datetime.fromtimestamp(int(data.get('posting_date'))).date()  if data.get('posting_date') else False
-        if not ( ot_date or shift or ot_start_time or ot_end_time or ot_approver or posting_date ) :
+        if not ( ot_date or shift or ot_start_time or ot_end_time or ot_approver ) :
             gen_response(500, i18n.t('translate.invalid_value', locale=get_language()), []) 
             return
         del data['cmd']
         data['ot_date'] = ot_date
-        data['posting_date'] = posting_date
         data['suggested_time'] = (ot_end_time.hour*60 + ot_end_time.minute  - (ot_start_time.hour*60 + ot_start_time.minute))/60
-        field_in = ["ot_date", "shift", "ot_start_time", "ot_end_time", "ot_approver", "posting_date","suggested_time"]
+        # field_in = ["ot_date", "shift", "ot_start_time", "ot_end_time", "ot_approver", "posting_date","suggested_time"]
         for field, value in data.items() :
             setattr(ot_rq, field, value)
         ot_rq.save()
@@ -112,3 +108,24 @@ def delete_ot_request(name):
         exception_handel(e)
 
 
+#get ot approver
+@frappe.whitelist(methods="GET")
+def get_ot_approver():
+    try:
+        from frappe.client import validate_link
+        employee = get_employee_id()
+        approver = validate_link(doctype='Employee',docname= employee,fields=json.dumps(["employee_name","department","ot_approver"]))
+        Employee = frappe.qb.DocType("Employee")
+        User = frappe.qb.DocType("User")
+        approver_info = (frappe.qb.from_(User)
+                         .inner_join(Employee)
+                         .on(User.email == Employee.user_id)
+                         .where(User.email ==  approver['ot_approver'])
+                         .select(Employee.employee_name.as_("full_name"),Employee.image,User.email)
+                         .run(as_dict=True)
+                         )
+        for info in approver_info:
+            info['image'] = validate_image(info.get("image"))
+        gen_response(200,i18n.t('translate.successfully', locale=get_language()),approver_info)
+    except Exception as e :
+        exception_handel(e )
