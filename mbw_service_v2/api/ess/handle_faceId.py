@@ -225,6 +225,54 @@ def update_faceid_employee(**kwargs):
         gen_response(500, i18n.t('translate.error', locale=get_language()))
 
 
+def add_text_to_image(file_name, imgdata, description):
+    ## add text to image
+    # save image
+    doc_file = save_file(file_name, imgdata, "", "",
+                     folder=None, decode=False, is_private=0, df=None)
+    # Open an Image
+    path_file = frappe.get_site_path('public') + doc_file.file_url                
+    img = Image.open(path_file)
+    # Call draw Method to add 2D graphics in an image
+    I1 = ImageDraw.Draw(img)
+    # Custom font style and font size
+    myFont = ImageFont.truetype('FreeMono.ttf', 65)
+    # Add Text to an image
+    lines = []
+    position = (10, 10)
+    x, y = position
+    max_width = img.width - 2 * (x + y)
+    font_color = (255, 0, 0)
+    for line in description.split("\\n"):
+        # Split line into words
+        words = line.split()
+        current_line = words[0]
+
+        for word in words[1:]:
+            # Check if adding the next word exceeds max_width
+            if I1.textsize(current_line + " " + word, font=myFont)[0] <= max_width:
+                current_line += " " + word
+            else:
+                lines.append(current_line)
+                current_line = word
+        
+        lines.append(current_line)
+    
+    for line in lines:
+        I1.text((x, y), line, font=myFont, fill=font_color)
+        y += myFont.getsize(line)[1]
+    # get image base64
+    buffered = io.BytesIO()
+    img.save(buffered, format="PNG")
+    image_base64_new = base64.b64decode(base64.b64encode(buffered.getvalue()))
+    
+    # delete file
+    frappe.delete_doc('File', doc_file.name)
+    path_file = "/files/" + file_name
+    delete_file(path_file)
+    ##
+    return image_base64_new
+
 @frappe.whitelist(methods="POST")
 def verify_faceid_employee(**kwargs):
     try:
@@ -280,40 +328,15 @@ def verify_faceid_employee(**kwargs):
                 file_name = "checkin_" + employee_id + \
                     "_" + str(datetime.now()) + ".png"
 
-                ## add text to image
-                # save image
-                doc_file = save_file(file_name, imgdata, "", "",
-                                 folder=None, decode=False, is_private=0, df=None)
-                # Open an Image
-                path_file = frappe.get_site_path('public') + doc_file.file_url                
-                img = Image.open(path_file)
-                # Call draw Method to add 2D graphics in an image
-                I1 = ImageDraw.Draw(img)
-                # Custom font style and font size
-                myFont = ImageFont.truetype('FreeMono.ttf', 65)
-                # Add Text to an image
-                lines = description.split("\\n")
-                position = (10, 10)
-                font_color = (255, 0, 0)
-                x, y = position
-                for line in lines:
-                    I1.text((x, y), line, font=myFont, fill=font_color)
-                    y += myFont.getsize(line)[1]
-                # get image base64
-                buffered = io.BytesIO()
-                img.save(buffered, format="PNG")
-                image_base64_new = base64.b64decode(base64.b64encode(buffered.getvalue()))
-                
-                # delete file
-                frappe.delete_doc('File', doc_file.name)
-                path_file = "/files/" + file_name
-                delete_file(path_file)
-                ##
+                if description:
+                    imgdata_new = add_text_to_image(file_name, imgdata, description)
+                else:
+                    imgdata_new = imgdata
                 
                 # save file image s3
                 object_name = f"{frappe.local.site}/checkin/{file_name}"
                 my_minio.put_object(bucket_name=bucket_name_s3,
-                                    object_name=object_name, data=io.BytesIO(image_base64_new))
+                                    object_name=object_name, data=io.BytesIO(imgdata_new))
 
                 # data response
                 data = {}
