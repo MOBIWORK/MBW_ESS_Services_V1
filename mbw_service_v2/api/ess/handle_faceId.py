@@ -226,7 +226,6 @@ def update_faceid_employee(**kwargs):
 
 
 def add_text_to_image(file_name, imgdata, description):
-    print("description", str(description))
     ## add text to image
     # save image
     doc_file = save_file(file_name, imgdata, "", "",
@@ -237,7 +236,7 @@ def add_text_to_image(file_name, imgdata, description):
     # Call draw Method to add 2D graphics in an image
     I1 = ImageDraw.Draw(img)
     # Custom font style and font size
-    myFont = ImageFont.truetype('FreeMono.ttf', 65)
+    myFont = ImageFont.load_default().font_variant(size=65)
     # Add Text to an image
     lines = []
     position = (10, 10)
@@ -261,7 +260,7 @@ def add_text_to_image(file_name, imgdata, description):
     
     for line in lines:
         I1.text((x, y), line, font=myFont, fill=font_color)
-        y += myFont.getsize(line)[1]
+        y += 65
     # get image base64
     buffered = io.BytesIO()
     img.save(buffered, format="PNG")
@@ -284,7 +283,7 @@ def verify_faceid_employee(**kwargs):
         
         employee_id = get_employee_id()
         faceimage = kwargs.get('faceimage')
-        description = kwargs.get('description')
+        description = str(kwargs.get('description'))
 
         # check faceimage have string base64 ex: "data:image/jpeg;base64,"
         list_check = faceimage.split(",")
@@ -343,6 +342,7 @@ def verify_faceid_employee(**kwargs):
                 data = {}
                 data["file_url"] = f"https://{endpoint_s3}/{bucket_name_s3}/{object_name}"
                 data['status'] = True
+                print(data)
                 gen_response(200, i18n.t('translate.faceid_verify_success', locale=get_language()), data)
                 return None
             else:
