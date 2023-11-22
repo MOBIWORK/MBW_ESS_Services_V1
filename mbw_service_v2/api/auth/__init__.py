@@ -87,7 +87,7 @@ def login(**kwargs):
         })
 
     except frappe.AuthenticationError:
-        gen_response(401, i18n.t('translate.login_error', locale=get_language()), [])
+        gen_response(404, i18n.t('translate.login_error', locale=get_language()), [])
         return None
     except Exception as e:
         exception_handel(e)
@@ -132,9 +132,10 @@ def reset_password(user):
 
         gen_response(200, i18n.t('translate.email_send_success', locale=get_language()))
     except frappe.DoesNotExistError:
-        frappe.local.response["http_status_code"] = 404
         frappe.clear_messages()
-        gen_response(404, i18n.t('translate.error', locale=get_language()), [])
+        del frappe.response["exc_type"]
+        gen_response(404, i18n.t('translate.user_not_found', locale=get_language()), [])
+        return
 
 
 @frappe.whitelist()

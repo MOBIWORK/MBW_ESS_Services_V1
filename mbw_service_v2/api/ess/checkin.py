@@ -420,7 +420,7 @@ def get_attendance_request(**kwargs):
             "data": queryShift,
             "user_approver": approver_info[0],
             "queryDraft": queryDraft,
-            "querryApproved": querryApproved,
+            "querryApprover": querryApproved,
             "queryRejected": queryRejected
         })
     except Exception as e:

@@ -226,6 +226,7 @@ def update_faceid_employee(**kwargs):
 
 
 def add_text_to_image(file_name, imgdata, description):
+    print("description", str(description))
     ## add text to image
     # save image
     doc_file = save_file(file_name, imgdata, "", "",
@@ -250,7 +251,7 @@ def add_text_to_image(file_name, imgdata, description):
 
         for word in words[1:]:
             # Check if adding the next word exceeds max_width
-            if I1.textsize(current_line + " " + word, font=myFont)[0] <= max_width:
+            if I1.textlength(current_line + " " + word, font=myFont) <= max_width:
                 current_line += " " + word
             else:
                 lines.append(current_line)
