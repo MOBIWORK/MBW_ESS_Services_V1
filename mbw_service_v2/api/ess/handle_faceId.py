@@ -5,6 +5,9 @@ import io
 import frappe
 import json
 from frappe import _
+from PIL import Image
+from PIL import ImageDraw
+from PIL import ImageFont
 
 from mbw_service_v2.api.common import (
     gen_response,
@@ -232,6 +235,7 @@ def verify_faceid_employee(**kwargs):
         
         employee_id = get_employee_id()
         faceimage = kwargs.get('faceimage')
+        description = kwargs.get('description')
 
         # check faceimage have string base64 ex: "data:image/jpeg;base64,"
         list_check = faceimage.split(",")
@@ -272,13 +276,44 @@ def verify_faceid_employee(**kwargs):
             # verify face
             check_verify = verify(image_check, images_register)
             if check_verify:
-                # save file image s3
                 imgdata = base64.b64decode(faceimage)
                 file_name = "checkin_" + employee_id + \
                     "_" + str(datetime.now()) + ".png"
+
+                ## add text to image
+                # save image
+                doc_file = save_file(file_name, imgdata, "", "",
+                                 folder=None, decode=False, is_private=0, df=None)
+                # Open an Image
+                path_file = frappe.get_site_path('public') + doc_file.file_url                
+                img = Image.open(path_file)
+                # Call draw Method to add 2D graphics in an image
+                I1 = ImageDraw.Draw(img)
+                # Custom font style and font size
+                myFont = ImageFont.truetype('FreeMono.ttf', 65)
+                # Add Text to an image
+                lines = description.split("\\n")
+                position = (10, 10)
+                font_color = (255, 0, 0)
+                x, y = position
+                for line in lines:
+                    I1.text((x, y), line, font=myFont, fill=font_color)
+                    y += myFont.getsize(line)[1]
+                # get image base64
+                buffered = io.BytesIO()
+                img.save(buffered, format="PNG")
+                image_base64_new = base64.b64decode(base64.b64encode(buffered.getvalue()))
+                
+                # delete file
+                frappe.delete_doc('File', doc_file.name)
+                path_file = "/files/" + file_name
+                delete_file(path_file)
+                ##
+                
+                # save file image s3
                 object_name = f"{frappe.local.site}/checkin/{file_name}"
                 my_minio.put_object(bucket_name=bucket_name_s3,
-                                    object_name=object_name, data=io.BytesIO(imgdata))
+                                    object_name=object_name, data=io.BytesIO(image_base64_new))
 
                 # data response
                 data = {}
@@ -294,6 +329,7 @@ def verify_faceid_employee(**kwargs):
         else:
             gen_response(404, i18n.t('translate.error', locale=get_language()))
     except Exception as e:
+        print(e)
         gen_response(500, i18n.t('translate.error', locale=get_language()))
 
 # End FaceID
