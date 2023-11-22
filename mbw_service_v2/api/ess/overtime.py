@@ -13,6 +13,7 @@ from mbw_service_v2.api.common import  (get_last_check, gen_response,get_employe
     validate_image
     )
 
+from pypika import CustomFunction
 
 from datetime import datetime
 from pypika import  Order, CustomFunction
@@ -89,12 +90,13 @@ def get_list_ot_request(**params):
         OtRequest = frappe.qb.DocType("Overtime Request")
         field_in = ["ot_date", "shift", "ot_start_time", "ot_end_time", "ot_approver", "posting_date","employee","suggested_time"]
         query = ((OtRequest.employee == employee_id) | (OtRequest.ot_approver == employee_info.get("user_id")))
+        UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
         if status:
             query = (((OtRequest.employee == employee_id) | (OtRequest.ot_approver == employee_info.get("user_id"))) and status == OtRequest.status)
         list_ot_rq = (
             frappe.qb.from_(OtRequest)
             .where(query)
-            .select(OtRequest.ot_date,OtRequest.shift,OtRequest.ot_date,OtRequest.ot_start_time,OtRequest.ot_end_time,OtRequest.ot_approver,OtRequest.posting_date,OtRequest.suggested_time,OtRequest.status)
+            .select(OtRequest.name,UNIX_TIMESTAMP(OtRequest.ot_date),OtRequest.shift,OtRequest.ot_start_time,OtRequest.ot_end_time,OtRequest.ot_approver,UNIX_TIMESTAMP(OtRequest.posting_date),OtRequest.suggested_time,OtRequest.status)
             .run(as_dict=True)
         )
 
