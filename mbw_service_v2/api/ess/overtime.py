@@ -96,7 +96,7 @@ def get_list_ot_request(**params):
         list_ot_rq = (
             frappe.qb.from_(OtRequest)
             .where(query)
-            .select(OtRequest.name,UNIX_TIMESTAMP(OtRequest.ot_date).as_("ot_date"),OtRequest.shift,OtRequest.ot_start_time,OtRequest.ot_end_time,OtRequest.ot_approver,UNIX_TIMESTAMP(OtRequest.posting_date).as_("posting_date"),OtRequest.suggested_time,OtRequest.status)
+            .select(OtRequest.name,UNIX_TIMESTAMP(OtRequest.ot_date).as_("ot_date"),OtRequest.shift,OtRequest.ot_start_time,OtRequest.ot_end_time,OtRequest.ot_approver,UNIX_TIMESTAMP(OtRequest.posting_date).as_("posting_date"),OtRequest.suggested_time,OtRequest.reason, OtRequest.status)
             .run(as_dict=True)
         )
 
