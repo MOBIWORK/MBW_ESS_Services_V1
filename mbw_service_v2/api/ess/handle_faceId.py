@@ -233,17 +233,19 @@ def add_text_to_image(file_name, imgdata, description):
     # Open an Image
     path_file = frappe.get_site_path('public') + doc_file.file_url                
     img = Image.open(path_file)
+    # Lấy thông tin EXIF (nếu có)
+    exif = img.info.get('exif')
     # Call draw Method to add 2D graphics in an image
     I1 = ImageDraw.Draw(img)
     # Custom font style and font size
-    myFont = ImageFont.load_default().font_variant(size=65)
+    myFont = ImageFont.truetype('FreeMono.ttf', 65)
     # Add Text to an image
     lines = []
-    position = (10, 10)
-    x, y = position
-    max_width = img.width - 2 * (x + y)
+    x = 10
+    y = 10
+    max_width = img.width - (x + y)
     font_color = (255, 0, 0)
-    for line in description.split("\\n"):
+    for line in description.split("\n"):
         # Split line into words
         words = line.split()
         current_line = words[0]
@@ -263,7 +265,7 @@ def add_text_to_image(file_name, imgdata, description):
         y += 65
     # get image base64
     buffered = io.BytesIO()
-    img.save(buffered, format="PNG")
+    img.save(buffered, format="PNG", exif=exif)
     image_base64_new = base64.b64decode(base64.b64encode(buffered.getvalue()))
     
     # delete file
@@ -342,7 +344,6 @@ def verify_faceid_employee(**kwargs):
                 data = {}
                 data["file_url"] = f"https://{endpoint_s3}/{bucket_name_s3}/{object_name}"
                 data['status'] = True
-                print(data)
                 gen_response(200, i18n.t('translate.faceid_verify_success', locale=get_language()), data)
                 return None
             else:

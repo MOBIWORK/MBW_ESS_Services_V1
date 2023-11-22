@@ -86,9 +86,7 @@ def get_list_ot_request(**params):
         employee_id = get_employee_id()
         employee_info = frappe.db.get_value("Employee",employee_id,['*'],as_dict=True)
         status = params.get("status") if params.get("status") else False
-        list_ot = frappe.db.get_list("Overtime Request",["name","ot_date", "shift", "ot_start_time", "ot_end_time", "ot_approver", "posting_date","employee","suggested_time","status"])
         OtRequest = frappe.qb.DocType("Overtime Request")
-        field_in = ["ot_date", "shift", "ot_start_time", "ot_end_time", "ot_approver", "posting_date","employee","suggested_time"]
         query = ((OtRequest.employee == employee_id) | (OtRequest.ot_approver == employee_info.get("user_id")))
         UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
         if status:
