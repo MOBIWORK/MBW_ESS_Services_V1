@@ -71,9 +71,9 @@ frappe.query_reports["MBW Monthly Attendance Sheet vi v2"] = {
 			let d = new frappe.ui.Dialog({
 				title: `${detail_check.employee_name} - Ngày ${detail_check.day}/${detail_check.month}/${detail_check.year}`,
 				fields: [
-					// Tông hợp
+					// Tổng hợp
 					{
-						label: __('Tông hợp'),
+						label: __('Tổng hợp'),
 						fieldtype:'Section Break',
 						collapsible: 1
 					},
@@ -81,7 +81,7 @@ frappe.query_reports["MBW Monthly Attendance Sheet vi v2"] = {
 						label: __('Tab 1'),
 						fieldtype: 'HTML',
 						fieldname: "html_1",
-						options: '<div id="tab1-content">Tông hợp</div>'
+						options: '<div id="tab1-content">Tổng hợp</div>'
 					},
 					// Đơn từ
 					{

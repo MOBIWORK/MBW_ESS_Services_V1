@@ -2,6 +2,7 @@ import frappe
 from frappe.utils import (
     sbool,
 )
+from frappe import _
 from frappe.monitor import add_data_to_monitor
 from pypika import Order, CustomFunction, Tuple
 from frappe.desk.query_report import (get_prepared_report_result)
@@ -269,13 +270,13 @@ def get_leaves(name_employee, str_date):
 
     for leave in leave_application:
         if leave.get("status") == "Open":
-            status_leave = "Chờ duyệt"
+            status_leave = _("Chờ duyệt")
         elif leave.get("status") == "Approved":
-            status_leave = "Đã duyệt"
+            status_leave = _("Đã duyệt")
         elif leave.get("status") == "Rejected":
-            status_leave = "Từ chối"
+            status_leave = _("Từ chối")
         else:
-            status_leave = "Đã hủy"
+            status_leave = _("Đã hủy")
         
         name = leave.get("name")
         data_leave.append({
@@ -285,7 +286,7 @@ def get_leaves(name_employee, str_date):
             "shift": leave.get("shift") if leave.get("shift") else "",
             "attendance_change": leave.exchange_to_working_day,
             "status": status_leave,
-            "receive_salary": "Có" if leave.get("is_lwp") == 0 else "Không",
+            "receive_salary": _("Có") if leave.get("is_lwp") == 0 else _("Không"),
             "link": f"/app/leave-application/{name}"
         })
     
@@ -300,21 +301,21 @@ def get_leaves(name_employee, str_date):
 
     for leave in attendance_request:
         if leave.get("docstatus") == 0:
-            status_leave = "Chờ duyệt"
+            status_leave = _("Chờ duyệt")
         elif leave.get("docstatus") == 1:
-            status_leave = "Đã duyệt"
+            status_leave = _("Đã duyệt")
         elif leave.get("docstatus") == 2:
-            status_leave = "Đã hủy"
+            status_leave = _("Đã hủy")
         
         name = leave.get("name")
         data_leave.append({
-            "leave_type": "Giải trình chấm công",
+            "leave_type": _("Giải trình chấm công"),
             "creation": leave.get("creation"),
             "shift": leave.get("shift") if leave.get("shift") else "",
             "attendance_change": leave.exchange_to_working_day,
             "status": status_leave,
             "name": name,
-            "receive_salary": "Có",
+            "receive_salary": _("Có"),
             "link": f"/app/attendance-request/{name}"
         })
     return data_leave
@@ -369,7 +370,7 @@ def get_holiday(name_employee, str_date, employee):
                 "stt": stt,
                 "holiday_date": hld.get('holiday_date'),
                 "description": hld.get('description'),
-                "receive_salary": "Có" if hld.get("weekly_off") == 0 else "Không",
+                "receive_salary": _("Có") if hld.get("weekly_off") == 0 else _("Không"),
             })
     return new_holidays
 
@@ -416,79 +417,79 @@ def get_report_attendance_sheet(**data):
         work_shift = get_work_shift(name_employee, str_date)
 
         thong_tin_cham_cong = {
-            "head_table": ["Tên ca", "Giờ làm việc", "Công", "Giờ làm thực tế", "Công thực", "Dữ liệu chấm công"],
+            "head_table": [_("Tên ca"), _("Giờ làm việc"), _("Công"), _("Giờ làm thực tế"), _("Công thực"), _("Dữ liệu chấm công")],
             "data": work_shift,
-            "message_empty": "Không có dữ liệu!"
+            "message_empty": _("Không có dữ liệu!")
         }
         
         info_synthesis = {
             "thong_tin_nhan_su": {
-                "label": "Thông tin nhân sự",
+                "label": _("Thông tin nhân sự"),
                 "value": {
                     "nhan_su": {
-                        "label": "Nhân sự",
+                        "label": _("Nhân sự"),
                         "value": valid_value(employee.get("name"))
                     },
                     "ten_nhan_su": {
-                        "label": "Tên nhân sự",
+                        "label": _("Tên nhân sự"),
                         "value": valid_value(employee.get("employee_name"))
                     },
                     "cong_ty": {
-                        "label": "Công ty",
+                        "label": _("Công ty"),
                         "value": valid_value(employee.get("company"))
                     },
                     "bo_phan": {
-                        "label": "Bộ phận",
+                        "label": _("Bộ phận"),
                         "value": valid_value(employee.get("department"))
                     },
                     "chuc_vu": {
-                        "label": "Chức vụ",
+                        "label": _("Chức vụ"),
                         "value": valid_value(employee.get("designation"))
                     }
                 }
             },
             "cong_lam_viec_trong_ngay": {
-                "label": "Công làm việc trong ngày",
+                "label": _("Công làm việc trong ngày"),
                 "value": cong_lam_viec_trong_ngay
                 },
             "thoi_gian_lam_viec_trong_ngay": {
-                "label": "Thời gian làm việc trong ngày",
+                "label": _("Thời gian làm việc trong ngày"),
                 "value": thoi_gian_lam_viec_trong_ngay
                 },
             "so_phut_di_muon_trong_ngay": {
-                "label": "Số phút đi muộn trong ngày",
+                "label": _("Số phút đi muộn trong ngày"),
                 "value": so_phut_di_muon_trong_ngay
                 },
             "so_phut_ve_som_trong_ngay": {
-                "label": "Số phút về sớm trong ngày",
+                "label": _("Số phút về sớm trong ngày"),
                 "value": so_phut_ve_som_trong_ngay
                 },
             "so_cong_tang_ca_trong_ngay": {
-                "label": "Số công tăng ca trong ngày",
+                "label": _("Số công tăng ca trong ngày"),
                 "value": so_cong_tang_ca_trong_ngay
                 },
             "so_gio_tang_ca_trong_ngay": {
-                "label": "Số giờ tăng ca trong ngày",
+                "label": _("Số giờ tăng ca trong ngày"),
                 "value": so_gio_tang_ca_trong_ngay
                 },
             "thong_tin_cham_cong": {
-                "label": "Thông tin chấm công",
+                "label": _("Thông tin chấm công"),
                 "value": thong_tin_cham_cong
                 },
         }
         
         # get leaves
         leaves = {
-            "head_table": ["Loại đơn", "Ngày tạo", "Ca áp dụng", "Công thay đổi", "Trạng thái", "Chi tiết đơn", "Hưởng lương"],
+            "head_table": [_("Loại đơn"), _("Ngày tạo"), _("Ca áp dụng"), _("Công thay đổi"), _("Trạng thái"), _("Chi tiết đơn"), _("Hưởng lương")],
             "data": get_leaves(name_employee, str_date),
-            "message_empty": "Không có dữ liệu!"
+            "message_empty": _("Không có dữ liệu!")
         }
         
         # get holiday
         holidays = {
-            "head_table": ["STT", "Ngày nghỉ","Loại nghỉ", "Tính lương"],
+            "head_table": [_("STT"), _("Ngày nghỉ"),_("Loại nghỉ"), _("Tính lương")],
             "data": get_holiday(name_employee, str_date, employee),
-            "message_empty": "Không có dữ liệu!"
+            "message_empty": _("Không có dữ liệu!")
         }
         
         result = {"info_synthesis": info_synthesis, "leaves": leaves, "holidays": holidays}
