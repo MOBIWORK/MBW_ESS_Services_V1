@@ -36,38 +36,41 @@ DATE_FORMAT = CustomFunction('DATE_FORMAT', ['date', 'format'])
 @frappe.whitelist()
 @frappe.read_only()
 def get_report_monthly(filters={},overview=True):
-    report = get_report_doc("MBW Monthly Attendance Sheet vi v2")
-    user = frappe.session.user
-    filters = json.loads(filters)
-    employee = get_employee_id()
-    ok = validate_link("Employee",employee,json.dumps(["company"]))
-    filters["summarized_view"] = True if sbool(overview) == True else False
-    filters["employee"] = employee
-    filters['company'] = ok.get('company')
-    result = generate_report_result(report, filters, user, False, None)
-    # print("result",result)
-    const_fiel = ["employee","employee_name","total_present","total_hours","total_leaves","total_absent","total_holidays","unmarked_days","total_late_entries","time_late_entries","total_early_exits","time_early_exits","shift"]
-    if result :
-        result = result[0] 
-        vacation = []
-        key_del = []
-        for key,value in result.items():
-            if key not in const_fiel :
-                if filters["summarized_view"]: 
-                    leave_type =  frappe.db.get_value("Leave Type", key.replace("_"," "),['*'],as_dict=1)
-                    if leave_type: 
-                        vacation.append({leave_type.get("leave_type_name"):value})
-                else :    vacation.append({key:value})
+    try:
+        report = get_report_doc("MBW Monthly Attendance Sheet vi v2")
+        user = frappe.session.user
+        filters = json.loads(filters)
+        employee = get_employee_id()
+        ok = validate_link("Employee",employee,json.dumps(["company"]))
+        filters["summarized_view"] = True if sbool(overview) == True else False
+        filters["employee"] = employee
+        filters['company'] = ok.get('company')
+        result = generate_report_result(report, filters, user, False, None)
+        print("result",result)
+        # print("result",result)
+        const_fiel = ["employee","employee_name","total_present","total_hours","total_leaves","total_absent","total_holidays","unmarked_days","total_late_entries","time_late_entries","total_early_exits","time_early_exits","shift"]
+        if result :
+            result = result[0] 
+            vacation = []
+            key_del = []
+            for key,value in result.items():
+                if key not in const_fiel :
+                    if filters["summarized_view"]: 
+                        leave_type =  frappe.db.get_value("Leave Type", key.replace("_"," "),['*'],as_dict=1)
+                        if leave_type: 
+                            vacation.append({leave_type.get("leave_type_name"):value})
+                    else :    vacation.append({key:value})
 
-                key_del.append(key)
-        for key_d in key_del : 
-            del result[key_d]
-        result["vacation"] = vacation
+                    key_del.append(key)
+            for key_d in key_del : 
+                del result[key_d]
+            result["vacation"] = vacation
 
-        
-    add_data_to_monitor(report=report.reference_report or report.name)
-    gen_response(200, i18n.t('translate.successfully', locale=get_language()), result)
-
+            
+        add_data_to_monitor(report=report.reference_report or report.name)
+        gen_response(200, i18n.t('translate.successfully', locale=get_language()), result)
+    except Exception as e:
+        exception_handel(e)
 
 @frappe.whitelist()
 @frappe.read_only()

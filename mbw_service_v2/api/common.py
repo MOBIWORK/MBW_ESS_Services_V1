@@ -371,12 +371,16 @@ def generate_report_result(
     res = get_report_result(report, filters) or []
     columns, result, message, chart, report_summary = ljust_list(
         res,5)
-    print("res",report_summary)
+    # print("res==============================cl",columns)
+    # print("res==============================rs", result)
+    # print("res==============================ms", message,)
+    # print("res==============================chart",chart)
+    # print("res==============================rp",report_summary)
     
     # report_column_names = [col["fieldname"] for col in columns]
 
     # convert to list of dicts
-    result = normalize_result(report_summary, columns)
+    result = normalize_result(chart, columns)
 
     return result
 
