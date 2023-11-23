@@ -103,6 +103,13 @@ def get_approvers(doctype, txt, searchfield, start, page_len, filters):
 			)
 		)
 
+	if filters.get("doctype") == "Overtime Request" and employee.ot_approver:
+			approvers.append(
+				frappe.db.get_value(
+					"User", employee.ot_approver, ["name", "first_name", "last_name"]
+				)
+			)
+
 	if filters.get("doctype") == "Leave Application":
 		parentfield = "leave_approvers"
 		field_name = "Leave Approver"

@@ -13,7 +13,7 @@ frappe.ui.form.on('Overtime Request', {
 				}
 			};
 		});
-		frm.set_query("employee", erpnext.queries.employee);
+		// frm.set_query("employee", erpnext.queries.employee);
 		frm.set_query("shift", function() {
 			return {
 				query: "mbw_service_v2.mbw_service_v2.doctype.overtime_request.overtime_request.get_shift_assignment",
@@ -26,7 +26,6 @@ frappe.ui.form.on('Overtime Request', {
 	},
 
 	employee: function(frm) {
-		frm.trigger("setup");
 		frm.trigger("set_ot_approver");
 	},
 
