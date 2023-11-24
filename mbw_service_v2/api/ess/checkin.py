@@ -375,6 +375,7 @@ def create_attendance_request(**kwargs):
 def get_attendance_request(**kwargs):
     try:
         employee_id = get_employee_id()
+        employee_info = frappe.db.get_value("Employee",employee_id,['*'],as_dict=True)
         approver = validate_link(doctype='Employee',docname= employee_id,fields=json.dumps(["employee_name","department","custom_attendance_request_approver"]))
         workflow_state = kwargs.get('status')
         UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
@@ -400,27 +401,51 @@ def get_attendance_request(**kwargs):
             return gen_response(404, i18n.t('translate.approve_not_setup', locale=get_language()))
         ShiftType = frappe.qb.DocType('Shift Type')
         AttendanceRequest = frappe.qb.DocType('Attendance Request')
-        query_code = (AttendanceRequest.employee == employee_id)
+        query_code = ((AttendanceRequest.employee == employee_id) | (Employee.custom_attendance_request_approver == employee_info.get("user_id")))
         if workflow_state:
             query_code = query_code & AttendanceRequest.workflow_state == workflow_state
         queryShift = (frappe.qb.from_(AttendanceRequest)
                       .inner_join(ShiftType)
                       .on(AttendanceRequest.custom_shift == ShiftType.name)
+                      .inner_join(Employee)
+                      .on(Employee.name == AttendanceRequest.employee)
                       .where(query_code)
                       .offset(start)
                       .limit(page_size)
                       .orderby(AttendanceRequest.creation, order=Order.desc)
-                      .select(AttendanceRequest.name, UNIX_TIMESTAMP(AttendanceRequest.creation).as_("creation"),UNIX_TIMESTAMP(AttendanceRequest.from_date).as_("from_date"), UNIX_TIMESTAMP(AttendanceRequest.to_date).as_("to_date"),AttendanceRequest.workflow_state,AttendanceRequest.half_day,UNIX_TIMESTAMP(AttendanceRequest.half_day_date).as_("half_day_date") ,AttendanceRequest.custom_shift.as_("shift_type"),AttendanceRequest.reason ,AttendanceRequest.explanation, ShiftType.start_time, ShiftType.end_time).run(as_dict=True)
+                      .select(AttendanceRequest.name, AttendanceRequest.employee_name ,UNIX_TIMESTAMP(AttendanceRequest.creation).as_("creation"),UNIX_TIMESTAMP(AttendanceRequest.from_date).as_("from_date"), UNIX_TIMESTAMP(AttendanceRequest.to_date).as_("to_date"),AttendanceRequest.workflow_state,AttendanceRequest.half_day,UNIX_TIMESTAMP(AttendanceRequest.half_day_date).as_("half_day_date") ,AttendanceRequest.custom_shift.as_("shift_type"),AttendanceRequest.reason ,AttendanceRequest.explanation, ShiftType.start_time, ShiftType.end_time).run(as_dict=True)
                       )        
-
-        queryDraft = frappe.db.count('Attendance Request', {'workflow_state': "Draft", 'employee': employee_id})
-        querryApproved = frappe.db.count('Attendance Request', {'workflow_state': "Approved", 'employee': employee_id})
-        queryRejected = frappe.db.count('Attendance Request', {'workflow_state': "Rejected", 'employee': employee_id})
+        queryDraft = len( (frappe.qb.from_(AttendanceRequest)
+                      .inner_join(ShiftType)
+                      .on(AttendanceRequest.custom_shift == ShiftType.name)
+                      .inner_join(Employee)
+                      .on(Employee.name == AttendanceRequest.employee)
+                      .where(((AttendanceRequest.employee == employee_id) | (Employee.custom_attendance_request_approver == employee_info.get("user_id")))& ("Draft" == AttendanceRequest.workflow_state))
+                      .select("*").run(as_dict=True)
+                      ) )
+        
+        querryApproved = len( (frappe.qb.from_(AttendanceRequest)
+                      .inner_join(ShiftType)
+                      .on(AttendanceRequest.custom_shift == ShiftType.name)
+                      .inner_join(Employee)
+                      .on(Employee.name == AttendanceRequest.employee)
+                      .where(((AttendanceRequest.employee == employee_id) | (Employee.custom_attendance_request_approver == employee_info.get("user_id")))& ("Approved" == AttendanceRequest.workflow_state))
+                      .select("*").run(as_dict=True)
+                      ) )
+        
+        queryRejected = len( (frappe.qb.from_(AttendanceRequest)
+                      .inner_join(ShiftType)
+                      .on(AttendanceRequest.custom_shift == ShiftType.name)
+                      .inner_join(Employee)
+                      .on(Employee.name == AttendanceRequest.employee)
+                      .where(((AttendanceRequest.employee == employee_id) | (Employee.custom_attendance_request_approver == employee_info.get("user_id")))& ("Rejected" == AttendanceRequest.workflow_state))
+                      .select("*").run(as_dict=True)
+                      ) )
         return gen_response(200, i18n.t('translate.successfully', locale=get_language()), {
             "data": queryShift,
             "user_approver": approver_info[0],
             "queryDraft": queryDraft,
-            "querryApprover": querryApproved,
+            "querryApproved": querryApproved,
             "queryRejected": queryRejected
         })
     except Exception as e:
