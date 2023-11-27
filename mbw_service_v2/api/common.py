@@ -17,9 +17,30 @@ from frappe.desk.query_report import (
 from frappe.core.utils import ljust_list
 from pypika import Query, Table, Field, Order
 import array
+from frappe.client import validate_link
 
 BASE_URL = frappe.utils.get_request_site_address()
 
+
+
+#get approve 
+def get_approver_detail(employee, field) :
+    approver = validate_link(doctype='Employee',docname= employee,fields=json.dumps(["employee_name","department",field]))
+    Employee = frappe.qb.DocType("Employee")
+    User = frappe.qb.DocType("User")
+    approver_info = (frappe.qb.from_(User)
+                        .inner_join(Employee)
+                        .on(User.email == Employee.user_id)
+                        .where(User.email ==  approver['ot_approver'])
+                        .select(Employee.employee_name.as_("full_name"),Employee.image,User.email)
+                        .run(as_dict=True)
+                        )
+    if len(approver_info) > 0: 
+            for approver_c  in approver_info:
+                approver_c["image"] = validate_image(approver_c.get("image"))
+    else: 
+        approver_info = None
+    return approver_info
 # ==================================================================================================
 ShiftType = frappe.qb.DocType('Shift Type')
 ShiftAssignment = frappe.qb.DocType('Shift Assignment')

@@ -10,7 +10,8 @@ from mbw_service_v2.api.common import  (get_last_check, gen_response,get_employe
     enable_check_shift,
     validate_datetime,
     validate_empty,
-    validate_image
+    validate_image,
+    get_approver_detail
     )
 
 from pypika import CustomFunction
@@ -87,11 +88,10 @@ def get_list_ot_request(**params):
         employee_info = frappe.db.get_value("Employee",employee_id,['*'],as_dict=True)
         status = params.get("status") if params.get("status") else False
         OtRequest = frappe.qb.DocType("Overtime Request")
-        query = ((OtRequest.employee == employee_id) | (OtRequest.ot_approver == employee_info.get("user_id")))
+        query = (OtRequest.employee == employee_id) 
         UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
         if status:
-            query = (((OtRequest.employee == employee_id) | (OtRequest.ot_approver == employee_info.get("user_id"))) & (status == OtRequest.status))
-        print("query",query)
+            query = ((OtRequest.employee == employee_id)  & (status == OtRequest.status))
         list_ot_rq = (
             frappe.qb.from_(OtRequest)
             .where(query)
@@ -99,44 +99,14 @@ def get_list_ot_request(**params):
             .run(as_dict=True)
         )
 
-        approver = validate_link(doctype='Employee',docname= employee_id,fields=json.dumps(["employee_name","department","ot_approver"]))
-        Employee = frappe.qb.DocType("Employee")
-        User = frappe.qb.DocType("User")
-        approver_info = (frappe.qb.from_(User)
-                         .inner_join(Employee)
-                         .on(User.email == Employee.user_id)
-                         .where(User.email ==  approver['ot_approver'])
-                         .select(Employee.employee_name.as_("full_name"),Employee.image,User.email)
-                         .run(as_dict=True)
-                         )
-        
-        if len(approver_info) > 0: 
-            approver_info = approver_info[0]
-            approver_info["image"] = validate_image(approver_info.get("image"))
-        else: 
-            approver_info = None
-
-        print("employee",employee_id)
-        print("approver",employee_info.get("user_id"))
-        queryDraft = len(frappe.qb.from_(OtRequest)
-            .where(((OtRequest.employee == employee_id) | (OtRequest.ot_approver == employee_info.get("user_id"))) & ("Draft" == OtRequest.status))
-            .select(OtRequest.employee,OtRequest.ot_date,OtRequest.shift,OtRequest.ot_date,OtRequest.ot_start_time,OtRequest.ot_end_time,OtRequest.ot_approver,OtRequest.posting_date,OtRequest.suggested_time,OtRequest.status)
-            .run(as_dict=True) )
-        queryApproved = len( frappe.qb.from_(OtRequest)
-            .where(((OtRequest.employee == employee_id) | (OtRequest.ot_approver == employee_info.get("user_id"))) & ("Approved" == OtRequest.status))
-            .select(OtRequest.employee,OtRequest.ot_date,OtRequest.shift,OtRequest.ot_date,OtRequest.ot_start_time,OtRequest.ot_end_time,OtRequest.ot_approver,OtRequest.posting_date,OtRequest.suggested_time,OtRequest.status)
-            .run(as_dict=True)
-                         )
-        queryRejected = len( frappe.qb.from_(OtRequest)
-            .where(((OtRequest.employee == employee_id) | (OtRequest.ot_approver == employee_info.get("user_id"))) & ("Rejected" == OtRequest.status))
-            .select(OtRequest.employee,OtRequest.ot_date,OtRequest.shift,OtRequest.ot_date,OtRequest.ot_start_time,OtRequest.ot_end_time,OtRequest.ot_approver,OtRequest.posting_date,OtRequest.suggested_time,OtRequest.status)
-            .run(as_dict=True)
-                         )
-        status = params.get("status") if params.get("status") else False
-
+        queryDraft = frappe.db.count("Overtime Request",filters={"employee" : employee_id, "status":"Draft"})
+        queryApproved = frappe.db.count("Overtime Request",filters={"employee" : employee_id, "status":"Approved"})
+        queryRejected = frappe.db.count("Overtime Request",filters={"employee" : employee_id, "status":"Rejected"})
+        if len(list_ot_rq) > 0 :
+            for rq in list_ot_rq :
+                rq["approvers"] = get_approver_detail(employee_id,"ot_approver")
         gen_response(200,"",{
             "data": list_ot_rq,
-            "user_approver": approver_info,
             "queryDraft": queryDraft,
             "queryApproved": queryApproved,
             "queryRejected": queryRejected,
