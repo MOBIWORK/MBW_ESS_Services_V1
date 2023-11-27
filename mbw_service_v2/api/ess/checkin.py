@@ -369,15 +369,69 @@ def create_attendance_request(**kwargs):
     except Exception as e:
         gen_response(500, i18n.t('translate.error', locale=get_language()), [])
 
-
-#list attendance request
+#list attendace rq
 @frappe.whitelist()
 def get_attendance_request(**kwargs):
+    try:
+        employee_id = get_employee_id()
+        approver = validate_link(doctype='Employee',docname= employee_id,fields=json.dumps(["employee_name","department","custom_attendance_request_approver"]))
+        UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
+        page_size = 20 if not kwargs.get(
+            'page_size') else int(kwargs.get('page_size'))
+
+        page = 1 if not kwargs.get('page') or int(
+            kwargs.get('page')) <= 0 else int(kwargs.get('page'))
+        start = (page - 1) * page_size
+        Employee = frappe.qb.DocType("Employee")
+        User = frappe.qb.DocType("User")
+        if approver['custom_attendance_request_approver']:
+            approver_info = (frappe.qb.from_(User)
+                            .inner_join(Employee)
+                            .on(User.email == Employee.user_id)
+                            .where(User.email ==  approver['custom_attendance_request_approver'])
+                            .select(Employee.employee_name.as_("full_name"),Employee.image,User.email)
+                            .run(as_dict=True)
+                            )
+            for info in approver_info:
+                info['image'] = validate_image(info.get("image"))
+        else: 
+            return gen_response(404, i18n.t('translate.approve_not_setup', locale=get_language()))
+        ShiftType = frappe.qb.DocType('Shift Type')
+        AttendanceRequest = frappe.qb.DocType('Attendance Request')
+        query_code = (AttendanceRequest.employee == employee_id)
+        queryShift = (frappe.qb.from_(AttendanceRequest)
+                      .inner_join(ShiftType)
+                      .on(AttendanceRequest.custom_shift == ShiftType.name)
+                      .where(query_code)
+                      .offset(start)
+                      .limit(page_size)
+                      .orderby(AttendanceRequest.creation, order=Order.desc)
+                      .select(AttendanceRequest.name,AttendanceRequest.employee_name ,UNIX_TIMESTAMP(AttendanceRequest.creation).as_("creation"),UNIX_TIMESTAMP(AttendanceRequest.from_date).as_("from_date"), UNIX_TIMESTAMP(AttendanceRequest.to_date).as_("to_date"),AttendanceRequest.workflow_state,AttendanceRequest.half_day,UNIX_TIMESTAMP(AttendanceRequest.half_day_date).as_("half_day_date") ,AttendanceRequest.custom_shift.as_("shift_type"),AttendanceRequest.reason ,AttendanceRequest.explanation, ShiftType.start_time, ShiftType.end_time).run(as_dict=True)
+                      )        
+
+        queryDraft = frappe.db.count('Attendance Request', {'workflow_state': "Draft", 'employee': employee_id})
+        querryApproved = frappe.db.count('Attendance Request', {'workflow_state': "Approved", 'employee': employee_id})
+        queryRejected = frappe.db.count('Attendance Request', {'workflow_state': "Rejected", 'employee': employee_id})
+        return gen_response(200, i18n.t('translate.successfully', locale=get_language()), {
+            "data": queryShift,
+            "user_approver": approver_info[0],
+            "queryDraft": queryDraft,
+            "querryApproved": querryApproved,
+            "queryRejected": queryRejected
+        })
+    except Exception as e:
+        print(e)
+        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
+
+#list attendance request for approver
+@frappe.whitelist()
+def attendance_request_for_approver(**kwargs):
     try:
         employee_id = get_employee_id()
         employee_info = frappe.db.get_value("Employee",employee_id,['*'],as_dict=True)
         approver = validate_link(doctype='Employee',docname= employee_id,fields=json.dumps(["employee_name","department","custom_attendance_request_approver"]))
         workflow_state = kwargs.get('status')
+        name = kwargs.get('name')
         UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
         page_size = 20 if not kwargs.get(
             'page_size') else int(kwargs.get('page_size'))
@@ -404,6 +458,8 @@ def get_attendance_request(**kwargs):
         query_code = ((AttendanceRequest.employee == employee_id) | (Employee.custom_attendance_request_approver == employee_info.get("user_id")))
         if workflow_state:
             query_code = query_code & AttendanceRequest.workflow_state == workflow_state
+        if name:
+            query_code = query_code & AttendanceRequest.name == name
         queryShift = (frappe.qb.from_(AttendanceRequest)
                       .inner_join(ShiftType)
                       .on(AttendanceRequest.custom_shift == ShiftType.name)
@@ -467,7 +523,7 @@ def get_detail_attendance(name):
                       .on(AttendanceRequest.custom_shift == ShiftType.name)
                       .where(query_code & (AttendanceRequest.name == name))
                       .orderby(AttendanceRequest.creation, order=Order.desc)
-                      .select(AttendanceRequest.name, UNIX_TIMESTAMP(AttendanceRequest.creation).as_("creation"),UNIX_TIMESTAMP(AttendanceRequest.from_date).as_("from_date"), UNIX_TIMESTAMP(AttendanceRequest.to_date).as_("to_date"),AttendanceRequest.workflow_state,AttendanceRequest.half_day,UNIX_TIMESTAMP(AttendanceRequest.half_day_date).as_("half_day_date") ,AttendanceRequest.custom_shift.as_("shift_type"), AttendanceRequest.explanation, ShiftType.start_time, ShiftType.end_time).run(as_dict=True)
+                      .select(AttendanceRequest.name,AttendanceRequest.employee_name ,UNIX_TIMESTAMP(AttendanceRequest.creation).as_("creation"),UNIX_TIMESTAMP(AttendanceRequest.from_date).as_("from_date"), UNIX_TIMESTAMP(AttendanceRequest.to_date).as_("to_date"),AttendanceRequest.workflow_state,AttendanceRequest.half_day,UNIX_TIMESTAMP(AttendanceRequest.half_day_date).as_("half_day_date") ,AttendanceRequest.custom_shift.as_("shift_type"), AttendanceRequest.explanation, ShiftType.start_time, ShiftType.end_time).run(as_dict=True)
                       )        
 
         Employee = frappe.qb.DocType("Employee")

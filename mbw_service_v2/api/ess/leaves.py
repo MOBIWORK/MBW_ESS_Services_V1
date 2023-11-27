@@ -98,6 +98,110 @@ def get_list_leave(**kwargs):
     except Exception as e:
         gen_response(500, i18n.t('translate.error', locale=get_language()), [])
 
+#list of leaves for approver for approver
+@frappe.whitelist()
+def list_leave_for_approver(**kwargs):
+    try:
+        from frappe.client import validate_link
+        employee_id = get_employee_id()
+        employee_info = frappe.db.get_value("Employee",employee_id,['*'],as_dict=True)
+        kwargs = frappe._dict(kwargs)
+        my_filter = {}
+        start_time = kwargs.get('start_time')
+        end_time = kwargs.get('end_time')
+        leave_type = kwargs.get('leave_type')
+        status = kwargs.get('status')
+        employee = kwargs.get('employee')
+        name = kwargs.get('name')
+        page_size = 20 if not kwargs.get(
+            'page_size') else int(kwargs.get('page_size'))
+
+        page = 1 if not kwargs.get('page') or int(
+            kwargs.get('page')) <= 0 else int(kwargs.get('page'))
+        start = (page - 1) * page_size
+        UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
+        if start_time:
+            start_time = datetime.fromtimestamp(int(start_time))
+        if end_time:
+            end_time = datetime.fromtimestamp(int(end_time))
+        if leave_type:
+            my_filter["leave_type"] = ['==', leave_type]
+        Employee = frappe.qb.DocType('Employee')
+        LeaveApplication = frappe.qb.DocType('Leave Application')
+        query_code = ((LeaveApplication.employee == employee_id) | (Employee.leave_approver == employee_info.get("user_id")))
+        if leave_type:
+            query_code = query_code & (LeaveApplication.leave_type == leave_type)
+        if status:
+            query_code = query_code & LeaveApplication.status == status
+        if employee:
+            query_code = query_code  & LeaveApplication.employee == employee
+        if name:
+            query_code = query_code & LeaveApplication.name == name
+        if (start_time) and (end_time):
+            query_code = query_code & (LeaveApplication.creation.between(start_time, end_time))
+        leave_application = (frappe.qb.from_(LeaveApplication)
+                              .inner_join(Employee)
+                              .on(LeaveApplication.employee == Employee.name)
+                              .offset(start)
+                              .limit(page_size)
+                              .where(query_code)
+                              .orderby(LeaveApplication.creation, order=Order.desc)
+                              .select(LeaveApplication.name,LeaveApplication.employee_name,LeaveApplication.employee, UNIX_TIMESTAMP(LeaveApplication.creation).as_("creation"), UNIX_TIMESTAMP(LeaveApplication.from_date).as_("from_date"),UNIX_TIMESTAMP(LeaveApplication.to_date).as_("to_date"), LeaveApplication.leave_type, LeaveApplication.status,LeaveApplication.leave_approver,LeaveApplication.half_day,UNIX_TIMESTAMP(LeaveApplication.half_day_date).as_("half_day_date"),LeaveApplication.total_leave_days,LeaveApplication.description).run(as_dict=True)
+                              )
+
+        approver = validate_link(doctype='Employee',docname= employee_id,fields=json.dumps(["employee_name","department","leave_approver"]))
+        User = frappe.qb.DocType("User")
+        approver_info = (frappe.qb.from_(User)
+                         .inner_join(Employee)
+                         .on(User.email == Employee.user_id)
+                         .where(User.email ==  approver['leave_approver'])
+                         .select(Employee.employee_name.as_("full_name"),Employee.image,User.email)
+                         .run(as_dict=True)
+                         )
+        
+        if len(approver_info) > 0: 
+            approver_info = approver_info[0]
+            approver_info["image"] = validate_image(approver_info.get("image"))
+        else: 
+            approver_info = None
+        employee = (frappe.qb.from_(Employee)
+                .where(Employee.name == employee_id)
+                .select(Employee.image.as_("avatar_employee"), Employee.employee_name).run(as_dict=True))
+        if len(employee) > 0: 
+            employee = employee[0]
+            employee["avatar_employee"] = validate_image(employee.get("avatar_employee"))
+        else: 
+            approver_info = None
+        queryOpen = len( (frappe.qb.from_(LeaveApplication)
+                        .inner_join(Employee)
+                        .on(LeaveApplication.employee == Employee.name)
+                        .where(((LeaveApplication.employee == employee_id) | (Employee.leave_approver == employee_info.get("user_id")))& ("Open" == LeaveApplication.status))
+                        .select("*").run(as_dict=True)
+                    ))
+        queryApprover = len( (frappe.qb.from_(LeaveApplication)
+                        .inner_join(Employee)
+                        .on(LeaveApplication.employee == Employee.name)
+                        .where(((LeaveApplication.employee == employee_id) | (Employee.leave_approver == employee_info.get("user_id")))& ("Approved" == LeaveApplication.status))
+                        .select("*").run(as_dict=True)
+                    ))
+        queryReject = len( (frappe.qb.from_(LeaveApplication)
+                        .inner_join(Employee)
+                        .on(LeaveApplication.employee == Employee.name)
+                        .where(((LeaveApplication.employee == employee_id) | (Employee.leave_approver == employee_info.get("user_id")))& ("Rejected" == LeaveApplication.status))
+                        .select("*").run(as_dict=True)
+                    ))
+        # avata_employee = validate_image(employee[0].avatar_employee)
+        gen_response(200, i18n.t('translate.successfully', locale=get_language()), {
+            "data": leave_application,
+            "info_employee": employee,
+            "approver_info": approver_info,
+            "queryOpen": queryOpen,
+            "queryApprover": queryApprover,
+            "queryReject": queryReject
+        })
+    except Exception as e:
+        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
+
 #create a leave
 @frappe.whitelist(methods="POST")
 def create_leave(**kwargs):
