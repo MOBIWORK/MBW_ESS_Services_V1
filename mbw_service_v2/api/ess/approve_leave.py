@@ -31,16 +31,13 @@ def approve_leave(**data):
         doc_comment.reference_name = name
         doc_comment.comment_type = 'Comment'
         doc_comment.content = reason
-        doc_comment.comment_by = get_employee_id()
+        doc_comment.comment_by = info_employee.get('employee_name')
         doc_comment.comment_email = info_employee.get('user_id')
         doc_comment.insert(ignore_permissions=True)
-        leave["reason"] = reason
-        gen_response(200,"",leave)
-        return
-    except frappe.UpdateAfterSubmitError : 
-        frappe.clear_messages()
-        del frappe.response["exc_type"]
-        print("exc",frappe.response.get('_server_messages'))
+        gen_response(200,"",{"leave":leave,"reason":reason})
         return
     except Exception as e:
+        frappe.clear_messages()
+        if frappe.response.get('exc_type'):
+            del frappe.response["exc_type"]
         exception_handel(e)
