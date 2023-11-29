@@ -42,3 +42,8 @@ en:
   delete_success: Delete success
   not_found: Not found
   approve_not_setup: Approve not setup yet
+  approve_not_setup: Chưa cài đặt người kiểm duyệt
+  attendance_request: Attendance Request
+  leave_application: Leave Application
+  shift_request: Shift Request
+  overtime_request: Overtime Request

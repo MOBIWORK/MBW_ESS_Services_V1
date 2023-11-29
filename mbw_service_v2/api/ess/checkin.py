@@ -382,6 +382,12 @@ def get_attendance_request(**kwargs):
         page = 1 if not kwargs.get('page') or int(
             kwargs.get('page')) <= 0 else int(kwargs.get('page'))
         start = (page - 1) * page_size
+        sortDefault = kwargs.get("sort")
+        if sortDefault == "asc":
+            sortDefault = Order.asc
+        else:
+            sortDefault = Order.desc
+
         Employee = frappe.qb.DocType("Employee")
         User = frappe.qb.DocType("User")
         if approver['custom_attendance_request_approver']:
@@ -405,98 +411,13 @@ def get_attendance_request(**kwargs):
                       .where(query_code)
                       .offset(start)
                       .limit(page_size)
-                      .orderby(AttendanceRequest.creation, order=Order.desc)
-                      .select(AttendanceRequest.name,AttendanceRequest.employee_name ,UNIX_TIMESTAMP(AttendanceRequest.creation).as_("creation"),UNIX_TIMESTAMP(AttendanceRequest.from_date).as_("from_date"), UNIX_TIMESTAMP(AttendanceRequest.to_date).as_("to_date"),AttendanceRequest.workflow_state,AttendanceRequest.half_day,UNIX_TIMESTAMP(AttendanceRequest.half_day_date).as_("half_day_date") ,AttendanceRequest.custom_shift.as_("shift_type"),AttendanceRequest.reason ,AttendanceRequest.explanation, ShiftType.start_time, ShiftType.end_time).run(as_dict=True)
+                      .orderby(AttendanceRequest.creation, order=sortDefault)
+                      .select(AttendanceRequest.name,AttendanceRequest.employee ,AttendanceRequest.employee_name ,UNIX_TIMESTAMP(AttendanceRequest.creation).as_("creation"),UNIX_TIMESTAMP(AttendanceRequest.from_date).as_("from_date"), UNIX_TIMESTAMP(AttendanceRequest.to_date).as_("to_date"),AttendanceRequest.workflow_state,AttendanceRequest.half_day,UNIX_TIMESTAMP(AttendanceRequest.half_day_date).as_("half_day_date") ,AttendanceRequest.custom_shift.as_("shift_type"),AttendanceRequest.reason ,AttendanceRequest.explanation, ShiftType.start_time, ShiftType.end_time).run(as_dict=True)
                       )        
 
         queryDraft = frappe.db.count('Attendance Request', {'workflow_state': "Draft", 'employee': employee_id})
         querryApproved = frappe.db.count('Attendance Request', {'workflow_state': "Approved", 'employee': employee_id})
         queryRejected = frappe.db.count('Attendance Request', {'workflow_state': "Rejected", 'employee': employee_id})
-        return gen_response(200, i18n.t('translate.successfully', locale=get_language()), {
-            "data": queryShift,
-            "user_approver": approver_info[0],
-            "queryDraft": queryDraft,
-            "querryApproved": querryApproved,
-            "queryRejected": queryRejected
-        })
-    except Exception as e:
-        print(e)
-        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
-
-#list attendance request for approver
-@frappe.whitelist()
-def attendance_request_for_approver(**kwargs):
-    try:
-        employee_id = get_employee_id()
-        employee_info = frappe.db.get_value("Employee",employee_id,['*'],as_dict=True)
-        approver = validate_link(doctype='Employee',docname= employee_id,fields=json.dumps(["employee_name","department","custom_attendance_request_approver"]))
-        workflow_state = kwargs.get('status')
-        name = kwargs.get('name')
-        UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
-        page_size = 20 if not kwargs.get(
-            'page_size') else int(kwargs.get('page_size'))
-
-        page = 1 if not kwargs.get('page') or int(
-            kwargs.get('page')) <= 0 else int(kwargs.get('page'))
-        start = (page - 1) * page_size
-        Employee = frappe.qb.DocType("Employee")
-        User = frappe.qb.DocType("User")
-        if approver['custom_attendance_request_approver']:
-            approver_info = (frappe.qb.from_(User)
-                            .inner_join(Employee)
-                            .on(User.email == Employee.user_id)
-                            .where(User.email ==  approver['custom_attendance_request_approver'])
-                            .select(Employee.employee_name.as_("full_name"),Employee.image,User.email)
-                            .run(as_dict=True)
-                            )
-            for info in approver_info:
-                info['image'] = validate_image(info.get("image"))
-        else: 
-            return gen_response(404, i18n.t('translate.approve_not_setup', locale=get_language()))
-        ShiftType = frappe.qb.DocType('Shift Type')
-        AttendanceRequest = frappe.qb.DocType('Attendance Request')
-        query_code = ((AttendanceRequest.employee == employee_id) | (Employee.custom_attendance_request_approver == employee_info.get("user_id")))
-        if workflow_state:
-            query_code = query_code & AttendanceRequest.workflow_state == workflow_state
-        if name:
-            query_code = query_code & AttendanceRequest.name == name
-        queryShift = (frappe.qb.from_(AttendanceRequest)
-                      .inner_join(ShiftType)
-                      .on(AttendanceRequest.custom_shift == ShiftType.name)
-                      .inner_join(Employee)
-                      .on(Employee.name == AttendanceRequest.employee)
-                      .where(query_code)
-                      .offset(start)
-                      .limit(page_size)
-                      .orderby(AttendanceRequest.creation, order=Order.desc)
-                      .select(AttendanceRequest.name, AttendanceRequest.employee_name ,UNIX_TIMESTAMP(AttendanceRequest.creation).as_("creation"),UNIX_TIMESTAMP(AttendanceRequest.from_date).as_("from_date"), UNIX_TIMESTAMP(AttendanceRequest.to_date).as_("to_date"),AttendanceRequest.workflow_state,AttendanceRequest.half_day,UNIX_TIMESTAMP(AttendanceRequest.half_day_date).as_("half_day_date") ,AttendanceRequest.custom_shift.as_("shift_type"),AttendanceRequest.reason ,AttendanceRequest.explanation, ShiftType.start_time, ShiftType.end_time).run(as_dict=True)
-                      )        
-        queryDraft = len( (frappe.qb.from_(AttendanceRequest)
-                      .inner_join(ShiftType)
-                      .on(AttendanceRequest.custom_shift == ShiftType.name)
-                      .inner_join(Employee)
-                      .on(Employee.name == AttendanceRequest.employee)
-                      .where(((AttendanceRequest.employee == employee_id) | (Employee.custom_attendance_request_approver == employee_info.get("user_id")))& ("Draft" == AttendanceRequest.workflow_state))
-                      .select("*").run(as_dict=True)
-                      ) )
-        
-        querryApproved = len( (frappe.qb.from_(AttendanceRequest)
-                      .inner_join(ShiftType)
-                      .on(AttendanceRequest.custom_shift == ShiftType.name)
-                      .inner_join(Employee)
-                      .on(Employee.name == AttendanceRequest.employee)
-                      .where(((AttendanceRequest.employee == employee_id) | (Employee.custom_attendance_request_approver == employee_info.get("user_id")))& ("Approved" == AttendanceRequest.workflow_state))
-                      .select("*").run(as_dict=True)
-                      ) )
-        
-        queryRejected = len( (frappe.qb.from_(AttendanceRequest)
-                      .inner_join(ShiftType)
-                      .on(AttendanceRequest.custom_shift == ShiftType.name)
-                      .inner_join(Employee)
-                      .on(Employee.name == AttendanceRequest.employee)
-                      .where(((AttendanceRequest.employee == employee_id) | (Employee.custom_attendance_request_approver == employee_info.get("user_id")))& ("Rejected" == AttendanceRequest.workflow_state))
-                      .select("*").run(as_dict=True)
-                      ) )
         return gen_response(200, i18n.t('translate.successfully', locale=get_language()), {
             "data": queryShift,
             "user_approver": approver_info[0],
@@ -565,3 +486,116 @@ def get_approved_attendance():
     except Exception as e:
         exception_handel(e)
 
+#delete shift rq
+@frappe.whitelist(methods="DELETE")
+def delete_shift_rq(name):
+    try:
+
+        frappe.delete_doc('Shift Request',name)
+        gen_response(200, i18n.t('translate.delete_success', locale=get_language()),[])
+    except Exception as e:
+        exception_handel(e)
+
+#update shift rq
+@frappe.whitelist(methods="PUT")
+def update_shift_rq(**data):
+    try:
+        date_format = '%Y/%m/%d'
+        fieldAccess = ["name", "shift_type", "to_date", "from_date"]
+        del data['cmd']
+
+        for field, value in dict(data).items():
+            if field not in fieldAccess:
+                mess = i18n.t('translate.invalid_value', locale=get_language()) + "" + field
+                frappe.local.response['message'] = mess
+                frappe.local.response['http_status_code'] = 404
+                frappe.response["result"] = []
+                return None
+            
+        if not data.get('name'):
+            gen_response(500,i18n.t('translate.name_require', locale=get_language()),[])
+            return
+        if data['from_date'] : 
+            data['from_date'] = datetime.fromtimestamp(int(data.get('from_date'))).strftime(date_format)
+        if data['to_date'] : 
+            data['to_date'] = datetime.fromtimestamp(int(data.get('to_date'))).strftime(date_format)
+
+        shift_name = data.get('name')
+        doc = frappe.get_doc('Shift Request', shift_name)
+        if not doc:
+            gen_response(500,i18n.t('translate.doc_not_found', locale=get_language()),[])
+            return
+        for field, value in dict(data).items():
+            setattr(doc, field, value)
+        doc.save()
+        if doc.get("from_date") :
+            setattr(doc,"from_date",datetime.strptime(doc.get("from_date"), date_format).timestamp()) 
+        if doc.get("to_date") :
+            setattr(doc,"to_date",datetime.strptime(doc.get("to_date"), date_format).timestamp())   
+        
+
+        gen_response(200, i18n.t('translate.update_success', locale=get_language()))
+
+    except Exception as e:
+        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
+        return exception_handel(e)
+
+
+#delete attendance rq
+@frappe.whitelist(methods="DELETE")
+def delete_attendance_rq(name):
+    try:
+
+        frappe.delete_doc('Attendance Request',name)
+        gen_response(200, i18n.t('translate.delete_success', locale=get_language()),[])
+    except Exception as e:
+        exception_handel(e)
+    
+#update attendance rq
+@frappe.whitelist(methods="PUT")
+def update_attendance_rq(**data):
+    try:
+        date_format = '%Y/%m/%d'
+        fieldAccess = ["name", "custom_shift", "to_date", "from_date", "explanation", "reason", "half_day","half_day_date"]
+        del data['cmd']
+
+        for field, value in dict(data).items():
+            if field not in fieldAccess:
+                mess = i18n.t('translate.invalid_value', locale=get_language()) + "" + field
+                frappe.local.response['message'] = mess
+                frappe.local.response['http_status_code'] = 404
+                frappe.response["result"] = []
+                return None
+            
+        if not data.get('name'):
+            gen_response(500,i18n.t('translate.name_require', locale=get_language()),[])
+            return
+        if data['from_date'] : 
+            data['from_date'] = datetime.fromtimestamp(int(data.get('from_date'))).strftime(date_format)
+        if data['to_date'] : 
+            data['to_date'] = datetime.fromtimestamp(int(data.get('to_date'))).strftime(date_format)
+        if data.get("half_day") == 1 and data.get("half_day_date") == "":
+            gen_response(500,i18n.t('translate.must_has_hafl_date', locale=get_language()),[])
+            return
+        if data['half_day_date'] : 
+            data['half_day_date'] = datetime.fromtimestamp(int(data.get('half_day_date'))).strftime(date_format)
+        shift_name = data.get('name')
+        doc = frappe.get_doc('Attendance Request', shift_name)
+        if not doc:
+            gen_response(500,i18n.t('translate.doc_not_found', locale=get_language()),[])
+            return
+        for field, value in dict(data).items():
+            setattr(doc, field, value)
+        doc.save()
+        if doc.get("from_date") :
+            setattr(doc,"from_date",datetime.strptime(doc.get("from_date"), date_format).timestamp()) 
+        if doc.get("to_date") :
+            setattr(doc,"to_date",datetime.strptime(doc.get("to_date"), date_format).timestamp())   
+        if doc.get("half_day_date") :
+            setattr(doc,"half_day_date",datetime.strptime(doc.get("half_day_date"), date_format).timestamp() )
+
+        gen_response(200, i18n.t('translate.update_success', locale=get_language()))
+
+    except Exception as e:
+        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
+        return exception_handel(e)

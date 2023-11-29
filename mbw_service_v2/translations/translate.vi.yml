@@ -42,3 +42,7 @@ vi:
   delete_success: Xóa thành công
   not_found: Không tìm thấy
   approve_not_setup: Chưa cài đặt người kiểm duyệt
+  attendance_request: Đơn giải trình chấm công
+  leave_application: Nghỉ phép
+  shift_request: Đăng ký ca
+  overtime_request: Tăng ca
