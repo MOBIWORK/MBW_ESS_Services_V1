@@ -85,28 +85,10 @@ def count_application(**data):
             .run(as_dict=True) )
     
     return gen_response(200, i18n.t('translate.successfully', locale=get_language()), {
-        "data": [
-            {
-                "OpenApplication" : queryOpenAttendanceRQ,
-                "Doctype": "Attendance Request",
-                "name": i18n.t('translate.attendance_request', locale=get_language())
-            },
-            {
-                "OpenApplication" : queryOpenLeaveApplication,
-                "Doctype": "Leave Application",
-                "name": i18n.t('translate.leave_application', locale=get_language())
-            },
-            {
-                "OpenApplication" : queryOpenShiftRQ,
-                "Doctype": "Shift Request",
-                "name": i18n.t('translate.shift_request', locale=get_language())
-            },
-            {
-                "OpenApplication" : queryOpenOTRequest,
-                "Doctype": "Overtime Request",
-                "name": i18n.t('translate.overtime_request', locale=get_language())
-            }
-        ]
+            "explantion": queryOpenAttendanceRQ,
+            "leave": queryOpenLeaveApplication,
+            "shift": queryOpenShiftRQ,
+            "overtime": queryOpenOTRequest
     })
 
 
