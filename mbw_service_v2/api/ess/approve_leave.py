@@ -48,6 +48,158 @@ def approve_leave(**data):
             del frappe.response["exc_type"]
         exception_handel(e)
 
+
+@frappe.whitelist(methods="GET")
+def get_leave_approve(**data):
+    try:
+        employee_id = get_employee_id()
+        employee_info = frappe.db.get_value("Employee",employee_id,['*'],as_dict=True)
+        workflow_state = data.get('status')
+        name = data.get('name')
+        employee = data.get('employee')
+        doctype = data.get("doctype")
+        sortDefault = data.get("sort")
+        if sortDefault == "asc":
+            sortDefault = Order.asc
+        else:
+            sortDefault = Order.desc
+        UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
+        page_size = 20 if not data.get(
+            'page_size') else int(data.get('page_size'))
+
+        page = 1 if not data.get('page') or int(
+            data.get('page')) <= 0 else int(data.get('page'))
+        start = (page - 1) * page_size
+        Employee = frappe.qb.DocType("Employee")
+        ShiftType = frappe.qb.DocType('Shift Type')
+
+        Doc = frappe.qb.DocType(doctype)
+
+        #attendance_request_for_approver
+        if doctype == 'Attendance Request':
+            typeLeave ='shift'
+            query_code = (Employee.custom_attendance_request_approver == employee_info.get("user_id"))
+            on1 = Doc.custom_shift
+            selectReturn = (
+                            Doc.workflow_state,
+                            Doc.half_day,
+                            UNIX_TIMESTAMP(Doc.half_day_date).as_("half_day_date") ,
+                            Doc.custom_shift.as_("shift_type"),
+                            Doc.reason ,
+                            Doc.explanation,
+                            UNIX_TIMESTAMP(Doc.from_date).as_("from_date"), 
+                                UNIX_TIMESTAMP(Doc.to_date).as_("to_date"),
+                            )
+            if workflow_state:
+                query_code = query_code & Doc.workflow_state == workflow_state
+            
+        #list_leave_for_approver
+        elif doctype == "Leave Application" :
+            typeLeave ='shift'
+            query_code = (Employee.leave_approver == employee_info.get("user_id"))
+            on1 = Doc.custom_shift_type
+            selectReturn = ( Doc.leave_type, Doc.status,Doc.leave_approver,
+                            Doc.half_day,UNIX_TIMESTAMP(Doc.half_day_date).as_("half_day_date"),
+                            Doc.total_leave_days,Doc.description,
+                            Doc.custom_shift_type,UNIX_TIMESTAMP(Doc.from_date).as_("from_date"), 
+                                UNIX_TIMESTAMP(Doc.to_date).as_("to_date"),)
+            if workflow_state:
+                query_code = query_code & Doc.status == workflow_state
+
+        #list_shift_rq_for_approver
+        elif doctype == "Overtime Request" :
+            typeLeave ='shift'
+            query_code = (Employee.ot_approver == employee_info.get("user_id"))
+            on1 = Doc.shift
+            if workflow_state:
+                query_code = query_code & Doc.workflow_state == workflow_state
+            selectReturn = (
+                    UNIX_TIMESTAMP(Doc.ot_date).as_("ot_date"),
+                    Doc.shift,Doc.ot_start_time,Doc.ot_end_time,
+                    Doc.ot_approver,UNIX_TIMESTAMP(Doc.posting_date).as_("posting_date"),
+                    Doc.suggested_time,Doc.reason, Doc.status)
+        #get_list_ot_request_approver
+        elif doctype == "Shift Request":
+            typeLeave ='shift'
+            query_code = (Employee.shift_request_approver == employee_info.get("user_id"))
+            on1 = Doc.shift_type
+            if workflow_state:
+                query_code = query_code & Doc.status == workflow_state
+            selectReturn = (
+                                UNIX_TIMESTAMP(Doc.from_date).as_("from_date"), 
+                              UNIX_TIMESTAMP(Doc.to_date).as_("to_date"), 
+                              Doc.shift_type,Doc.status
+            )
+        #get_list_Employee Advance
+        elif doctype == 'Employee Advance':
+            typeLeave ='advance'
+            selectReturn = (Doc.purpose,Doc.advance_amount,Doc.status)
+            query_code = (Employee.advance_approver == employee_info.get("user_id"))
+            if workflow_state:
+                query_code = query_code & Doc.status == workflow_state
+
+        #handle common
+        if name:
+                query_code = query_code & Doc.name == name
+        if employee:
+            if type(employee) == str :
+                 query_code = query_code & Doc.employee == employee
+            else:
+                query_code = query_code & (Doc.employee.isin(employee))
+
+        # handle type leave 
+        if typeLeave == "shift" :
+            leave = (frappe.qb.from_(Doc)
+                                .inner_join(ShiftType)
+                                .on(on1 == ShiftType.name)
+                                .inner_join(Employee)
+                                .on(Doc.employee == Employee.name)
+                                .offset(start)
+                                .limit(page_size)
+                                .where(query_code)
+                                .orderby(Doc.creation, order=sortDefault)
+                                .select(Doc.name, 
+                                    Doc.employee,
+                                    Doc.employee_name ,
+                                    UNIX_TIMESTAMP(Doc.creation).as_("creation"),
+                                    
+                                    *selectReturn,
+                                    ShiftType.start_time, ShiftType.end_time,Employee.image, Employee.department).run(as_dict=True)
+                                )
+        else:
+            leave = (frappe.qb.from_(Doc)
+                     .inner_join(Employee)
+                    .on(Doc.employee == Employee.name)
+                    .where(query_code)
+                    .offset(start)
+                    .limit(page_size)
+                    .where(query_code)
+                    .orderby(Doc.creation, order=sortDefault)
+                    .select(
+                        Doc.name, 
+                        Doc.employee,
+                        Doc.employee_name ,
+                        UNIX_TIMESTAMP(Doc.creation).as_("creation"),                        
+                        *selectReturn,
+                        Employee.image, Employee.department).run(as_dict=True)
+                    )
+                     
+        if len(leave) > 0 :
+            for rq in leave :
+                rq['image'] = validate_image(rq.get("image"))
+                info_approvers = frappe.db.get_value("Employee",employee_id, ['image', "user_id", "employee_name"],as_dict=True)
+                rq["approver"] = {
+                    "image": validate_image(info_approvers.get('image')),
+                    "name_approver": info_approvers.get('employee_name'),
+                    "email": info_approvers.get('user_id')
+                }
+        gen_response(200, i18n.t('translate.successfully', locale=get_language()), {
+            "data": leave
+        })
+    except Exception as e:
+        exception_handel(e)
+
+
 @frappe.whitelist(methods="GET")
 def count_application(**data):
     employee_id = get_employee_id()
@@ -122,7 +274,10 @@ def attendance_request_for_approver(**kwargs):
         if name:
             query_code = query_code & AttendanceRequest.name == name
         if employee:
-            query_code = query_code & AttendanceRequest.employee == employee
+            if type(employee) == str :
+                 query_code = query_code & AttendanceRequest.employee == employee
+            else:
+                query_code = query_code & (AttendanceRequest.employee.isin(employee))
         queryShift = (frappe.qb.from_(AttendanceRequest)
                       .inner_join(ShiftType)
                       .on(AttendanceRequest.custom_shift == ShiftType.name)
@@ -202,7 +357,10 @@ def list_leave_for_approver(**kwargs):
         if status:
             query_code = query_code & LeaveApplication.status == status
         if employee:
-            query_code = query_code  & LeaveApplication.employee == employee
+            if type(employee) == str :
+                 query_code = query_code & LeaveApplication.employee == employee
+            else:
+                query_code = query_code & (LeaveApplication.employee.isin(employee))
         if name:
             query_code = query_code & LeaveApplication.name == name
         if (start_time) and (end_time):
@@ -272,7 +430,10 @@ def list_shift_rq_for_approver(**kwargs):
         if name:
             query_code = query_code & ShiftRequest.name == name
         if employee:
-            query_code = query_code & ShiftRequest.employee == name
+            if type(employee) == str :
+                 query_code = query_code & ShiftRequest.employee == employee
+            else:
+                query_code = query_code & (ShiftRequest.employee.isin(employee))
         queryShift = (frappe.qb.from_(ShiftRequest)
                       .inner_join(ShiftType)
                       .on(ShiftRequest.shift_type == ShiftType.name)
@@ -286,7 +447,7 @@ def list_shift_rq_for_approver(**kwargs):
                               ShiftRequest.employee, ShiftRequest.employee_name ,UNIX_TIMESTAMP(ShiftRequest.creation).as_("creation"),
                               UNIX_TIMESTAMP(ShiftRequest.from_date).as_("from_date"), 
                               UNIX_TIMESTAMP(ShiftRequest.to_date).as_("to_date"), 
-                              ShiftRequest.shift_type, ShiftType.start_time, ShiftType.end_time,ShiftRequest.status,
+                              ShiftRequest.shift_type,ShiftRequest.status, ShiftType.start_time, ShiftType.end_time,
                               Employee.image, Employee.department).run(as_dict=True)
                       )
         if len(queryShift) > 0 :
@@ -335,8 +496,10 @@ def get_list_ot_request_approver(**kwargs):
         if name:
             query_code = query_code & OtRequest.name == name
         if employee:
-            query_code = query_code & OtRequest.employee == employee
-        
+            if type(employee) == str :
+                 query_code = query_code & OtRequest.employee == employee
+            else:
+                query_code = query_code & (OtRequest.employee.isin(employee))
         list_ot_rq = (
             frappe.qb.from_(OtRequest)
             .inner_join(Employee)
