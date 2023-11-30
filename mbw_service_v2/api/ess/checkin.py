@@ -251,7 +251,9 @@ from frappe.desk.search import search_link, build_for_autosuggest, search_widget
 @frappe.whitelist(methods="POST")
 def create_shift_request(**data) :
     try: 
+        employee_id = get_employee_id()
         new_shift_request = frappe.new_doc('Shift Request')
+        new_shift_request.employee = employee_id
         from_date = datetime.fromtimestamp(int(data.get("from_date"))).date() if data.get("from_date") else False
         to_date = datetime.fromtimestamp(int(data.get("to_date"))).date() if data.get("to_date") else False
         if not from_date or not to_date:
@@ -271,7 +273,6 @@ def create_shift_request(**data) :
                          .select(User.full_name,Employee.image,User.email)
                          .run(as_dict=True)
                          )
- 
         new_shift_request.insert()
         gen_response(201,i18n.t('translate.create_success', locale=get_language()),{
             "shift_request": new_shift_request,
