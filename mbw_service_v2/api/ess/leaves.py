@@ -253,7 +253,7 @@ def get_leave_details():
     query_code = (Employee.user_id == leave_approver)
     query_approver = (frappe.qb.from_(Employee)
                             .where(query_code)
-                            .select(Employee.user_id.as_("leave_approver") ,Employee.image, Employee.employee_name.as_("name_leave_approver")).run(as_dict=True)
+                            .select(Employee.user_id.as_("email") ,Employee.image, Employee.employee_name.as_("full_name")).run(as_dict=True)
                             )
     for leave in query_approver:
             leave['image'] = validate_image(leave.get("image"))
@@ -261,6 +261,6 @@ def get_leave_details():
     lwp = frappe.get_list("Leave Type", filters={"is_lwp": 1}, pluck="name")
     gen_response(200, i18n.t('translate.successfully', locale=get_language()), {
         "leave_allocation": leave_allocation,
-        "leave_approver": query_approver[0],
+        "leave_approver": [query_approver[0]],
         "lwps": lwp,
     })
