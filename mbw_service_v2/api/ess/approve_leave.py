@@ -190,7 +190,7 @@ def get_leave_approve(**data):
                 info_approvers = frappe.db.get_value("Employee",employee_id, ['image', "user_id", "employee_name"],as_dict=True)
                 rq["approver"] = {
                     "image": validate_image(info_approvers.get('image')),
-                    "name_approver": info_approvers.get('employee_name'),
+                    "full_name": info_approvers.get('employee_name'),
                     "email": info_approvers.get('user_id')
                 }
         gen_response(200, i18n.t('translate.successfully', locale=get_language()), {
