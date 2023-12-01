@@ -99,6 +99,7 @@ def checkin_shift(**data):
                     setattr(new_check, field, value)
                 log_type = "IN" if shift_now.get('shift_status') == False or shift_now.get('shift_status') == "OUT" else "OUT"
                 setattr(new_check,'log_type',log_type)
+                setattr(new_check,'employee',name)
                 setattr(new_check,"image_attach",data.get("image"))
                 new_check.insert()
                 gen_response(200,i18n.t('translate.successfully', locale=get_language()),new_check)
