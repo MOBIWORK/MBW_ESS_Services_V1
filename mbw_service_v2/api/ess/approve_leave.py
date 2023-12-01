@@ -206,6 +206,8 @@ def count_application(**data):
     LeaveApplication = frappe.qb.DocType('Leave Application')
     ShiftRequest = frappe.qb.DocType('Shift Request')
     OtRequest = frappe.qb.DocType("Overtime Request")
+    EmployeeAdvance = frappe.qb.DocType("Employee Advance")
+
     
     queryOpenAttendanceRQ = len( (frappe.qb.from_(AttendanceRequest)
                       .inner_join(Employee)
@@ -235,11 +237,19 @@ def count_application(**data):
             .select("*")
             .run(as_dict=True) )
     
+    queryOpenAdvance = len( (frappe.qb.from_(EmployeeAdvance)
+                      .inner_join(Employee)
+                      .on(Employee.name == EmployeeAdvance.employee)
+                      .where(((Employee.advance_approver == employee_info.get("user_id")))& ("Draft" == EmployeeAdvance.status))
+                      .select("*").run(as_dict=True)
+                      ))
+    
     return gen_response(200, i18n.t('translate.successfully', locale=get_language()), {
             "explantion": queryOpenAttendanceRQ,
             "leave": queryOpenLeaveApplication,
             "shift": queryOpenShiftRQ,
-            "overtime": queryOpenOTRequest
+            "overtime": queryOpenOTRequest,
+            "advance": queryOpenAdvance
     })
 
 
