@@ -193,9 +193,7 @@ def get_leave_approve(**data):
                     "full_name": info_approvers.get('employee_name'),
                     "email": info_approvers.get('user_id')
                 }
-        gen_response(200, i18n.t('translate.successfully', locale=get_language()), {
-            "data": leave
-        })
+        gen_response(200, i18n.t('translate.successfully', locale=get_language()), leave)
     except Exception as e:
         exception_handel(e)
 
