@@ -104,7 +104,7 @@ def get_leave_approve(**data):
                             Doc.custom_shift_type,UNIX_TIMESTAMP(Doc.from_date).as_("from_date"), 
                                 UNIX_TIMESTAMP(Doc.to_date).as_("to_date"),)
             if workflow_state:
-                query_code = query_code & Doc.status == workflow_state
+                query_code = (query_code & Doc.status == workflow_state)
 
         #list_shift_rq_for_approver
         elif doctype == "Overtime Request" :
@@ -146,7 +146,7 @@ def get_leave_approve(**data):
                  query_code = query_code & Doc.employee == employee
             else:
                 query_code = query_code & (Doc.employee.isin(employee))
-
+        print("query_code",query_code,page_size,start)
         # handle type leave 
         if typeLeave == "shift" :
             leave = (frappe.qb.from_(Doc)
@@ -161,8 +161,7 @@ def get_leave_approve(**data):
                                 .select(Doc.name, 
                                     Doc.employee,
                                     Doc.employee_name ,
-                                    UNIX_TIMESTAMP(Doc.creation).as_("creation"),
-                                    
+                                    UNIX_TIMESTAMP(Doc.creation).as_("creation"),                                    
                                     *selectReturn,
                                     ShiftType.start_time, ShiftType.end_time,Employee.image, Employee.department).run(as_dict=True)
                                 )
@@ -215,12 +214,14 @@ def count_application(**data):
                       .select("*").run(as_dict=True)
                       ))
     
-    queryOpenLeaveApplication = len( (frappe.qb.from_(LeaveApplication)
+    queryOpenLeaveApplication = len( 
+        (frappe.qb.from_(LeaveApplication)
                         .inner_join(Employee)
                         .on(LeaveApplication.employee == Employee.name)
-                        .where(((Employee.leave_approver == employee_info.get("user_id"))) & ("Open" == LeaveApplication.status))
+                        .where(((Employee.leave_approver == employee_info.get("user_id"))) & ("Open" == LeaveApplication.status)  & (LeaveApplication.custom_shift_type != ""))
                         .select("*").run(as_dict=True)
                     ))
+    
     
     queryOpenShiftRQ = len( (frappe.qb.from_(ShiftRequest)
                       .inner_join(Employee)
