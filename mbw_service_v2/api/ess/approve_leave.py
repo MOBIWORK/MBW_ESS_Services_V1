@@ -542,3 +542,58 @@ def get_list_ot_request_approver(**kwargs):
         } ) 
     except Exception as e:
         exception_handel(e)
+
+
+# api list employee approver
+@frappe.whitelist(methods='GET')
+def list_employee_approver(**data):
+    try:
+        employee_id = get_employee_id()
+        employee_info = frappe.db.get_value("Employee",employee_id,['*'],as_dict=True)
+        doctype = data.get("doctype")
+        Employee = frappe.qb.DocType("Employee")
+
+        Doc = frappe.qb.DocType(doctype)
+
+        #attendance_request_for_approver
+        if doctype == 'Attendance Request':
+            typeLeave ='shift'
+            query_code = (Employee.custom_attendance_request_approver == employee_info.get("user_id"))
+        #list_leave_for_approver
+        elif doctype == "Leave Application" :
+            typeLeave ='shift'
+            query_code = (Employee.leave_approver == employee_info.get("user_id"))
+        #list_shift_rq_for_approver
+        elif doctype == "Overtime Request" :
+            typeLeave ='shift'
+            query_code = (Employee.ot_approver == employee_info.get("user_id"))
+        #get_list_ot_request_approver
+        elif doctype == "Shift Request":
+            typeLeave ='shift'
+            query_code = (Employee.shift_request_approver == employee_info.get("user_id"))
+        #get_list_Employee Advance
+        elif doctype == 'Employee Advance':
+            typeLeave ='advance'
+            query_code = (Employee.advance_approver == employee_info.get("user_id"))
+
+        # handle type leave 
+        if typeLeave == "shift" :
+            leave = (frappe.qb.from_(Employee)
+                                .where(query_code)
+                                .select(
+                                    Doc.employee,
+                                    Doc.employee_name ,
+                                    Employee.image, Employee.department).run(as_dict=True)
+                                )
+        else:
+            leave = (frappe.qb.from_(Employee)
+                    .where(query_code)
+                    .where(query_code)
+                    .select(
+                        Doc.employee,
+                        Doc.employee_name ,
+                        Employee.image, Employee.department).run(as_dict=True)
+                    )
+        gen_response(200, i18n.t('translate.successfully', locale=get_language()), leave)
+    except Exception as e:
+        exception_handel(e)
