@@ -106,7 +106,7 @@ def get_wifi_timesheet(name):
             .inner_join(TimeSheetWifiIntermediate)
             .on(TimeSheetPosition.name == TimeSheetWifiIntermediate.parent)
             .where(TimeSheetPosition.name == name)
-            .select(TimeSheetWifiIntermediate.wifi,TimeSheetWifiIntermediate.wifi_ip,TimeSheetWifiIntermediate.wifi_name)
+            .select(TimeSheetWifiIntermediate.wifi_name,TimeSheetWifiIntermediate.wifi_address)
             .run(as_dict=True)
             )
     return data
