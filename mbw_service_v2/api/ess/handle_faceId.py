@@ -378,6 +378,7 @@ def verify_faceid_employee(**kwargs):
             gen_response(404, i18n.t('translate.error', locale=get_language()))
     except Exception as e:
         exception_handel(e)
+        return 
         # print(e)
         # gen_response(500, i18n.t('translate.error', locale=get_language()))
 
