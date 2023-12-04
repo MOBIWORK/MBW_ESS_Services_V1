@@ -252,7 +252,7 @@ def add_text_to_image(file_name, imgdata, description):
     # Call draw Method to add 2D graphics in an image
     I1 = ImageDraw.Draw(img)
     # Custom font style and font size
-    myFont = ImageFont.truetype('FreeMono.ttf', 65)
+    myFont = ImageFont.truetype('/mbw_service_v2/font/FreeMono.ttf', 65)
     # Add Text to an image
     lines = []
     x = 10
