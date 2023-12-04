@@ -79,6 +79,7 @@ class MinioConnection:
                                       object_name=object_name, data=data, metadata=metadata,
                                       length=length, part_size=part_size)
 
+
 def create_my_minio():
     settings = frappe.get_doc("MBW Employee Settings").as_dict()
 
@@ -89,7 +90,8 @@ def create_my_minio():
         region="auto",
         secure=0
     )
-    
+
+
 my_minio = create_my_minio()
 
 
