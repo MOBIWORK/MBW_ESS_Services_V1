@@ -59,8 +59,9 @@ def get_faceid_employee(**kwargs):
 
         gen_response(200, i18n.t('translate.successfully', locale=get_language()), faceids)
     except Exception as e:
-        message = e
-        gen_response(500, i18n.t('translate.error', locale=get_language()))
+        # message = e
+        # gen_response(500, i18n.t('translate.error', locale=get_language()))
+        exception_handel(e)
 
 
 @frappe.whitelist(methods="POST")
@@ -354,7 +355,8 @@ def verify_faceid_employee(**kwargs):
         else:
             gen_response(404, i18n.t('translate.error', locale=get_language()))
     except Exception as e:
-        print(e)
-        gen_response(500, i18n.t('translate.error', locale=get_language()))
+        exception_handel(e)
+        # print(e)
+        # gen_response(500, i18n.t('translate.error', locale=get_language()))
 
 # End FaceID
