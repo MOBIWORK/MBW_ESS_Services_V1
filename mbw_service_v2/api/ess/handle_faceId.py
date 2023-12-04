@@ -342,9 +342,10 @@ def verify_faceid_employee(**kwargs):
             images_register = []
             for face in employee_faces:
                 images_register.append(json.loads(face.get('vector')))
-
+            print('truoc khi vf')
             # verify face
             check_verify = verify(image_check, images_register)
+            print('saukhi vf',check_verify)
             if check_verify:
                 imgdata = base64.b64decode(faceimage)
                 file_name = "checkin_" + employee_id + \

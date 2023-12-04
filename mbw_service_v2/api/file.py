@@ -104,6 +104,7 @@ def verify(embedding_check, know_embedding, threshsold=0.5):
     distances = distance_cal([embedding_check], know_embedding)
     distances = np.array(distances)
     mask = distances < threshsold
+    print("mask",mask)
     if True in mask:
         return True
     else:
