@@ -69,6 +69,8 @@ def get_report_monthly(filters={},overview=True):
 
             
         add_data_to_monitor(report=report.reference_report or report.name)
+        if not result: 
+            result = []
         gen_response(200, i18n.t('translate.successfully', locale=get_language()), result)
     except Exception as e:
         exception_handel(e)
