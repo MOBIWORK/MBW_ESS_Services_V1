@@ -25,7 +25,7 @@ status_map = {
 
 day_abbr = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
-
+#ham tra ve data
 def execute(filters: Optional[Filters] = None) -> Tuple:
     filters = frappe._dict(filters or {})
 
@@ -75,6 +75,7 @@ def execute(filters: Optional[Filters] = None) -> Tuple:
     return columns, data, message, data_service_mobile
 
 
+
 def get_message() -> str:
     message = ""
     colors = ["green", "red", "orange", "green", "#318AD8", "", ""]
@@ -90,7 +91,7 @@ def get_message() -> str:
 
     return message
 
-
+#ham tra ve column
 def get_columns(filters: Filters) -> List[Dict]:
     columns = []
 
@@ -108,13 +109,13 @@ def get_columns(filters: Filters) -> List[Dict]:
     columns.extend(
         [
             {
-                "label": _("Nhân viên"),
+                "label": _("Employee"),
                 "fieldname": "employee",
                 "fieldtype": "Link",
                 "options": "Employee",
                 "width": 135,
             },
-            {"label": _("Tên nhân viên"), "fieldname": "employee_name", "fieldtype": "Data", "width": 120},
+            {"label": _("Employee Name"), "fieldname": "employee_name", "fieldtype": "Data", "width": 120},
         ]
     )
 
@@ -185,7 +186,7 @@ def get_columns(filters: Filters) -> List[Dict]:
 
     return columns
 
-
+#ham tra
 def get_columns_for_leave_types() -> List[Dict]:
     leave_types = frappe.db.get_all("Leave Type", pluck="name")
     types = []

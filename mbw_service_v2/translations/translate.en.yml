@@ -1,5 +1,6 @@
 en:
   not_found_shift: Shift not Assignment.
+  invalid_shift: Shift not Valid.
   time_not_in: Inappropriate time.
   shift_not_out: Not yet clocked out.
   successfully: Success.

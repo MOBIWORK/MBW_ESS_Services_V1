@@ -284,6 +284,8 @@ frappe.query_reports["MBW Monthly Attendance Sheet vi v2"] = {
 		});
 	},
 	formatter: function(value, row, column, data, default_formatter) {
+		// console.log({value, row, column, data, default_formatter});
+
 		value = default_formatter(value, row, column, data);
 		const summarized_view = frappe.query_report.get_filter_value('summarized_view');
 		const group_by = frappe.query_report.get_filter_value('group_by');
@@ -300,7 +302,7 @@ frappe.query_reports["MBW Monthly Attendance Sheet vi v2"] = {
 					value = "<span style='color:#318AD8'>" + value + "</span>";
 			}
 		}
-
+		console.log('value',value);
 		return value;
 	}
 }

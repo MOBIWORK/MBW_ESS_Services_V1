@@ -1,5 +1,6 @@
 vi:
   not_found_shift: Ca này chưa đăng ký.
+  invalid_shift: Ca không hợp lệ
   time_not_in: Thời gian không phù hợp.
   shift_not_out: Chưa chấm công ra.
   successfully: Thành công.

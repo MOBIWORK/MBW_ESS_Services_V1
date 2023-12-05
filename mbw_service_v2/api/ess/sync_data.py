@@ -6,6 +6,7 @@ import json
 from datetime import datetime
 from frappe.utils import cstr
 from mbw_service_v2.config_translate import i18n
+# sync data
 @frappe.whitelist(methods="POST")
 def checkin_data(**data):
     try:

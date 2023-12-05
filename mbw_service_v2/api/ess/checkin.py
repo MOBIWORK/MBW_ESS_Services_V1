@@ -1,6 +1,6 @@
 import frappe
 import json
-from mbw_service_v2.api.common import  (get_last_check, gen_response,get_employee_id,exception_handel,get_language,get_shift_type_now,
+from mbw_service_v2.api.common import  (get_last_check_today, gen_response,get_employee_id,exception_handel,get_language,get_shift_type_now,
     today_list_shift,
     delta_to_time_now,
     group_fields,
@@ -24,40 +24,43 @@ from mbw_service_v2.config_translate import i18n
 def checkin_shift(**data):
     try:
         ip_network = get_ip_network()
-        id_position = dict(data).get("timesheet_position")
+        id_position = (data).get("timesheet_position")
         
-        wifi_mac = dict(data).get("wifi_mac")
-        shift = dict(data).get("shift")
+        wifi_mac = (data).get("wifi_mac")
+        shift = (data).get("shift")
         timesheet_position_detail = frappe.get_doc("TimeSheet Position",id_position)
         name= get_employee_id()
         time_now = datetime.now()
         if not id_position or not shift: 
             gen_response(500, i18n.t('translate.invalid_value', locale=get_language()),[])
             return
-
-        if not enable_check_shift(name, shift,time_now) : 
-            gen_response(500, i18n.t('translate.not_found_shift', locale=get_language()),[])
-            return
+        
         # Get the record of today's last shift or the most recent cross-day shift
-        last_check = get_last_check(name)
-
+        last_check = get_last_check_today(name)
+        print('last_check',last_check)
         # Get the transmitted shift information
         shift_detail = frappe.get_doc("Shift Type",shift)
+        log_type = "IN"
+
         # Check the record status 
         if last_check :
-            if last_check.get("log_type") == "OUT": 
-                time_enable = delta_to_time_now(shift_detail.get("start_time"))
-                if time_now.timestamp() < time_enable : 
-                    gen_response(500, i18n.t('translate.time_not_in', locale=get_language()),[])
+            if last_check.get('shift').lower() == shift.lower(): 
+                if  last_check.get("log_type") == "OUT": 
+                    gen_response(500, i18n.t('translate.invalid_shift', locale=get_language()),[])
                     return
-            elif last_check.get('shift').lower() != shift.lower()  :
-                gen_response(500, i18n.t('translate.shift_not_out', locale=get_language()),[])
-                return
+                else: 
+                    log_type = "OUT" 
+            else:           
+                if last_check.get("log_type") == "IN": 
+                    gen_response(500, i18n.t('translate.shift_not_out', locale=get_language()),[])
+                    return
+        if not enable_check_shift(name, shift,time_now,log_type) : 
+            gen_response(500, i18n.t('translate.invalid_shift', locale=get_language()),[])
+            return
         # check location
         if timesheet_position_detail:
             wifi_position = timesheet_position_detail.get('wifi')
             mac_position = timesheet_position_detail.get('mac')
-            print()
             is_limited = timesheet_position_detail.get("is_limited")
             employees = timesheet_position_detail.get("employees")
             if is_limited != "All employee" :
@@ -86,27 +89,23 @@ def checkin_shift(**data):
                 if not in_mac and not in_wf :
                     gen_response(500, i18n.t('translate.error_network', locale=get_language()),[])
                     return
-    
-            
-            shift_now = get_shift_type_now(name) 
-            if shift_now.get("shift_type_now"):   
-                new_check = frappe.new_doc("Employee Checkin")
-                data["device_id"] = json.dumps({"longitude": data.get(
-                    "longitude"), "latitude": data.get("latitude")})
-                data['on_map'] = json.dumps({"type":"Feature","properties":{},"geometry":{"type":"Point","coordinates":[data.get(
-                    "longitude"),data.get("latitude")]}})
-                for field, value in dict(data).items():
-                    setattr(new_check, field, value)
-                log_type = "IN" if shift_now.get('shift_status') == False or shift_now.get('shift_status') == "OUT" else "OUT"
-                setattr(new_check,'log_type',log_type)
-                setattr(new_check,'employee',name)
-                setattr(new_check,"image_attach",data.get("image"))
-                new_check.insert()
-                gen_response(200,i18n.t('translate.successfully', locale=get_language()),new_check)
-                return
-            gen_response(500, i18n.t('translate.no_shift', locale=get_language()),None)
+            new_check = frappe.new_doc("Employee Checkin")
+            data["device_id"] = json.dumps({"longitude": data.get(
+                "longitude"), "latitude": data.get("latitude")})
+            data['on_map'] = json.dumps({"type":"Feature","properties":{},"geometry":{"type":"Point","coordinates":[data.get(
+                "longitude"),data.get("latitude")]}})
+            for field, value in data.items():
+                setattr(new_check, field, value)
+            setattr(new_check,'log_type',log_type)
+            setattr(new_check,'employee',name)
+            setattr(new_check,"image_attach",data.get("image"))
+            new_check.insert()
+            gen_response(200,i18n.t('translate.successfully', locale=get_language()),new_check)
+            return
     except frappe.DoesNotExistError:
         gen_response(404, i18n.t('translate.error', locale=get_language()), []) 
+    except Exception as e: 
+        exception_handel(e)
 
 
 # employee attendance list
@@ -134,7 +133,7 @@ def get_list_cham_cong(**kwargs):
     except Exception as e:
         exception_handel(e)
 
-
+#Shift now
 @frappe.whitelist(methods="GET",allow_guest= True)
 def get_shift_now():
     try:
@@ -145,7 +144,7 @@ def get_shift_now():
             "shift_status" : False
                 }
         # take the last shift
-        last_check = get_last_check(name)
+        last_check = get_last_check_today(name)
         # return last_check
         if last_check  :  
             if last_check.get("log_type") == "OUT" : 
@@ -177,7 +176,7 @@ def get_shift_now():
         else: 
             in_shift = inshift(name, time_now)
             shift_now = {
-            "shift_type_now" :in_shift,
+            "shift_type_now" :in_shift if in_shift else False,
             "shift_status" : False
             }
         if shift_now["shift_type_now"]:
@@ -189,7 +188,7 @@ def get_shift_now():
     except Exception as e:
         exception_handel(e)
 
-
+#List shift
 @frappe.whitelist(methods="GET")
 def get_shift_list():
     try:
@@ -204,6 +203,7 @@ def get_shift_list():
     except Exception as e:
         exception_handel(e)
 
+#list shift request
 @frappe.whitelist(methods="GET")
 def get_list_shift_request(**kwargs):
     try:
