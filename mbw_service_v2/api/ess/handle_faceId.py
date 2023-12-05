@@ -354,11 +354,13 @@ def verify_faceid_employee(**kwargs):
                 file_name = "checkin_" + employee_id + \
                     "_" + str(datetime.now()) + ".png"
 
-                if description:
-                    imgdata_new = add_text_to_image(
-                        file_name, imgdata, description)
-                else:
-                    imgdata_new = imgdata
+                # if description:
+                #     imgdata_new = add_text_to_image(
+                #         file_name, imgdata, description)
+                # else:
+                #     imgdata_new = imgdata
+
+                imgdata_new = imgdata
 
                 # save file image s3
                 object_name = f"{frappe.local.site}/checkin/{file_name}"
