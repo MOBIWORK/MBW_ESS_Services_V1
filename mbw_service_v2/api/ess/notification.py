@@ -73,7 +73,8 @@ def get_list_notification(**kwargs):
         }
         gen_response(200, i18n.t('translate.successfully', locale=get_language()), result)
     except Exception as e:
-        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
+        exception_handel(e)
+        # gen_response(500, i18n.t('translate.error', locale=get_language()), [])
 
 
 @frappe.whitelist(methods="GET")
@@ -145,7 +146,8 @@ def get_info_notification(**kwargs):
             gen_response(404, i18n.t('translate.not_found', locale=get_language()), list_doc)
             return None
     except Exception as e:
-        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
+        exception_handel(e)
+        # gen_response(500, i18n.t('translate.error', locale=get_language()), [])
 
 
 @frappe.whitelist(methods="GET")
@@ -203,4 +205,5 @@ def get_list_notification_system(**kwargs):
         }
         gen_response(200, i18n.t('translate.successfully', locale=get_language()), result)
     except Exception as e:
-        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
+        exception_handel(e)
+        # gen_response(500, i18n.t('translate.error', locale=get_language()), [])

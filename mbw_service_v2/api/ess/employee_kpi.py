@@ -100,4 +100,5 @@ def insert(**kwargs):
 
         return gen_response(200, i18n.t('translate.create_success', locale=get_language()), doc_new)
     except Exception as e:
-        return gen_response(500, i18n.t('translate.error', locale=get_language()), result={})
+        exception_handel(e)
+        # return gen_response(500, i18n.t('translate.error', locale=get_language()), result={})

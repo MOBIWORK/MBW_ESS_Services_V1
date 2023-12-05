@@ -15,6 +15,7 @@ from frappe.client import validate_link
 import json
 from mbw_service_v2.config_translate import i18n
 
+#create advance
 @frappe.whitelist(methods="POST")
 def create_employee_advance(**data):
     try:
@@ -46,7 +47,8 @@ def create_employee_advance(**data):
         gen_response(500, i18n.t('translate.error', locale=get_language()), False)
 
     except Exception as e:
-        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
+        exception_handel(e)
+        # gen_response(500, i18n.t('translate.error', locale=get_language()), [])
 
 
 

@@ -322,7 +322,8 @@ def attendance_request_for_approver(**kwargs):
         })
     except Exception as e:
         print(e)
-        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
+        exception_handel(e)
+        # gen_response(500, i18n.t('translate.error', locale=get_language()), [])
 
 #list of leaves for approver for approver
 @frappe.whitelist()
@@ -407,7 +408,8 @@ def list_leave_for_approver(**kwargs):
             "data": leave_application
         })
     except Exception as e:
-        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
+        exception_handel(e)
+        # gen_response(500, i18n.t('translate.error', locale=get_language()), [])
 
 
 @frappe.whitelist(methods="GET")

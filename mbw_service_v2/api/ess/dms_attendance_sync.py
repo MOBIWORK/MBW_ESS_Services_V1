@@ -26,4 +26,5 @@ def get_list_sync(**kwargs):
 
         gen_response(200, i18n.t('translate.successfully', locale=get_language()), result)
     except Exception as e:
-        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
+        exception_handel(e)
+        # gen_response(500, i18n.t('translate.error', locale=get_language()), [])

@@ -145,7 +145,8 @@ def get_statistic_vacation_fund():
         gen_response(200, i18n.t('translate.successfully', locale=get_language()), result)
     except Exception as e:
         message = str(e)
-        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
+        exception_handel(e)
+        # gen_response(500, i18n.t('translate.error', locale=get_language()), [])
 
 @frappe.whitelist()
 def get_report_advance(**data):
@@ -498,4 +499,5 @@ def get_report_attendance_sheet(**data):
         gen_response(200, i18n.t('translate.successfully', locale=get_language()), result)
     except Exception as e:
         print(e)
-        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
+        exception_handel(e)
+        # gen_response(500, i18n.t('translate.error', locale=get_language()), [])

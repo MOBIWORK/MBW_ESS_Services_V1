@@ -96,7 +96,8 @@ def get_list_leave(**kwargs):
             "queryReject": queryReject
         })
     except Exception as e:
-        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
+        exception_handel(e)
+        # gen_response(500, i18n.t('translate.error', locale=get_language()), [])
 
 
 #create a leave

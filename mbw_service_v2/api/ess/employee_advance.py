@@ -7,7 +7,8 @@ from mbw_service_v2.api.common import (
     get_employee_id,
     get_language,
     validate_image,
-    get_report_doc
+    get_report_doc,
+    exception_handel
 )
 from mbw_service_v2.config_translate import i18n
 from frappe.desk.query_report import generate_report_result as reportDefault
@@ -108,4 +109,5 @@ def get_list_employee_advance(**kwargs):
         return gen_response(200, i18n.t('translate.successfully', locale=get_language()), result)
     except Exception as e:
         print(e)
-        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
+        exception_handel(e)
+        # gen_response(500, i18n.t('translate.error', locale=get_language()), [])

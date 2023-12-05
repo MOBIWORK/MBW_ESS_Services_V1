@@ -77,4 +77,5 @@ def get_employee_info() :
 
         gen_response(200,i18n.t('translate.successfully', locale=get_language()),user_info)
     except Exception as e:
-        gen_response(500,i18n.t('translate.error', locale=get_language()), [])
+        exception_handel(e)
+        # gen_response(500,i18n.t('translate.error', locale=get_language()), [])
