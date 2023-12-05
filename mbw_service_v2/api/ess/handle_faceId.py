@@ -252,7 +252,12 @@ def add_text_to_image(file_name, imgdata, description):
     # Call draw Method to add 2D graphics in an image
     I1 = ImageDraw.Draw(img)
     # Custom font style and font size
-    myFont = ImageFont.truetype('/mbw_service_v2/font/FreeMono.ttf', 65)
+    default_font_size = 65
+    myFont = ImageFont.truetype(
+        '/apps/mbw_service_v2/mbw_service_v2/font/FreeMono.ttf', default_font_size)
+    # myFont = ImageFont.load_default()
+    # default_font_size = myFont.getsize("A")[0]
+
     # Add Text to an image
     lines = []
     x = 10
@@ -276,7 +281,7 @@ def add_text_to_image(file_name, imgdata, description):
 
     for line in lines:
         I1.text((x, y), line, font=myFont, fill=font_color)
-        y += 65
+        y += default_font_size
     # get image base64
     buffered = io.BytesIO()
     img.save(buffered, format="PNG", exif=exif)
@@ -342,10 +347,8 @@ def verify_faceid_employee(**kwargs):
             images_register = []
             for face in employee_faces:
                 images_register.append(json.loads(face.get('vector')))
-            print('truoc khi vf')
             # verify face
             check_verify = verify(image_check, images_register)
-            print('saukhi vf',check_verify)
             if check_verify:
                 imgdata = base64.b64decode(faceimage)
                 file_name = "checkin_" + employee_id + \
@@ -379,7 +382,7 @@ def verify_faceid_employee(**kwargs):
             gen_response(404, i18n.t('translate.error', locale=get_language()))
     except Exception as e:
         exception_handel(e)
-        return 
+        return
         # print(e)
         # gen_response(500, i18n.t('translate.error', locale=get_language()))
 
