@@ -254,7 +254,7 @@ def add_text_to_image(file_name, imgdata, description):
     # Custom font style and font size
     default_font_size = 65
     myFont = ImageFont.truetype(
-        '/apps/mbw_service_v2/mbw_service_v2/font/FreeMono.ttf', default_font_size)
+        'FreeMono.ttf', default_font_size)
     # myFont = ImageFont.load_default()
     # default_font_size = myFont.getsize("A")[0]
 
