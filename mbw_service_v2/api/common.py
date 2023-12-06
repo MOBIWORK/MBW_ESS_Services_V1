@@ -293,7 +293,7 @@ def exception_handel(e):
     if hasattr(e, "http_status_code"):
         return gen_response(e.http_status_code, cstr(e))
     else:
-        return gen_response(500, cstr(e))
+        return gen_response(406, cstr(e))
 
 # export employee key
 def generate_key(user):
