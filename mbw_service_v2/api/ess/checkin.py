@@ -368,7 +368,7 @@ def create_attendance_request(**kwargs):
         new_doc.insert()
         gen_response(201, i18n.t('translate.create_success', locale=get_language()))
     except Exception as e:
-        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
+       exception_handel(e)
 
 #list attendace rq
 @frappe.whitelist()
@@ -428,7 +428,7 @@ def get_attendance_request(**kwargs):
         })
     except Exception as e:
         print(e)
-        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
+        exception_handel(e)
 
 #detail attendance
 @frappe.whitelist()
@@ -464,7 +464,7 @@ def get_detail_attendance(name):
             "user_approver": approver_info[0]
         })
     except Exception as e:
-        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
+       exception_handel(e)
 
 # approver attendance information
 @frappe.whitelist(methods='GET')
@@ -538,8 +538,7 @@ def update_shift_rq(**data):
         gen_response(200, i18n.t('translate.update_success', locale=get_language()))
 
     except Exception as e:
-        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
-        return exception_handel(e)
+       exception_handel(e)
 
 
 #delete attendance rq
@@ -598,5 +597,4 @@ def update_attendance_rq(**data):
         gen_response(200, i18n.t('translate.update_success', locale=get_language()))
 
     except Exception as e:
-        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
-        return exception_handel(e)
+       exception_handel(e)
