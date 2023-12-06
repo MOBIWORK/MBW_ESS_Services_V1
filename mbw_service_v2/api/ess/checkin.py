@@ -392,7 +392,7 @@ def get_attendance_request(**kwargs):
 
         Employee = frappe.qb.DocType("Employee")
         User = frappe.qb.DocType("User")
-        if approver['custom_attendance_request_approver']:
+        if approver.get('custom_attendance_request_approver'):
             approver_info = (frappe.qb.from_(User)
                             .inner_join(Employee)
                             .on(User.email == Employee.user_id)
