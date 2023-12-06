@@ -145,14 +145,31 @@ def today_list_shift(employee_name, time_now):
     query = (ShiftAssignment.employee == employee_name) & (time_now.date() >= ShiftAssignment.start_date)
     if not ShiftAssignment.end_date.isnull() :
         query = (ShiftAssignment.employee == employee_name) & (time_now.date() >= ShiftAssignment.start_date) & (time_now.date() <= ShiftAssignment.end_date)
-    return (frappe.qb.from_(ShiftType)
+    data =  (frappe.qb.from_(ShiftType)
             .inner_join(ShiftAssignment)
             .on(ShiftType.name == ShiftAssignment.shift_type)
-            .where(((ShiftAssignment.employee == employee_name) & (time_now.date() >= ShiftAssignment.start_date) )or ((ShiftAssignment.employee == employee_name) & (time_now.date() >= ShiftAssignment.start_date) & (ShiftAssignment.start_date == None) ))
-            .select(ShiftAssignment.employee, ShiftType.name, ShiftType.start_time, ShiftType.end_time, ShiftType.allow_check_out_after_shift_end_time, ShiftType.begin_check_in_before_shift_start_time)
+            .where(
+                (ShiftAssignment.employee == employee_name) & 
+                            (ShiftAssignment.status == "Active") & 
+                            (ShiftAssignment.docstatus == 1) 
+            )
+            .select(ShiftAssignment.start_date,ShiftAssignment.end_date,ShiftAssignment.employee, ShiftType.name, ShiftType.start_time, ShiftType.end_time, ShiftType.allow_check_out_after_shift_end_time, ShiftType.begin_check_in_before_shift_start_time)
             .run(as_dict=True)
             )
-
+    data_rs = []
+    for shift in data:
+            if not shift.get("end_date") and not shift.get('start_date'):
+                data_rs.append( shift)
+            elif not shift.get("end_date") and  shift.get('start_date') :
+                if shift.get("start_date") <= time_now.date() :
+                    data_rs.append( shift)
+            elif  shift.get("end_date") and not shift.get('start_date') :
+                if shift.get("end_date") >= time_now.date() :
+                    data_rs.append( shift)
+            else :
+                if shift.get("end_date") >= time_now.date()  and shift.get("start_date") <= time_now.date() :
+                    data_rs.append( shift)
+    return data_rs
 
 # is in shift
 def inshift(employee_name,time_now) :

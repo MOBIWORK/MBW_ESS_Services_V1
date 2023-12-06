@@ -194,7 +194,6 @@ def get_shift_list():
     try:
         name= get_employee_id()
         time_now = datetime.now()
-
         list_shift = today_list_shift(name,time_now)
         for x in list_shift:
             x["start_time_today"] = delta_to_time_now(x["start_time"])
