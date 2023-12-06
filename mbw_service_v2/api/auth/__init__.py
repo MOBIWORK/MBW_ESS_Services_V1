@@ -87,8 +87,8 @@ def login(**kwargs):
         })
 
     except frappe.AuthenticationError:
-        # gen_response(404, i18n.t('translate.login_error', locale=get_language()), [])
-        exception_handel(e)
+        gen_response(404, i18n.t('translate.login_error', locale=get_language()), [])
+        # exception_handel(e)
         return None
     except Exception as e:
         exception_handel(e)

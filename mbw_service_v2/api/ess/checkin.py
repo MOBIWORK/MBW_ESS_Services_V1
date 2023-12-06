@@ -55,7 +55,7 @@ def checkin_shift(**data):
                     gen_response(500, i18n.t('translate.shift_not_out', locale=get_language()),[])
                     return
         if not enable_check_shift(name, shift,time_now,log_type) : 
-            gen_response(500, i18n.t('translate.invalid_shift', locale=get_language()),[])
+            gen_response(406, i18n.t('translate.invalid_shift', locale=get_language()),[])
             return
         # check location
         if timesheet_position_detail:
