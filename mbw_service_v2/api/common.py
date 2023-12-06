@@ -95,10 +95,12 @@ def enable_check_shift(employee,shift,time_now,log_type):
                 if shift.get("end_date") >= time_now.date()  and shift.get("start_date") <= time_now.date() :
                     has_shift= shift
         if has_shift :
+
             if has_shift.begin_check_in_before_shift_start_time:
+                print('in')
                 if log_type == "OUT":
                     return True
-                if time_now.timestamp() - delta_to_time_now(has_shift.get('start_time')) > has_shift.get('begin_check_in_before_shift_start_time') and time_now.timestamp() - delta_to_time_now(has_shift.get('start_time')) < has_shift.get('total_shift_time') :
+                if (time_now.timestamp() - delta_to_time_now(has_shift.get('start_time')) > has_shift.get('begin_check_in_before_shift_start_time') or time_now.timestamp() - delta_to_time_now(has_shift.get('start_time')) < has_shift.get('total_shift_time')):
                     return True
                 return False
             return True
