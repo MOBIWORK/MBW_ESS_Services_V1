@@ -290,6 +290,8 @@ def gen_response(status, message, result=[]):
 def exception_handel(e):
     frappe.log_error(title="ESS Mobile App Error",
                      message=frappe.get_traceback())
+    return gen_response(406, cstr(e))
+    
     if hasattr(e, "http_status_code"):
         return gen_response(e.http_status_code, cstr(e))
     else:
