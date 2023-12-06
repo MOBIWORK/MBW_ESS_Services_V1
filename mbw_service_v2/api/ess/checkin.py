@@ -113,6 +113,7 @@ def checkin_shift(**data):
 def get_list_cham_cong(**kwargs):
     try:
         kwargs = frappe._dict(kwargs)
+        employee = get_employee_id()
         date = datetime.fromtimestamp(int(kwargs.get('date')))
         start_time = date.replace(hour=0,minute=0)
         end_time = date.replace(hour=23,minute=59)
@@ -124,7 +125,7 @@ def get_list_cham_cong(**kwargs):
                       .on(EmployeeCheckin.shift == ShiftType.name)
                       .inner_join(Attendance)
                       .on(Attendance.employee == EmployeeCheckin.employee)
-                      .where((EmployeeCheckin.time >= start_time) & (EmployeeCheckin.time <= end_time) & (Attendance.attendance_date == date.date()))
+                      .where((EmployeeCheckin.time >= start_time) & (EmployeeCheckin.time <= end_time) & (Attendance.attendance_date == date.date()) & (EmployeeCheckin.employee == employee))
                       .select(EmployeeCheckin.shift, EmployeeCheckin.log_type, EmployeeCheckin.time, EmployeeCheckin.device_id, ShiftType.start_time, ShiftType.end_time)
                       .run(as_dict=True)
                       )

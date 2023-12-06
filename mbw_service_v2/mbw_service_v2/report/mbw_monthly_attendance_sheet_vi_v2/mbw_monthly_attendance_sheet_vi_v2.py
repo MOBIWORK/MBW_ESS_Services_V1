@@ -276,7 +276,8 @@ def get_attendance_map(filters: Filters) -> Dict:
                 attendance_map[d.employee][d.shift][d.day_of_month] = 0
             else :
                 # print("d",d.exchange_to_working_day)
-                attendance_map[d.employee][d.shift][d.day_of_month] = round((d.working_hours/d.total_shift_time)*d.exchange_to_working_day,2) 
+                working = round((d.working_hours/d.total_shift_time)*d.exchange_to_working_day,2) if d.working_hours <=d.total_shift_time else d.exchange_to_working_day
+                attendance_map[d.employee][d.shift][d.day_of_month] = working
 
         else:
             attendance_map.setdefault(d.employee, {}).setdefault(d.shift, {})
