@@ -253,8 +253,13 @@ def add_text_to_image(file_name, imgdata, description):
     I1 = ImageDraw.Draw(img)
     # Custom font style and font size
     default_font_size = 65
-    myFont = ImageFont.truetype(
-        'FreeMono.ttf', default_font_size)
+    font_path = os.path.dirname(__file__)
+    font_relative_path = "../../font"
+    font_directory = os.path.abspath(
+        os.path.join(font_path, font_relative_path)) + "/FreeMono.ttf"
+
+    myFont = ImageFont.truetype(font_directory, default_font_size)
+
     # myFont = ImageFont.load_default()
     # default_font_size = myFont.getsize("A")[0]
 
@@ -354,13 +359,13 @@ def verify_faceid_employee(**kwargs):
                 file_name = "checkin_" + employee_id + \
                     "_" + str(datetime.now()) + ".png"
 
-                # if description:
-                #     imgdata_new = add_text_to_image(
-                #         file_name, imgdata, description)
-                # else:
-                #     imgdata_new = imgdata
+                if description:
+                    imgdata_new = add_text_to_image(
+                        file_name, imgdata, description)
+                else:
+                    imgdata_new = imgdata
 
-                imgdata_new = imgdata
+                # imgdata_new = imgdata
 
                 # save file image s3
                 object_name = f"{frappe.local.site}/checkin/{file_name}"
