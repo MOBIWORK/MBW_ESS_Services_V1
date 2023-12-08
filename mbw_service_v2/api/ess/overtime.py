@@ -120,9 +120,6 @@ def get_list_ot_request(**params):
             approver_info["image"] = validate_image(approver_info.get("image"))
         else: 
             approver_info = None
-
-        print("employee",employee_id)
-        print("approver",employee_info.get("user_id"))
         queryDraft = len(frappe.qb.from_(OtRequest)
             .where(((OtRequest.employee == employee_id) | (OtRequest.ot_approver == employee_info.get("user_id"))) & ("Draft" == OtRequest.status))
             .select(OtRequest.employee,OtRequest.ot_date,OtRequest.shift,OtRequest.ot_date,OtRequest.ot_start_time,OtRequest.ot_end_time,OtRequest.ot_approver,OtRequest.posting_date,OtRequest.suggested_time,OtRequest.status)
