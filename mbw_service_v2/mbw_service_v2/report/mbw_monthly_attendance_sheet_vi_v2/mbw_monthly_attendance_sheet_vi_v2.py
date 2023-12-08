@@ -10,11 +10,35 @@ import frappe
 from frappe import _
 from frappe.query_builder.functions import Count, Extract, Sum
 from frappe.utils import cint, cstr, getdate
-
+from datetime import datetime, date, timedelta
 Filters = frappe._dict
 
+status_off = {
+    "Work From Home": "WFH",
+    "On Leave": "L",
+    "Holiday": "H",
+    "Weekly Off": "WO",
+    "Half Day": "HD",
+
+}
+
+leave_without_pay = {
+    "Nghỉ không lương": "KL"
+}
+
+leave_with_pay = {
+    "Work From Home": "WFH",
+    "On Leave": "L",
+    "Holiday": "H",
+    "Half Day": "HD",
+
+}
+
+ot_type = {
+    "Over Time": "OT"
+}
+
 status_map = {
-    # "Present": "P",
     "Absent": "A",
     "Half Day": "HD",
     "Work From Home": "WFH",
@@ -22,6 +46,7 @@ status_map = {
     "Holiday": "H",
     "Weekly Off": "WO",
 }
+
 
 day_abbr = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
@@ -63,13 +88,15 @@ def execute(filters: Optional[Filters] = None) -> Tuple:
                         "year": filters.get('year')
                     }
                     string_show = ''
-                    if l != "WO" and l != False:
+                    if l == "A" or l=="KL" or l == "A/A":
+                        string_show = f'<p  onclick="frappe.open_dialog({detail_check})">{l if l == "KL" else "A"}</p>'
+                    elif l != "WO" and l != False and l !='':
                         string_show = f'<p  onclick="frappe.open_dialog({detail_check})">{w} {f"<sup>{l}</sup>" if l else ""} </p>'
                     elif w == 0 and l != "WO": 
                         string_show = f'<p  onclick="frappe.open_dialog({detail_check})">x</p>'
                     else:
                         string_show = f'<p  onclick="frappe.open_dialog({detail_check})">{w if l != "WO" else "WO" }</p>'
-                    row[field] = string_show    
+                    row[field] = string_show  
     # chart = get_chart_data(attendance_map, filters)
     message = get_message() if not filters.summarized_view else ""
     return columns, data, message, data_service_mobile
@@ -114,6 +141,7 @@ def get_columns(filters: Filters) -> List[Dict]:
                 "fieldtype": "Link",
                 "options": "Employee",
                 "width": 135,
+
             },
             {"label": _("Employee Name"), "fieldname": "employee_name", "fieldtype": "Data", "width": 120},
         ]
@@ -175,7 +203,7 @@ def get_columns(filters: Filters) -> List[Dict]:
                 {"label": _("Shift OT"), "fieldname": "shift_ot", "fieldtype": "Float", "width": 110},
                 {"label": _("Shift OT time(Hour)"), "fieldname": "shift_ot_time", "fieldtype": "Float", "width": 110},
 
-                {"label": _("OT time (Hour)"), "fieldname": "ot_time", "fieldtype": "Float", "width": 110},
+                {"label": _("OT time (Hour)"), "fieldname": "total_ot", "fieldtype": "Float", "width": 110},
             ]
         )
 
@@ -261,30 +289,58 @@ def get_attendance_map(filters: Filters) -> Dict:
     attendance_list = get_attendance_records(filters)
     attendance_map = {}
     leave_map = {}
-    for d in attendance_list:
-        # print("d",d)
-        if d.status == "On Leave":
-            leave_map.setdefault(d.employee, []).append(d.day_of_month)
-            attendance_map[d.employee][d.shift][d.day_of_month] = {
-                "status" :d.status, 
-                "exchange_to_working_day": d.exchange_to_working_day	
-                }
-            continue
-        if d.status not in status_map : 
-            attendance_map.setdefault(d.employee, {}).setdefault(d.shift, {})
+    for d in attendance_list:        
+        attendance_map.setdefault(d.employee, {}).setdefault(d.shift, {})
+        date_att = date(int(filters.get('year')),int(filters.get('month')),int( d.day_of_month))
+        if d.status not in status_map and d.status not in leave_without_pay : 
             if d.total_shift_time == 0 :
                 attendance_map[d.employee][d.shift][d.day_of_month] = 0
             else :
-                # print("d",d.exchange_to_working_day)
-                working = round((d.working_hours/d.total_shift_time)*d.exchange_to_working_day,3) if d.working_hours <=d.total_shift_time else d.exchange_to_working_day
-                attendance_map[d.employee][d.shift][d.day_of_month] = working
+                if d.working_hours and d.total_shift_time and  d.exchange_to_working_day:
+                    overtime_leave = False
+                    if d.working_hours > d.total_shift_time :
+                        overtime_leave = frappe.db.get_value("Overtime Request", {"employee": d.employee, "ot_date": date_att,"workflow_state": "Approved"},['*'],as_dict=True)
+                        if overtime_leave:
+                            #hệ số chuyển đổi (tam thoi fix cung, se co cau hinh rieng)
+                            conversion_factor = 0.2
+                            #tinh so gio tang ca ra cong
+                            working_ot = d.working_hours - d.exchange_to_working_day
+                            time_ot_access = overtime_leave.get('ot_end_time') - overtime_leave.get('ot_start_time')
+                            print("-------------------------",working_ot,time_ot_access)
+                            # chua thong nhat ......, de tam la cong cua ca truoc no
+                            working = d.exchange_to_working_day
+                        else :
+                            working = d.exchange_to_working_day
+                    else:        
+                        working = round((d.working_hours/d.total_shift_time)*d.exchange_to_working_day,2) 
+                    attendance_map[d.employee][d.shift][d.day_of_month] = working if not overtime_leave and d.working_hours <= d.total_shift_time  else {
+                    "status" :"Over Time", 
+                    "has_leave": False ,
+                    "exchange_to_working_day": working	
+                    }
 
+                else :
+                    attendance_map[d.employee][d.shift][d.day_of_month] = 0         
         else:
-            attendance_map.setdefault(d.employee, {}).setdefault(d.shift, {})
-            attendance_map[d.employee][d.shift][d.day_of_month] = {
+            if d.status == "On Leave":
+                leave_map.setdefault(d.employee, []).append(d.day_of_month)
+                attendance_map[d.employee][d.shift][d.day_of_month] = {
+                    "status" :d.status, 
+                    "exchange_to_working_day": d.exchange_to_working_day
+                    }
+            elif d.status in leave_without_pay:
+                attendance_map[d.employee][d.shift][d.day_of_month] = {
                 "status" :d.status, 
-                "exchange_to_working_day": d.exchange_to_working_day	
+                "exchange_to_working_day": d.exchange_to_working_day
                 }
+            else:
+                attendance_map.setdefault(d.employee, {}).setdefault(d.shift, {})
+                attendance_map[d.employee][d.shift][d.day_of_month] = {
+                    "status" :d.status, 
+                    "has_leave": d.has_leave if d.has_leave else False,
+                    "exchange_to_working_day": d.exchange_to_working_day	
+                    }
+                
     # leave is applicable for the entire day so all shifts should show the leave entry
     for employee, leave_days in leave_map.items():
         # no attendance records exist except leaves
@@ -299,37 +355,68 @@ def get_attendance_map(filters: Filters) -> Dict:
 # lay thong tin danh dau com cong/ban ghi tho
 def get_attendance_records(filters: Filters) -> List[Dict]:
     Attendance = frappe.qb.DocType("Attendance")
-    shiftType = frappe.qb.DocType("Shift Type")
-    #lay thong tin ban danh dau cham cong
+
     query = (
-        frappe.qb.from_(Attendance)
-        .inner_join(shiftType)
-        .on(Attendance.shift == shiftType.name)
-        .select(
-            Attendance.employee,
-            Extract("day", Attendance.attendance_date).as_("day_of_month"),
-            Attendance.status,
-            Attendance.shift,
+		frappe.qb.from_(Attendance)
+		.select(
+			Attendance.employee,
+			Extract("day", Attendance.attendance_date).as_("day_of_month"),
+			Attendance.attendance_date,
+			Attendance.status,
+			Attendance.shift,
             Attendance.working_hours,
             Attendance.late_check_in,
             Attendance.early_check_out,
-            shiftType.total_shift_time,
-            shiftType.exchange_to_working_day
-        )
-        .where(
-            (Attendance.docstatus == 1)
-            & (Attendance.company == filters.company)
-            & (Extract("month", Attendance.attendance_date) == filters.month)
-            & (Extract("year", Attendance.attendance_date) == filters.year)
-        )
-    )
+            Attendance.attendance_request,
+            Attendance.leave_type,
+            Attendance.leave_application,
+		)
+		.where(
+			(Attendance.docstatus == 1)
+			& (Attendance.company == filters.company)
+			& (Extract("month", Attendance.attendance_date) == filters.month)
+			& (Extract("year", Attendance.attendance_date) == filters.year)
+		)
+	)
 
     if filters.employee:
         query = query.where(Attendance.employee == filters.employee)
     query = query.orderby(Attendance.employee, Attendance.attendance_date)
-    # print("query.run(as_dict=1)",query.run(as_dict=1))
-    return query.run(as_dict=1)
 
+    data_att =  query.run(as_dict=1)
+    LeaveApplication = frappe.qb.DocType("Leave Application")
+    if not filters.summarized_view:
+        for att in data_att:
+            if att.status not in status_off: 
+                list_leave = (
+                frappe.qb.from_(LeaveApplication)
+                .select('*')
+                .where(
+                    (LeaveApplication.employee == att.get('employee')) & 
+                    (att.get("attendance_date") >= LeaveApplication.from_date) & 
+                    (att.get("attendance_date") <= LeaveApplication.to_date)
+                )
+                .run(as_dict=1)
+                )           
+                if len(list_leave) > 0: 
+                    att['has_leave'] = True 
+                
+            if not att.get('shift'):
+                if att.get("attendance_request") :
+                    att_request = frappe.db.get_value("Attendance Request",att.get("attendance_request"),['custom_shift'],as_dict=1)
+                    att['shift'] = att_request.get('custom_shift')
+                if att.get('leave_type'):
+                    att_leave = frappe.db.get_value("Leave Application",att.get('leave_application'),['custom_shift_type',"leave_type"],as_dict=1)
+                    att['shift'] = att_leave.get('custom_shift_type')
+            if att.get('shift') :
+                shift_detail = frappe.db.get_value('Shift Type',att.get('shift'), ['total_shift_time',"exchange_to_working_day"],as_dict=1)
+                att['total_shift_time'] = shift_detail.get('total_shift_time')
+                att['exchange_to_working_day'] = shift_detail.get('exchange_to_working_day')
+            
+            if att.get('leave_type') and att.get('leave_type') in leave_without_pay:
+                att["status"] = att.get('leave_type')
+
+    return data_att
 
 def get_employee_related_details(filters: Filters) -> Tuple[Dict, List]:
     """Returns
@@ -420,7 +507,7 @@ def get_holiday_map(filters: Filters) -> Dict[str, List[Dict]]:
 
     return holiday_map
 
-# xuat ra row hien thi tren table
+# xuat ra row hien thi tren table (bao gom tinh tong cong cua ca)
 def get_rows(
     employee_details: Dict, filters: Filters, holiday_map: Dict, attendance_map: Dict
 ) -> List[Dict]:
@@ -456,25 +543,50 @@ def get_rows(
             )
             detail_checkin = {}
             for att in range(0,len(attendance_for_employee)): 
+
                 # attendance_for_employee[att]  = {}
+                detail_shift = attendance_map.get(employee).get(attendance_for_employee[att].get("shift"))
                 for field_att, value_att in attendance_for_employee[att].items():
                     if field_att != 'shift':
-                        if detail_checkin.get(str(field_att)): 
-                            if type(value_att) == str :
-                                detail_checkin[str(field_att)]['l'] = value_att
-                            else:
-                                detail_checkin[str(field_att)]['w'] += value_att
-                        else:
+                        detail_shift_day = detail_shift.get(field_att)  
+                        prev_w =  detail_checkin.get(str(field_att))['w'] if detail_checkin.get(str(field_att)) and detail_checkin.get(str(field_att))['w'] != None else 0
+                        prev_l =  detail_checkin.get(str(field_att))['l'] if detail_checkin.get(str(field_att)) and detail_checkin.get(str(field_att))['l'] != ''  else ""
+                        if detail_shift_day: 
+                            this_w = 0
+                            this_l = ""
+                            if type(detail_shift_day) == dict and (detail_shift_day.get('status') in leave_with_pay or  detail_shift_day.get('status') in ot_type): 
+                                this_w = detail_shift_day.get('exchange_to_working_day') or 0
+                                this_l = value_att + ("!" if detail_shift_day.get("has_leave") else "")
+                            elif type(detail_shift_day) == float:
+                                this_w  = value_att  or 0
+                            else : 
+                                this_w = 0
+                                this_l = value_att   + ("!" if type(detail_shift_day) == dict and  detail_shift_day.get("has_leave") else "")                
+                            l = prev_l
+                            print("ooaofno:",field_att,{prev_l,this_l})
+                            if prev_l != "" and this_l != "" and prev_l != this_l  :
+                                l= prev_l + "/"+ this_l
+                            elif prev_l == this_l:
+                                l= prev_l
+                            else: 
+                                l = this_l
+
                             detail_checkin[str(field_att)] = {
-                                "w": value_att if type(value_att) == float or type(value_att) == int else 0,
-                                "l":value_att if type(value_att) == str else False
+                                "w": prev_w + this_w  ,
+                                "l": l
                             }
+                            # print("detail_shift_day",attendance_for_employee[att].get("shift"),detail_shift_day)
+                        else: 
+                            detail_checkin[str(field_att)] = {
+                                "w": 0 + prev_w,
+                                "l": "" + prev_l
+                            }
+                           
             detail_checkin.update(
                 {"employee": employee, "employee_name": details.employee_name}
             )
-            # set employee details in the detail_checkin
-            # print("detail_checkin",detail_checkin)
             records.extend([detail_checkin])
+    # print("records",records)
     return records
 
 
@@ -483,7 +595,7 @@ def set_defaults_for_summarized_view(filters, row):
         if entry.get("fieldtype") == "Float":
             row[entry.get("fieldname")] = 0.0
 
-
+# format data summarized view
 def get_attendance_status_for_summarized_view(
     employee: str, filters: Filters, holidays: List
 ) -> Dict:
@@ -516,9 +628,10 @@ def get_attendance_status_for_summarized_view(
         "total_absent_to_work": summary.sum_absent_shift,
         "total_holidays": total_holidays,
         "unmarked_days": total_unmarked_days,
+        "total_ot" : summary.total_ot
     }
 
-
+#tinh tong ca/ thoi gian
 def get_attendance_summary_and_days(employee: str, filters: Filters) -> Tuple[Dict, List]:
     Attendance = frappe.qb.DocType("Attendance")
     ShiftType = frappe.qb.DocType("Shift Type")
@@ -551,6 +664,54 @@ def get_attendance_summary_and_days(employee: str, filters: Filters) -> Tuple[Di
     half_day_case_shift = frappe.qb.terms.Case().when(Attendance.status == "Half Day", ShiftType.exchange_to_working_day).else_(0)
     sum_half_day_shift = Sum(half_day_case_shift).as_("total_half_days_shift")
 
+    #Tong thoi gian tang ca
+    OverTimeRequest = frappe.qb.DocType("Overtime Request")
+    EmployeeCheckin = frappe.qb.DocType("Employee Checkin")
+    ot_total = (
+        frappe.qb.from_(OverTimeRequest)
+        .inner_join(ShiftType)
+        .on(ShiftType.name == OverTimeRequest.shift)
+        .inner_join(EmployeeCheckin)
+        .on(EmployeeCheckin.shift == OverTimeRequest.shift)
+        .inner_join(Attendance)
+        .on(Attendance.shift == OverTimeRequest.shift)
+        .select(
+            # OverTimeRequest.name,
+            OverTimeRequest.employee,
+            OverTimeRequest.ot_start_time,
+            OverTimeRequest.ot_date,
+            OverTimeRequest.ot_end_time,
+            EmployeeCheckin.time,
+            EmployeeCheckin.name,
+        )
+        .where(
+            (EmployeeCheckin.log_type == "OUT")
+            & ((OverTimeRequest.status == "Approved") | (OverTimeRequest.workflow_state == "Approved"))
+            & (Attendance.docstatus == 1)
+            & (Attendance.employee == employee)
+            & (OverTimeRequest.employee == employee)
+            & (Attendance.company == filters.company)
+            & (Attendance.status == "Present")
+            & (Extract("month", Attendance.attendance_date) == filters.month)
+            & (Extract("year", Attendance.attendance_date) == filters.year)
+            & (Extract("month", OverTimeRequest.ot_date) == filters.month)
+            & (Extract("year", OverTimeRequest.ot_date) == filters.year)
+            & (Extract("day",EmployeeCheckin.time) == Extract("day", OverTimeRequest.ot_date))
+            & (Extract("month",EmployeeCheckin.time) == Extract("month", OverTimeRequest.ot_date))
+            & (Extract("year",EmployeeCheckin.time) == Extract("year", OverTimeRequest.ot_date))
+        )
+    ).run(as_dict=True)
+    total_ot = 0
+    for ot_doc in ot_total : 
+        if ot_doc.get('time').timestamp() >=  delta_to_time_now(ot_doc.get("ot_date"),ot_doc.get("ot_end_time")) :
+            time_ot_shift = delta_to_time_now(ot_doc.get("ot_date"),ot_doc.get("ot_end_time")) - delta_to_time_now(ot_doc.get("ot_date"),ot_doc.get("ot_start_time"))
+        else:
+            time_ot_shift = ot_doc.get('time').timestamp() - delta_to_time_now(ot_doc.get("ot_date"),ot_doc.get("ot_start_time"))
+        time_to_hour = time_ot_shift/3600
+        total_ot += time_to_hour
+        
+
+    #tinh tong thoi gian
     summary = (
         frappe.qb.from_(Attendance)
         .inner_join(ShiftType)
@@ -573,7 +734,7 @@ def get_attendance_summary_and_days(employee: str, filters: Filters) -> Tuple[Di
             & (Extract("year", Attendance.attendance_date) == filters.year)
         )
     ).run(as_dict=True)
-    # print("summary",summary[0])
+    summary[0]["total_ot"] = total_ot
     days = (
         frappe.qb.from_(Attendance)
         .select(Extract("day", Attendance.attendance_date).as_("day_of_month"))
@@ -586,10 +747,11 @@ def get_attendance_summary_and_days(employee: str, filters: Filters) -> Tuple[Di
             & (Extract("year", Attendance.attendance_date) == filters.year)
         )
     ).run(pluck=True)
-
     return summary[0], days
-
-# xu ly lay thong tin cham cong
+# ham xu ly hop nhat ngay thang
+def delta_to_time_now(date,time):
+    return int((datetime.combine(date, datetime.min.time())+time).timestamp())
+# xu ly lay thong tin cham cong 'shift': 'Morning Shift', 1: 'A', 2: 'P', 3: 'A'....},
 def get_attendance_status_for_detailed_view(
     employee: str, filters: Filters, employee_attendance: Dict, holidays: List
 ) -> List[Dict]:
@@ -607,14 +769,18 @@ def get_attendance_status_for_detailed_view(
 
         for day in range(1, total_days + 1):
             status = status_dict.get(day)
-            # print("status_map",status)
             if type(status) == dict:
                 status = status.get('status')
             if status is None and holidays:
                 status = get_holiday_status(day, holidays)
-            
-            abbr = status_map.get(status, "")
-            if status not in status_map:
+
+            if status in status_map:
+                abbr = status_map.get(status, "")
+            elif status in leave_without_pay:
+                abbr = leave_without_pay.get(status,"")
+            elif status in ot_type:
+                abbr = ot_type.get(status,"")
+            else :
                 abbr = 0
                 if status :
                     abbr = status
