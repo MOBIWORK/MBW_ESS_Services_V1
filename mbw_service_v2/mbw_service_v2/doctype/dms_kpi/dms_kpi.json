@@ -1,0 +1,152 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-12-08 15:37:15.762466",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "ma_nv",
+  "spending_sell_in",
+  "actually_achieved_sell_in",
+  "rate_sell_in",
+  "spending_sell_out",
+  "actually_achieved_sell_out",
+  "rate_sell_out",
+  "bonus_sales",
+  "spending_kpi1",
+  "actually_achieved_kpi1",
+  "rate_kpi1",
+  "bonus_kpi1",
+  "spending_kpi2",
+  "actually_achieved_kpi2",
+  "rate_kpi2",
+  "bonus_kpi2",
+  "status",
+  "total_records",
+  "total_import"
+ ],
+ "fields": [
+  {
+   "fieldname": "ma_nv",
+   "fieldtype": "Data",
+   "label": "M\u00e3 nh\u00e2n vi\u00ean"
+  },
+  {
+   "fieldname": "spending_sell_in",
+   "fieldtype": "Data",
+   "label": "Chi ti\u00eau sell in"
+  },
+  {
+   "fieldname": "actually_achieved_sell_in",
+   "fieldtype": "Data",
+   "label": "Th\u1ef1c \u0111\u1ea1t sell in"
+  },
+  {
+   "fieldname": "rate_sell_in",
+   "fieldtype": "Data",
+   "label": "T\u1ec9 l\u1ec7 \u0111\u1ea1t sell in"
+  },
+  {
+   "fieldname": "spending_sell_out",
+   "fieldtype": "Data",
+   "label": "Chi ti\u00eau sell out"
+  },
+  {
+   "fieldname": "actually_achieved_sell_out",
+   "fieldtype": "Data",
+   "label": "Th\u1ef1c \u0111\u1ea1t sell out"
+  },
+  {
+   "fieldname": "rate_sell_out",
+   "fieldtype": "Data",
+   "label": "T\u1ec9 l\u1ec7 \u0111\u1ea1t sell out"
+  },
+  {
+   "fieldname": "bonus_sales",
+   "fieldtype": "Data",
+   "label": "Th\u01b0\u1edfng doanh s\u1ed1"
+  },
+  {
+   "fieldname": "spending_kpi1",
+   "fieldtype": "Data",
+   "label": "Chi ti\u00eau KPI1"
+  },
+  {
+   "fieldname": "actually_achieved_kpi1",
+   "fieldtype": "Data",
+   "label": "Th\u1ef1c \u0111\u1ea1t KPI1"
+  },
+  {
+   "fieldname": "rate_kpi1",
+   "fieldtype": "Data",
+   "label": "T\u1ec9 l\u1ec7 \u0111\u1ea1t KPI1"
+  },
+  {
+   "fieldname": "bonus_kpi1",
+   "fieldtype": "Data",
+   "label": "Th\u01b0\u1edfng KPI1"
+  },
+  {
+   "fieldname": "spending_kpi2",
+   "fieldtype": "Data",
+   "label": "Chi ti\u00eau KPI1"
+  },
+  {
+   "fieldname": "actually_achieved_kpi2",
+   "fieldtype": "Data",
+   "label": "Th\u1ef1c \u0111\u1ea1t KPI1"
+  },
+  {
+   "fieldname": "rate_kpi2",
+   "fieldtype": "Data",
+   "label": "T\u1ec9 l\u1ec7 \u0111\u1ea1t KPI1"
+  },
+  {
+   "fieldname": "bonus_kpi2",
+   "fieldtype": "Data",
+   "label": "Th\u01b0\u1edfng KPI1"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Tr\u1ea1ng th\u00e1i",
+   "options": "\u0110ang ti\u1ebfn h\u00e0nh\nTh\u00e0nh c\u00f4ng\nTh\u1ea5t b\u1ea1i"
+  },
+  {
+   "fieldname": "total_records",
+   "fieldtype": "Int",
+   "label": "T\u1ed5ng s\u1ed1 b\u1ea3n ghi"
+  },
+  {
+   "fieldname": "total_import",
+   "fieldtype": "Int",
+   "label": "T\u1ed5ng s\u1ed1 b\u1ea3n ghi nh\u1eadp"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2023-12-08 17:20:45.559410",
+ "modified_by": "Administrator",
+ "module": "Mbw Service V2",
+ "name": "DMS KPI",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
