@@ -191,44 +191,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Integrate DMS synchronization",
-   "link_count": 3,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Configure Basic Authentication for DMS",
-   "link_count": 0,
-   "link_to": "DMS Basic Authen Settings",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Employee synchronization",
-   "link_count": 0,
-   "link_to": "dms-attendance-sync",
-   "link_type": "Page",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "DMS Log",
-   "link_count": 0,
-   "link_to": "DMS Log",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Work shift",
    "link_count": 3,
    "onboard": 0,
@@ -291,9 +253,57 @@
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Integrate DMS synchronization",
+   "link_count": 4,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Configure Basic Authentication for DMS",
+   "link_count": 0,
+   "link_to": "DMS Basic Authen Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Employee synchronization",
+   "link_count": 0,
+   "link_to": "dms-attendance-sync",
+   "link_type": "Page",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "DMS Log",
+   "link_count": 0,
+   "link_to": "DMS Log",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Sync Kpi Dms",
+   "link_count": 0,
+   "link_to": "dms-kpi-sync",
+   "link_type": "Page",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2023-12-11 08:46:24.055477",
+ "modified": "2023-12-12 14:33:52.077311",
  "modified_by": "Administrator",
  "module": "Mbw Service V2",
  "name": "Quick Link",

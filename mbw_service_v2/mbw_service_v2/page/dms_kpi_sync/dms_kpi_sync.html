@@ -5,10 +5,9 @@
       <tr>
         <th style="width: 10%">Thời gian đồng bộ</th>
         <th style="width: 10%">Mã nhân viên</th>
-        <th style="width: 10%">Bắt đầu đồng bộ</th>
-        <th style="width: 10%">Kết thúc đồng bộ</th>
-        <th style="width: 10%">Tổng số đã nhập</th>
-        <th style="width: 10%">Tổng số thất bại</th>
+        <th style="width: 10%">Mã nhân viên (DMS)</th>
+        <th style="width: 10%">Tháng</th>
+        <th style="width: 10%">Năm</th>
         <th style="width: 15%">Lý do</th>
         <th style="width: 10%">Trạng thái</th>
       </tr>
@@ -19,16 +18,15 @@
         <td class="creation text-muted">
           {{ frappe.datetime.prettyDate(item.creation) }}
         </td>
-        <td>{{ item.ma_nv }}</td>
-        <td>{{ item.checkin_start }}</td>
-        <td>{{ item.checkin_end }}</td>
-        <td>{{ item.total_import }}</td>
-        <td>{{ item.total_records-item.total_import }}</td>
-        <td>{{ item.message }}</td>
+        <td>{{ item.employee }}</td>
+        <td>{{ item.employee_dms }}</td>
+        <td>{{ item.month }}</td>
+        <td>{{ item.year }}</td>
+        <td>{{ item.reason }}</td>
         <td>
           {% if item.status == "Đang tiến hành" %}
           <span class="indicator-pill orange"> {{ item.status }} </span>
-          {% else %} {% if item.status == "Thành công" %}
+          {% else %} {% if item.status == "Thành Công" %}
           <span class="indicator-pill green"> {{ item.status }} </span>
           {% else %}
           <span class="indicator-pill red"> {{ item.status }} </span>
