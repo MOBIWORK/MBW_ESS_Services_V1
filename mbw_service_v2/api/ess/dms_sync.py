@@ -28,3 +28,17 @@ def get_list_sync(**kwargs):
     except Exception as e:
         exception_handel(e)
         # gen_response(500, i18n.t('translate.error', locale=get_language()), [])
+
+
+
+@frappe.whitelist(methods='GET')
+def get_list_kpi_sync(**kwargs):
+    try:
+        list_sync = frappe.db.get_all(
+            'DMS Kpi Log', fields=['*'], page_length=20)
+        gen_response(200, i18n.t('translate.successfully', locale=get_language()), {
+            "data": list_sync
+        })
+    except Exception as e:
+        exception_handel(e)
+        # gen_response(500, i18n.t('translate.error', locale=get_language()), [])

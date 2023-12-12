@@ -86,7 +86,7 @@ class DMSAttendanceSync {
 
   refreshSync() {
     frappe.call({
-      method: "mbw_service_v2.api.ess.dms_attendance_sync.get_list_sync",
+      method: "mbw_service_v2.api.ess.dms_sync.get_list_sync",
       type: "GET",
       callback: (res) => {
         if (!res.exc) {

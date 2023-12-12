@@ -21,7 +21,6 @@ frappe.ui.form.on("TimeSheet Position", {
   },
 
   map: async function (frm) {
-    // let mapdata = JSON.parse(frm.doc.map).features[0];
     let mapdata_point = JSON.parse(frm.doc.map)?.features;
     if (mapdata_point) {
       let last_point = mapdata_point[mapdata_point.length - 1];

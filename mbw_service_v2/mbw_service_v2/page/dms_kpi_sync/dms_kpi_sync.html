@@ -1,0 +1,55 @@
+{% if list_sync.length %}
+<div class="table-section">
+  <table class="table table-background-jobs">
+    <thead>
+      <tr>
+        <th style="width: 10%">Thời gian đồng bộ</th>
+        <th style="width: 10%">Mã nhân viên</th>
+        <th style="width: 10%">Bắt đầu đồng bộ</th>
+        <th style="width: 10%">Kết thúc đồng bộ</th>
+        <th style="width: 10%">Tổng số đã nhập</th>
+        <th style="width: 10%">Tổng số thất bại</th>
+        <th style="width: 15%">Lý do</th>
+        <th style="width: 10%">Trạng thái</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in list_sync %}
+      <tr>
+        <td class="creation text-muted">
+          {{ frappe.datetime.prettyDate(item.creation) }}
+        </td>
+        <td>{{ item.ma_nv }}</td>
+        <td>{{ item.checkin_start }}</td>
+        <td>{{ item.checkin_end }}</td>
+        <td>{{ item.total_import }}</td>
+        <td>{{ item.total_records-item.total_import }}</td>
+        <td>{{ item.message }}</td>
+        <td>
+          {% if item.status == "Đang tiến hành" %}
+          <span class="indicator-pill orange"> {{ item.status }} </span>
+          {% else %} {% if item.status == "Thành công" %}
+          <span class="indicator-pill green"> {{ item.status }} </span>
+          {% else %}
+          <span class="indicator-pill red"> {{ item.status }} </span>
+          {% endif %} {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="no-background-jobs">
+  <img
+    src="/assets/frappe/images/ui-states/list-empty-state.svg"
+    alt="Empty State"
+  />
+  <p class="text-muted">{{ __("Chưa có log nào gần đây") }}</p>
+</div>
+{% endif %}
+<div class="footer">
+  <div class="text-muted">
+    {{ frappe.datetime.now_datetime().toLocaleString("%Y-%m-%d")}}
+  </div>
+</div>
