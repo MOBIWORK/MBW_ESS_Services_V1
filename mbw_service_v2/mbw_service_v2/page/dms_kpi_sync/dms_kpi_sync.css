@@ -53,3 +53,24 @@
 .footer {
   padding: var(--padding-md);
 }
+
+
+ul.paging {
+  margin-top: 12px;
+list-style: none;
+display: flex;
+flex-direction: row;
+justify-content: end;
+
+}
+
+ul.paging li {
+  padding: 4px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+}
+
+ul.paging li:hover {
+  color: white;
+  background-color: #ccc;
+}

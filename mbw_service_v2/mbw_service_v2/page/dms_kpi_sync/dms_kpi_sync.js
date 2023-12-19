@@ -1,9 +1,10 @@
 frappe.pages['dms-kpi-sync'].on_page_load = function(wrapper) {
 	const dms_kpi_sync = new DmsKpiSync(wrapper);
-
 	$(wrapper).bind("show", () => {
 	  dms_kpi_sync.show();
 	});
+
+
 }
 
 class DmsKpiSync {
@@ -68,18 +69,38 @@ class DmsKpiSync {
 	});
 	}
 
-	refreshSync() {
+	paging(page_num) {
+		if(!page_num ) return [1]
+		else {
+			let arr_page = []
+			for(let i=1 ;i<=page_num;i++) {
+				arr_page.push(i)
+			}
+			return arr_page
+		}
+
+
+			
+	}
+	refreshSync(page) {
 	frappe.call({
 		method: "mbw_service_v2.api.ess.dms_sync.get_list_kpi_sync",
+		args: {
+			page
+		},
 		type: "GET",
 		callback: (res) => {
 		if (!res.exc) {
+			$('#paging').innerHTML = "ok"
 			this.$content.html(
 			frappe.render_template("dms_kpi_sync", {
 				list_sync: res?.result?.data || [],
+				paging: {
+					array: this.paging( res?.result?.total_page),
+					change_page:() => {}
+				},
 			})
 			);
-
 			let auto_refresh = this.auto_refresh.get_value();
 			if (frappe.get_route()[0] === "dms-kpi-sync" && auto_refresh) {
 			setTimeout(() => this.refreshSync(), 2000);

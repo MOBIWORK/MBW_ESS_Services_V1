@@ -229,34 +229,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Report",
-   "link_count": 2,
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Report monthly attendance",
-   "link_count": 0,
-   "link_to": "MBW Monthly Attendance Sheet vi v2",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Report Payroll",
-   "link_count": 0,
-   "link_to": "MBW Payroll",
-   "link_type": "Report",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Integrate DMS synchronization",
    "link_count": 4,
    "onboard": 0,
@@ -301,9 +273,47 @@
    "link_type": "Page",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Report",
+   "link_count": 3,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Report monthly attendance",
+   "link_count": 0,
+   "link_to": "MBW Monthly Attendance Sheet vi v2",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Report Payroll",
+   "link_count": 0,
+   "link_to": "MBW Payroll",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Report Payroll Page",
+   "link_count": 0,
+   "link_to": "mbw-payroll",
+   "link_type": "Page",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2023-12-12 14:33:52.077311",
+ "modified": "2023-12-18 15:47:21.525736",
  "modified_by": "Administrator",
  "module": "Mbw Service V2",
  "name": "Quick Link",

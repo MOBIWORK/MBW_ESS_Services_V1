@@ -306,7 +306,6 @@ def get_attendance_map(filters: Filters) -> Dict:
                             #tinh so gio tang ca ra cong
                             working_ot = d.working_hours - d.exchange_to_working_day
                             time_ot_access = overtime_leave.get('ot_end_time') - overtime_leave.get('ot_start_time')
-                            print("-------------------------",working_ot,time_ot_access)
                             # chua thong nhat ......, de tam la cong cua ca truoc no
                             working = d.exchange_to_working_day
                         else :

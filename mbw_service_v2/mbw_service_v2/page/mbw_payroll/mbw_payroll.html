@@ -1,0 +1,104 @@
+{% if list_sync.length %}
+<div class="table-section">
+  <table class="table table-background-jobs">
+    <thead>
+      <tr>
+        <td>TÊN NHÂN VIÊN</td>
+        <td>Chức Vụ</td>
+        <td>NPP/Tỉnh/KV quản lý</td>
+        <td colspan="3">Ngày</td>
+        <td colspan="4">Lương + Phụ cấp</td>
+        <td>Tổng thu nhập chưa tính lương</td>
+        <td colspan="3 ">Doanh số hàng hộp,gói, Tết,snack SELL IN</td>
+        <td colspan="3">Doanh số hàng hộp,gói, Tết,snack SELL OUT</td>
+        <td colspan="5">Thưởng doanh số SELL OUT</td>
+        <td colspan="3">KPI 1</td>
+        <td colspan="3">Thưởng KPI 1</td>
+        <td>Tổng thu nhập</td>
+        <td>Khoản Giảm Trừ</td>
+        <td>Thực lĩnh</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td>Chỉ tiêu</td>
+        <td>Công</td>
+        <td>Nghỉ lễ</td>
+        <td>Lương cơ bản</td>
+        <td>Lương trách nhiệm</td>
+        <td>Phụ cấp công việc</td>
+        <td>Phụ cấp khu vực</td>
+        <td></td>
+        <td>Chỉ tiêu</td>
+        <td>Thực đạt</td>
+        <td>Tỉ lệ đạt</td>
+        <td>Chỉ tiêu</td>
+        <td>Thực đạt</td>
+        <td>Tỉ lệ đạt</td>
+        <td>>=80%</td>
+        <td>>=90%</td>
+        <td>>=100%</td>
+        <td>>=110%</td>
+        <td>>=120%</td>
+        <td>Chỉ tiêu</td>
+        <td>Thực đạt</td>
+        <td>Tỉ lệ đạt</td>
+        <td>>=80%</td>
+        <td>>=90%</td>
+        <td>>=100%</td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>
+    </thead>
+    <tbody class="body-table">
+      {% for item in list_sync %}
+      <tr class="">
+        <td>{{item.employee_name}}</td>
+        <td>{{item.positions}}</td>
+        <td>{{item.area_manager}}</td>
+        <td>{{item.total_working}}</td>
+        <td>{{item.total_present}}</td>
+        <td>{{item.total_holiday}}</td>
+        <td>{{item.salary_basic}}</td>
+        <td>{{item.salary_allowance}}</td>
+        <td>{{item.salary_allowance}}</td>
+        <td>{{item.total_deductions}}</td>
+        <td>{{item.total_not_bonuses}}</td>
+        <td>{{item.spending_sell_in}}</td>
+        <td>{{item.actually_achieved_sell_in}}</td>
+        <td>{{item.rate_sell_in}}</td>
+        <td>{{item.spending_sell_out}}</td>
+        <td>{{item.actually_achieved_sell_out}}</td>
+        <td>{{item.rate_sell_out}}</td>
+        <td>{{item.sell_out_80}}</td>
+        <td>{{item.sell_out_90}}</td>
+        <td>{{item.sell_out_100}}</td>
+        <td>{{item.sell_out_110}}</td>
+        <td>{{item.sell_out_120}}</td>
+        <td>{{item.spending_kpi1}}</td>
+        <td>{{item.actually_achieved_kpi1}}</td>
+        <td>{{item.rate_kpi1}}</td>
+        <td>{{item.kpi_80}}</td>
+        <td>{{item.kpi_90}}</td>
+        <td>{{item.kpi_100}}</td>
+        <td>{{item.gross_pay}}</td>
+        <td>{{item.total_deduction}}</td>
+        <td>{{item.gross_pay - item.total_deduction}}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="no-background-jobs">
+  <img src="/assets/frappe/images/ui-states/list-empty-state.svg" alt="Empty State" />
+  <p class="text-muted">{{ __("Nothing to show") }}</p>
+</div>
+{% endif %}
+<div class="footer">
+  <div class="text-muted">
+    {{ frappe.datetime.now_datetime().toLocaleString("%Y-%m-%d")}}
+  </div>
+</div>

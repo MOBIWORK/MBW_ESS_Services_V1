@@ -501,3 +501,4 @@ def get_report_attendance_sheet(**data):
         print(e)
         exception_handel(e)
         # gen_response(500, i18n.t('translate.error', locale=get_language()), [])
+

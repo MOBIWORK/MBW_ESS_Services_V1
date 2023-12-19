@@ -30,15 +30,34 @@ def get_list_sync(**kwargs):
         # gen_response(500, i18n.t('translate.error', locale=get_language()), [])
 
 
-
+import math
 @frappe.whitelist(methods='GET')
 def get_list_kpi_sync(**kwargs):
     try:
+        pageSize = 20
+        pageNumber = kwargs.get('page') if kwargs.get('page') else 1
+        limit_start = (pageNumber - 1) * pageSize
+        total_sync = frappe.db.count('DMS Kpi Log')
+        total_page =  math.ceil(total_sync/20)
         list_sync = frappe.db.get_all(
-            'DMS Kpi Log', fields=['*'], page_length=20)
+            'DMS Kpi Log', fields=['*'],  limit_start=limit_start, limit_page_length=pageSize)
         gen_response(200, i18n.t('translate.successfully', locale=get_language()), {
-            "data": list_sync
+            "data": list_sync,
+            "total_page": total_page
         })
     except Exception as e:
         exception_handel(e)
         # gen_response(500, i18n.t('translate.error', locale=get_language()), [])
+
+
+
+@frappe.whitelist(methods="GET")
+def total_bonus_kpi(**data):
+    month = data.get("month")
+    year = data.get("year")
+    employee = data.get("employee")
+    info_kpi = frappe.db.get_value("DMS KPI", {"employee": employee,"month": month,"year":year},["bonus_sales","bonus_kpi1"],as_dict=1)
+    if info_kpi:
+        return float(info_kpi.get("bonus_sales")) + float(info_kpi.get("bonus_kpi1"))
+    else :
+        return 0
