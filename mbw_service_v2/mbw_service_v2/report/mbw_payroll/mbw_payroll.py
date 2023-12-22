@@ -94,6 +94,7 @@ def handle_box(data,filters) :
 def get_rows(
     employee_details: Dict, filters: Filters,holiday_map:Dict, kpi_map:Dict, salary_slip: Dict
 ) -> List[Dict]:
+    print("employee_details",employee_details,holiday_map)
     total_holiday = 0
     for holiday ,value in holiday_map.items():
         total_holiday += value
@@ -140,7 +141,7 @@ def append_manage(records,employee):
     return records
 ## employee
 def get_employee_summary(details):
-    return { "employee": details.get("name") ,"employee_name": details.get("employee_name") or "","positions":details.get("designation") or "" ,"area_manager": details.get("department") or "", "wage": "", "dependent_person":""}
+    return { "employee": details.get("name") ,"employee_name": details.get("employee_name") or "","positions":details.get("grade") or "" ,"area_manager": details.get("manager_area") or "", "wage": "", "dependent_person":""}
 
 ## salary
 def get_salary_summary(salary_slip):
@@ -364,11 +365,11 @@ def get_salary_records(filters) -> Dict:
         query = query.where(SalarySlip.employee == filters.employee)
     if filters.view_mode :
         if filters.view_mode == "em":
-            query = query.where(Employee.designation == "SR")
+            query = query.where(Employee.grade == "SR")
         elif filters.view_mode == "ss":
-            query =  query.where(Employee.designation == "SS")          
+            query =  query.where(Employee.grade == "SS")          
         else: 
-            query =  query.where(Employee.designation == "ARM")
+            query =  query.where(Employee.grade == "ARM")
     query = query.orderby(SalarySlip.employee, SalarySlip.posting_date)
     data_salary =  query.run(as_dict=1)
     salary_map = frappe._dict()
@@ -492,8 +493,9 @@ def get_attendance_summary(employee: str, filters: Filters) -> Tuple[Dict, List]
             & (Extract("year", Attendance.attendance_date) == filters.year)
         )
     ).run(as_dict=True)
-
     if employee:
+        for key,value in summary[0].items()  :
+            summary[0][key] = value if value else 0
         return summary[0]
     else :
         return None
@@ -549,7 +551,6 @@ def get_employee_related_details(filters: Filters,salary_slip) -> Tuple[Dict, Li
         )
         .where(Employee.name.isin(employees))
     )
-    print("employees",employees)
     if filters.employee:
         query = query.where(Employee.name == filters.employee)
     employee_details = query.run(as_dict=True)

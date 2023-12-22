@@ -1,6 +1,6 @@
 import frappe
 from mbw_service_v2.api.common import (
-    basic_auth, gen_response, exception_handel, inshift, get_language)
+    basic_auth, gen_response, exception_handel, inshift, get_language,cong_va_xoa_trung)
 import requests
 import json
 from datetime import datetime
@@ -164,7 +164,174 @@ def bonus_kpi(rate):
 	elif rate >=0.8:
 		return 400000	
 	else: return 0
+##### Cac ham xu ly ho tro dong bo kpi
+     
+# xu ly phan cap tu data 1 cap => data 4 cap
+def handle_array_to_key(data_array,i=0):
+    key_field = ['rsm','asm','ss']
+    arr_tree = {}
+    if i < len(key_field): 
+        for kpi_data in  data_array :
+            if kpi_data.get(key_field[i]) != '':
+                arr_tree.setdefault(kpi_data.get(key_field[i]),[])
+                if kpi_data.get(key_field[i]) in arr_tree.keys():
+                    arr_tree[kpi_data.get(key_field[i])].append(kpi_data)
+            else:
+                if i>0:
+                    arr_tree.setdefault(f"none_{key_field[i]}",[])
+                    if kpi_data.get(key_field[i]) == '':
+                        arr_tree[f"none_{key_field[i]}"].append(kpi_data)  
 
+        for key, data_ in arr_tree.items():
+            arr_tree[key]=handle_array_to_key(data_,i+1)
+    else:
+        arr_tree = data_array
+    return arr_tree    
+
+
+
+# xu ly dong bo theo tung khu vuc
+def handle_sync_data(data_lv,manage_info = None,kv=None,filters={}):
+    month = filters['month']
+    year = filters['year']
+    data_kpi_sr_total = {
+            "spending_sell_out": 0,
+            "actually_achieved_sell_out": 0,
+            "spending_kpi1": 0,
+            "actually_achieved_kpi1": 0,
+            "month": month,
+            "year": year
+        }
+    if type(data_lv) == dict:
+        for key,value in data_lv.items():
+            # lay thong tin nhan vien cap cao theo key
+            emp_info = frappe.db.get_value(
+            "Employee",
+            {"employee_code_dms": key},
+            ["employee","employee_code_dms"],
+             as_dict=1,
+        )
+            #tinh toan du lieu kpi cua ca thang con
+            data_sync_manage = handle_sync_data(value,emp_info,kv,filters)
+            if emp_info:
+                data_sync_manage.update({
+                    "employee" : emp_info.get('employee'),
+                    "employee_dms" : emp_info.get('employee_code_dms')
+                })
+                data_mn = hande_sync_single_employee(key, emp_info,data_sync_manage,filters,manage_info,kv)
+                if data_mn:
+                    data_kpi_sr_total['spending_sell_out'] += data_mn['spending_sell_out']
+                    data_kpi_sr_total['actually_achieved_sell_out'] += data_mn['spending_sell_out']
+                    data_kpi_sr_total['actually_achieved_sell_out'] += data_mn['spending_sell_out']
+                    data_kpi_sr_total['spending_kpi1'] += data_mn['spending_kpi1']    
+    else:       
+        for data_sync in data_lv:
+            emp_data = frappe.db.get_value(
+                "Employee",
+                {"employee_code_dms": data_sync.get('ma_nv')},
+                ["employee","employee_code_dms"],
+                 as_dict=1,
+                )
+            data_employee_kpi = {
+                "spending_sell_out": data_sync.get("doanh_so").get('kh'),
+                "actually_achieved_sell_out": data_sync.get("doanh_so").get('th'),
+                "rate_sell_out": data_sync.get("doanh_so").get('tl'),
+                "bonus_sales": bonus_sell(float( data_sync.get("doanh_so").get('tl')/100), data_sync.get("doanh_so").get('th')),
+                "spending_kpi1": data_sync.get("sp_trong_tam").get('kh'),
+                "actually_achieved_kpi1": data_sync.get("sp_trong_tam").get('th'),
+                "rate_kpi1": data_sync.get("sp_trong_tam").get('tl'),
+                "bonus_kpi1": bonus_kpi(float(data_sync.get("sp_trong_tam").get('tl')/100)),
+                "month": month,
+                "year": year
+            }
+            data_sr= hande_sync_single_employee(data_sync.get('ma_nv'),emp_data, data_employee_kpi,filters,manage_info,kv)
+            if data_sr:
+                data_kpi_sr_total['spending_sell_out'] += data_sr['spending_sell_out']
+                data_kpi_sr_total['actually_achieved_sell_out'] += data_sr['actually_achieved_sell_out']
+                data_kpi_sr_total['actually_achieved_kpi1'] += data_sr['actually_achieved_kpi1']
+                data_kpi_sr_total['spending_kpi1'] += data_sr['spending_kpi1']   
+    # rate + bonus total:
+    if data_kpi_sr_total['spending_sell_out'] != 0  :
+        data_kpi_sr_total['rate_sell_out'] =  float( data_kpi_sr_total['actually_achieved_sell_out']/data_kpi_sr_total['spending_sell_out']) *100
+        data_kpi_sr_total['bonus_sales']  = bonus_sell(float( data_kpi_sr_total['rate_sell_out']/100), data_kpi_sr_total['actually_achieved_sell_out'])
+    else:
+        data_kpi_sr_total['rate_sell_out'] = 100 if data_kpi_sr_total['actually_achieved_sell_out'] > 0 else 0
+        data_kpi_sr_total['bonus_sales']  = bonus_sell(float( data_kpi_sr_total['rate_sell_out']/100), data_kpi_sr_total['actually_achieved_sell_out'])
+    if  data_kpi_sr_total['spending_kpi1'] !=0:
+        data_kpi_sr_total['rate_kpi1'] =  float( data_kpi_sr_total['actually_achieved_kpi1']/data_kpi_sr_total['spending_kpi1']) *100
+        data_kpi_sr_total['bonus_kpi1']  = bonus_kpi(float(data_kpi_sr_total['rate_kpi1']/100)) 
+    else: 
+        data_kpi_sr_total['rate_kpi1'] =  100 if data_kpi_sr_total['actually_achieved_kpi1'] > 0 else 0
+        data_kpi_sr_total['bonus_kpi1']  = bonus_kpi(float(data_kpi_sr_total['rate_kpi1']/100)) 
+     
+    return data_kpi_sr_total 
+ # xu ly dong bo tung nhan vien      
+def hande_sync_single_employee(ma_nv,emp_data,data_employee_kpi,filters,manage_info,kv):
+    month = filters['month']
+    year = filters['year']
+    # them mot log khi dong bo du lieu nhan vien
+    new_log  =frappe.new_doc("DMS Kpi Log")
+    reason = ""
+    data_log = {
+                "employee_dms":ma_nv,
+                "month":  month,
+                "year":  year,
+                "status": "Đang tiến hành"
+            }
+    for fiel, value in data_log.items():
+        setattr(new_log, fiel, value) 
+    new_log.insert() 
+    if emp_data:       
+        update_employee = frappe.get_doc("Employee",emp_data.get('employee'))   
+        if kv.get(emp_data.get('employee_code_dms')):
+            setattr(update_employee,'manager_area',kv.get(emp_data.get('employee_code_dms')))
+        if manage_info:
+            setattr(update_employee,'reports_to',manage_info.get("employee"))
+
+        update_employee.save()       
+        # dang tien hanh dong bo (them vao log)
+        # xu ly dong bo kpi
+        new_kpi = frappe.new_doc('DMS KPI')
+        data_employee_kpi.update({"employee": emp_data.get('employee'),
+                "employee_dms": emp_data.get('employee_code_dms')}) 
+        
+        # xu ly dong bo nhan vien
+        try:
+            frappe.db.delete('DMS KPI', {
+                "employee" : emp_data.get("employee"),
+                "month": month,
+                "year": year          
+            })
+            for field, value in data_employee_kpi.items() :
+                setattr(new_kpi,field,value)
+            new_kpi.insert()
+            new_log.status = "Thành Công" 
+            new_log.employee = emp_data.get("employee")  
+            new_log.save()     
+            return {
+                "spending_sell_out": data_employee_kpi.get('spending_sell_out'),
+                "actually_achieved_sell_out": data_employee_kpi.get('actually_achieved_sell_out'),
+                "spending_kpi1": data_employee_kpi.get('spending_kpi1'),
+                "actually_achieved_kpi1": data_employee_kpi.get('actually_achieved_kpi1'),
+                
+            }                  
+        except Exception as e:
+            new_log.reason = cstr(e) 
+            new_log.status = "Thất Bại"
+            new_log.save()
+            return False
+    else:
+        # thong bao that bai neu nhan vien khong co tai frappe
+        new_log.reason = f"Employee not found by {ma_nv}" 
+        new_log.status = "Thất Bại"
+        new_log.save()  
+        return False
+        # ket thuc xu ly dong bo 1 nhan vien
+def handle_khu_vuc(arr_gs) :
+    employee_kv = {}
+    for gs in arr_gs:
+        employee_kv[gs.get('ma_nv')] = gs.get('kv_quan_ly')
+    return employee_kv
 ##handle
 @frappe.whitelist(methods="POST")
 def kpi_data(**data): 
@@ -175,83 +342,29 @@ def kpi_data(**data):
         token_key = data.get('token_key') if data.get('token_key') else False
         ma_nv = data.get('employee_code') if data.get('employee_code') else False
         params = {
-             "month": month,
-             "year": year
+             "thang": month,
+             "nam": year,
         }
         if ma_nv:
             params['nhan_vien'] = ma_nv
-        url = f"https://dev.mobiwork.vn:4036/OpenAPI/V1/KPI"
-        dataTimeSheet = requests.get(url=url,verify=False, params=params,
+        url = f"https://openapi.mobiwork.vn/OpenAPI/V1/KPI"
+        # url = f"https://dev.mobiwork.vn:4036/OpenAPI/V1/KPI"
+        dataTimeSheet = requests.get(url=url, params=params,verify=False,
                                      headers={
                                          "Authorization": basic_auth(id_dms, token_key),
                                      })
         dataTimeSheet = json.loads(dataTimeSheet.text)
-        
         if dataTimeSheet.get('message') != "":
             gen_response(500, i18n.t('translate.error', locale=get_language()), [])
             return
         data_kpi = dataTimeSheet.get('result')
-        # return data_kpi
-        if len(data_kpi) > 0:   
-            for employee_kpi in data_kpi:
-                emp_data = frappe.db.get_value(
-                    "Employee",
-                    {"employee_code_dms": employee_kpi.get('ma_nv')},
-                    ["employee","employee_code_dms"],
-                    as_dict=1,
-                )
-                #kiem tra lai nhan vien dms sang frappe
-                new_log = frappe.new_doc("DMS Kpi Log")
-                reason = ""
-                data_log = {
-                            "employee_dms":employee_kpi.get('ma_nv'),
-                            "month":  month,
-                            "year":  year,
-                            "status": "Đang tiến hành"
-                        }
-                for fiel, value in data_log.items():
-                            setattr(new_log, fiel, value) 
-                new_log.insert() 
-                if emp_data:                   
-                    # dang tien hanh dong bo (them vao log)
-                    data_log['employee'] = emp_data.get('employee')                            
-                    # xu ly dong bo kpi
-                    new_kpi = frappe.new_doc('DMS KPI')
-                    data_employee_kpi = {
-                            "employee": emp_data.get('employee'),
-                            "employee_dms": emp_data.get('employee_code_dms'),
-                            "spending_sell_out": employee_kpi.get("doanh_so").get('kh'),
-                            "actually_achieved_sell_out": employee_kpi.get("doanh_so").get('th'),
-                            "rate_sell_out": employee_kpi.get("doanh_so").get('tl'),
-                            "bonus_sales": bonus_sell(float( employee_kpi.get("doanh_so").get('tl')/100), employee_kpi.get("doanh_so").get('th')),
-                            "spending_kpi1": employee_kpi.get("sp_trong_tam").get('kh'),
-                            "actually_achieved_kpi1": employee_kpi.get("sp_trong_tam").get('th'),
-                            "rate_kpi1": employee_kpi.get("sp_trong_tam").get('tl'),
-                            "bonus_kpi1": bonus_kpi(float(employee_kpi.get("sp_trong_tam").get('tl')/100)),
-                            "month": month,
-                            "year": year
-                    }
-                    for field, value in data_employee_kpi.items() :
-                            setattr(new_kpi,field,value)
-                    
-                    try:
-                        frappe.db.delete('DMS KPI', {
-                            "employee" : emp_data.get('employee'),
-                            "month": month,
-                            "year": year          
-                        })
-                        new_kpi.insert()
-                        new_log.status = "Thành Công" 
-                        new_log.employee = emp_data.get('employee')   
-                        new_log.save()                       
-                    except Exception as e:
-                        new_log.reason =cstr(e) 
-                        new_log.status = "Thất Bại"
-                        new_log.save()
-                else:
-                    new_log.reason = f"Employee not found by {employee_kpi.get('ma_nv')}" 
-                    new_log.status = "Thất Bại"
-                    new_log.save()  
+        data_gs = dataTimeSheet.get('ds_giam_sat')
+        # sap xep kpi nhan vien theo quan ly
+        if len(data_kpi) > 0:       
+            data_level = handle_array_to_key(data_kpi)
+            data_gs_kv = handle_khu_vuc(data_gs)
+            # return data_level, data_gs_kv
+            handle_sync_data(data_level,None,data_gs_kv,data)                           
             gen_response(200,"Thành công!",[])
             return 
         else: 

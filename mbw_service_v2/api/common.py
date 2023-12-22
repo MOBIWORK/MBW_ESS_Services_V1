@@ -288,6 +288,14 @@ def gen_response(status, message, result=[]):
         frappe.response["message"] = message
     frappe.response["result"] = result
 
+def cong_va_xoa_trung(mang1, mang2):
+    # Cộng hai mảng và chuyển kết quả thành một set để loại bỏ các phần tử trùng nhau
+    ket_qua_set = set(mang1 + mang2)
+
+    # Chuyển kết quả trở lại thành một danh sách (nếu cần)
+    ket_qua = list(ket_qua_set)
+
+    return ket_qua
 
 def exception_handel(e):
     frappe.log_error(title="ESS Mobile App Error",
