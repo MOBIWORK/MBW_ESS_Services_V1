@@ -61,31 +61,31 @@
         <td>{{item.total_working}}</td>
         <td>{{item.total_present}}</td>
         <td>{{item.total_holiday}}</td>
-        <td>{{item.salary_basic}}</td>
-        <td>{{item.salary_allowance}}</td>
-        <td>{{item.salary_allowance}}</td>
-        <td>{{item.total_deductions}}</td>
-        <td>{{item.total_not_bonuses}}</td>
-        <td>{{item.spending_sell_in}}</td>
-        <td>{{item.actually_achieved_sell_in}}</td>
-        <td>{{item.rate_sell_in}}</td>
-        <td>{{item.spending_sell_out}}</td>
-        <td>{{item.actually_achieved_sell_out}}</td>
-        <td>{{item.rate_sell_out}}</td>
-        <td>{{item.sell_out_80}}</td>
-        <td>{{item.sell_out_90}}</td>
-        <td>{{item.sell_out_100}}</td>
-        <td>{{item.sell_out_110}}</td>
-        <td>{{item.sell_out_120}}</td>
-        <td>{{item.spending_kpi1}}</td>
-        <td>{{item.actually_achieved_kpi1}}</td>
-        <td>{{item.rate_kpi1}}</td>
-        <td>{{item.kpi_80}}</td>
-        <td>{{item.kpi_90}}</td>
-        <td>{{item.kpi_100}}</td>
-        <td>{{item.gross_pay}}</td>
-        <td>{{item.total_deduction}}</td>
-        <td>{{item.gross_pay - item.total_deduction}}</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.salary_basic))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.salary_allowance))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.salary_allowance))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.total_deductions))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.total_not_bonuses))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.spending_sell_in))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.actually_achieved_sell_in))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.rate_sell_in))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.spending_sell_out))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.actually_achieved_sell_out))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.rate_sell_out))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.sell_out_80))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.sell_out_90))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.sell_out_100))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.sell_out_110))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.sell_out_120))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.spending_kpi1))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.actually_achieved_kpi1))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.rate_kpi1))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.kpi_80))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.kpi_90))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.kpi_100))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.gross_pay))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.total_deduction))}} VND</td>
+        <td>{{Intl.NumberFormat().format(Math.round(item.gross_pay - item.total_deduction))}} VND</td>
       </tr>
       {% endfor %}
     </tbody>
@@ -99,6 +99,7 @@
 {% endif %}
 <div class="footer">
   <div class="text-muted">
-    {{ frappe.datetime.now_datetime().toLocaleString("%Y-%m-%d")}}
+    {{ frappe.datetime.now_datetime().toLocaleString("%Y-%m-%d")}} VND
   </div>
 </div>
+
