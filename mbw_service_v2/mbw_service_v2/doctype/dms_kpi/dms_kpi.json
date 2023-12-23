@@ -9,6 +9,7 @@
  "field_order": [
   "sr_1",
   "employee",
+  "fullname",
   "cr_1",
   "employee_dms",
   "sr_2",
@@ -62,12 +63,14 @@
   {
    "fieldname": "rate_sell_out",
    "fieldtype": "Data",
-   "label": "T\u1ec9 l\u1ec7 \u0111\u1ea1t sell out"
+   "label": "T\u1ec9 l\u1ec7 \u0111\u1ea1t sell out",
+   "read_only": 1
   },
   {
    "fieldname": "bonus_sales",
    "fieldtype": "Data",
-   "label": "Th\u01b0\u1edfng doanh s\u1ed1"
+   "label": "Th\u01b0\u1edfng doanh s\u1ed1",
+   "read_only": 1
   },
   {
    "fieldname": "spending_kpi1",
@@ -82,12 +85,14 @@
   {
    "fieldname": "rate_kpi1",
    "fieldtype": "Data",
-   "label": "T\u1ec9 l\u1ec7 \u0111\u1ea1t KPI1"
+   "label": "T\u1ec9 l\u1ec7 \u0111\u1ea1t KPI1",
+   "read_only": 1
   },
   {
    "fieldname": "bonus_kpi1",
    "fieldtype": "Data",
-   "label": "Th\u01b0\u1edfng KPI1"
+   "label": "Th\u01b0\u1edfng KPI1",
+   "read_only": 1
   },
   {
    "fieldname": "cr_1",
@@ -95,8 +100,9 @@
   },
   {
    "fieldname": "employee",
-   "fieldtype": "Data",
-   "label": "M\u00e3 nh\u00e2n vi\u00ean"
+   "fieldtype": "Link",
+   "label": "M\u00e3 nh\u00e2n vi\u00ean",
+   "options": "Employee"
   },
   {
    "fieldname": "employee_dms",
@@ -153,11 +159,17 @@
    "fieldname": "year",
    "fieldtype": "Int",
    "label": "N\u0103m"
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "fullname",
+   "fieldtype": "Data",
+   "label": "Nh\u00e2n vi\u00ean"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2023-12-13 16:16:10.414707",
+ "modified": "2023-12-23 10:17:27.283066",
  "modified_by": "Administrator",
  "module": "Mbw Service V2",
  "name": "DMS KPI",

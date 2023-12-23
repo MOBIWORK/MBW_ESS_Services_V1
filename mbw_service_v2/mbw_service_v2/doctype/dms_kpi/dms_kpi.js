@@ -47,6 +47,13 @@ frappe.ui.form.on('DMS KPI', {
 			frm.set_value("bonus_sales",bonus_sell(rate_sell_out,frm.doc.actually_achieved_sell_out))
 		}
 	},
+	actually_achieved_sell_in: async (frm) => {
+		let spending_sell_in = frm.doc.spending_sell_in
+		if(spending_sell_in) {
+			let rate_sell_in = parseFloat((frm.doc.actually_achieved_sell_in)/spending_sell_in,2)
+			frm.set_value("rate_sell_in",rate_sell_in*100)
+		}
+	},
 	actually_achieved_kpi1: async (frm) => {
 		let spending_kpi1 = frm.doc.spending_kpi1
 		if(spending_kpi1) {
