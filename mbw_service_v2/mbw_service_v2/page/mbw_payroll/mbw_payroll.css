@@ -110,3 +110,7 @@ table tr td:first-child {
   width: 80px;
 }
 
+
+.table-section table tbody tr:last-child {
+  font-weight: 600;
+}
