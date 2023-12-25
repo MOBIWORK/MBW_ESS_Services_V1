@@ -8,7 +8,7 @@
         <td>NPP/Tỉnh/KV quản lý</td>
         <td colspan="3">Ngày</td>
         <td colspan="4">Lương + Phụ cấp</td>
-        <td>Tổng thu nhập chưa tính lương</td>
+        <td>Tổng thu nhập chưa tính thưởng</td>
         <td colspan="3 ">Doanh số hàng hộp,gói, Tết,snack SELL IN</td>
         <td colspan="3">Doanh số hàng hộp,gói, Tết,snack SELL OUT</td>
         <td colspan="5">Thưởng doanh số SELL OUT</td>
@@ -55,7 +55,7 @@
     <tbody class="body-table">
       {% for item in list_sync %}
       <tr class="">
-        <td>{{item.employee_name}}</td>
+        <td><a href="/app/employee/{{item.employee}}">{{item.employee_name}}</a></td>
         <td>{{item.positions}}</td>
         <td>{{item.area_manager}}</td>
         <td>{{item.total_working}}</td>

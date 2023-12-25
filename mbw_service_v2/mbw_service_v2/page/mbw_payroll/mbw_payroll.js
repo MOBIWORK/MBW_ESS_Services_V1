@@ -51,7 +51,7 @@ class MBW_payroll {
 				let isTotal = res?.message?.add_total_row
 				let list_total_new = {}
 				let field_not_total = ['rate_sell_out','rate_sell_in','positions','employee_name',"area_manager"]
-				let field_not_round = ['positions','employee_name',"area_manager"]
+				let field_not_round = ['positions','employee_name',"area_manager","employee"]
 				if(isTotal) {
 					if (list_data.length > 0) {
 						for(let key in  list_data[0]) {
@@ -61,6 +61,7 @@ class MBW_payroll {
 							list_total_new[key] = value
 						}
 						list_total_new['employee_name'] = __('Total')
+						list_total_new['employee'] = '#'
 					}
 
 					list_data.forEach(dataEmployee=> {
