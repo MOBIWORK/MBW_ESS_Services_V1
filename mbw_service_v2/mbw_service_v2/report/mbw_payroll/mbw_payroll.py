@@ -145,9 +145,9 @@ def get_employee_summary(details):
 
 ## salary
 def get_salary_summary(salary_slip):
-    fiel_base_salary = "DMS_Lương cơ bản chuẩn"
-    fiel_base_salary_received = "DMS_Lương trách nhiệm"
-    fiel_allowance = ['DMS_Phụ cấp đi lại','DMS_Phụ cấp điện thoại + thiết bị']
+    fiel_base_salary = "Lương cơ bản chuẩn"
+    fiel_base_salary_received = "Lương trách nhiệm"
+    fiel_allowance = ['Phụ cấp đi lại','Phụ cấp điện thoại + thiết bị']
     fiel_tax = "Income Tax"
     fiel_advance= "Tạm ứng"
     fiel_bhxh = "Bảo hiểm xã hội"

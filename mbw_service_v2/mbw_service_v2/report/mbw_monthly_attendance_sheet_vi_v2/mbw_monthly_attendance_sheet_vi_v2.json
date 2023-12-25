@@ -1,5 +1,5 @@
 {
- "add_total_row": 0,
+ "add_total_row": 1,
  "columns": [],
  "creation": "2023-11-06 15:26:29.873701",
  "disable_prepared_report": 0,
@@ -9,7 +9,7 @@
  "filters": [],
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2023-11-06 15:26:29.873701",
+ "modified": "2023-12-25 08:57:12.602914",
  "modified_by": "Administrator",
  "module": "Mbw Service V2",
  "name": "MBW Monthly Attendance Sheet vi v2",

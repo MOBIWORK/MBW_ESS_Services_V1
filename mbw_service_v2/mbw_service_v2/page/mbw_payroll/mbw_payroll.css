@@ -106,7 +106,7 @@ table tr td:first-child {
   z-index: 2;
 }
 
-
-
-
+.table-section table tr td:nth-child(2) {
+  width: 80px;
+}
 

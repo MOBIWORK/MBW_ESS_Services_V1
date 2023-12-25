@@ -88,7 +88,13 @@
         <td>{{Intl.NumberFormat().format(Math.round(item.gross_pay - item.total_deduction))}} VND</td>
       </tr>
       {% endfor %}
+      
     </tbody>
+    <!-- <tfoot>
+     <tr>
+      {{list_total}}
+     </tr>
+    </tfoot> -->
   </table>
 </div>
 {% else %}

@@ -46,9 +46,46 @@ class MBW_payroll {
 			arguments:{},
 			callback: (res) => {
 			  if (!res.exc) {
+				let list_data = res?.message?.result ? res?.message?.result.slice(0, -1)  : []
+				// let list_total = res?.message?.result ? res?.message?.result.slice(-1)  : []
+				let isTotal = res?.message?.add_total_row
+				let list_total_new = {}
+				let field_not_total = ['rate_sell_out','rate_sell_in','positions','employee_name',"area_manager"]
+				let field_not_round = ['positions','employee_name',"area_manager"]
+				if(isTotal) {
+					if (list_data.length > 0) {
+						for(let key in  list_data[0]) {
+							let value = 0
+							if(field_not_total.includes(key))
+								value = ''	
+							list_total_new[key] = value
+						}
+						list_total_new['employee_name'] = __('Total')
+					}
+
+					list_data.forEach(dataEmployee=> {
+						for(let key_kpi in dataEmployee) {
+							if(!field_not_total.includes(key_kpi)){
+								list_total_new[key_kpi] += Number.parseFloat(dataEmployee[key_kpi])
+							}
+						}
+					})
+				}
+
+				list_data = list_data.map(employee_kpi => {
+					for(let key in employee_kpi) {
+						if(!field_not_round.includes(key)) {
+							employee_kpi[key] = typeof employee_kpi[key] == 'number'? employee_kpi[key].toFixed(2) : Number.parseFloat(employee_kpi[key]).toFixed(2)
+						}
+					}
+					console.log("employee_kpi",employee_kpi);
+					return employee_kpi
+				})
+				list_data = [...list_data,list_total_new]
+
 				this.$content.html(
 				  frappe.render_template("mbw_payroll", {
-					list_sync: res?.message?.result|| [],
+					list_sync: list_data,
 				  })
 				);
 			  } else {
