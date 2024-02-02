@@ -301,6 +301,8 @@ frappe.query_reports["MBW Monthly Attendance Sheet vi v2"] = {
 			}
 		}
 
+		console.log(value);
+
 		return value;
 	}
 }

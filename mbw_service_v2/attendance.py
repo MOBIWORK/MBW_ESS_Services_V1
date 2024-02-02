@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import time
 
 
+
 def calc_minutes(time_shift, time_real, type_calc='late_entry'):
     fmt = '%H:%M:%S'
     time_shift_obj = time_shift

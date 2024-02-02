@@ -96,16 +96,16 @@ def get_list_don_tu(**kwargs):
 @frappe.whitelist(methods='GET')
 def get_list_employee(**kwargs):
     try:
-        page_size = 20 if not kwargs.get(
-            'page_size') else int(kwargs.get('page_size'))
-        page = 1 if not kwargs.get('page') or int(
-            kwargs.get('page')) <= 0 else int(kwargs.get('page'))
+        page_size = 20 if not kwargs.get('page_size') else int(kwargs.get('page_size'))
+        page = 1 if not kwargs.get('page') or int(kwargs.get('page')) <= 0 else int(kwargs.get('page'))
         start = (page - 1) * page_size
-
+        query_filter = {'status': 'Active'}
         total_doc = frappe.db.count('Employee', {"status": "Active"})
+        
+        print(query_filter,query_filter)
         list_employee = frappe.db.get_list(
             'Employee',
-            filters={'status': 'Active'},
+            filters=query_filter,
             fields={'name', 'employee_name', 'designation', "image",
                     'cell_number', 'user_id as email', 'UNIX_TIMESTAMP(date_of_birth) as date_of_birth'},
             start=start,
@@ -123,6 +123,7 @@ def get_list_employee(**kwargs):
         }
         gen_response(200, i18n.t('translate.successfully', locale=get_language()), result)
     except Exception as e:
+        return e
         gen_response(500, i18n.t('translate.error', locale=get_language()), [])
 
 
