@@ -23,8 +23,7 @@ frappe.ui.form.on("TimeSheet Position", {
   map: async function (frm) {
     let mapdata_point = JSON.parse(frm.doc.map)?.features;
     if (mapdata_point) {
-      let last_point = mapdata_point[mapdata_point.length - 1];
-
+      let last_point = mapdata_point[mapdata_point.length - 1];      
       if (last_point && last_point.geometry.type == "Point") {
         let lat = last_point.geometry.coordinates[1];
         let lon = last_point.geometry.coordinates[0];
