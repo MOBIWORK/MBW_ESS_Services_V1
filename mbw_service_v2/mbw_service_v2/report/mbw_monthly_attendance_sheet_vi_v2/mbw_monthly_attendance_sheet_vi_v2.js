@@ -302,6 +302,12 @@ frappe.query_reports["MBW Monthly Attendance Sheet vi v2"] = {
 					value = "<span style='color:#318AD8'>" + value + "</span>";
 			}
 		}
+<<<<<<< HEAD
+
+		console.log(value);
+
+=======
+>>>>>>> 820e7d74546072d5f82f985c40ea38fecf0bc304
 		return value;
 	},
 

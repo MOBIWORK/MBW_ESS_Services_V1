@@ -7,3 +7,8 @@ CONFIG_GEO_ADDRESS = {
     "EKGIS": "https://api.ekgis.vn/v1/place/geocode/forward",
     "GOOGLE": "https://maps.googleapis.com/maps/api/geocode/json"
 }
+
+OPTIMAL_ROUTER = {
+    "EKGIS": "https://api.ekgis.vn/navigation/route/bicycle/driving",
+    "GOOGLE": ""
+}

@@ -87,3 +87,41 @@ def get_approved_amount():
         gen_response(200,"",info_approve) 
     except Exception as e:
         exception_handel(e)
+
+
+##update a employee_advance
+@frappe.whitelist(methods="PATCH")
+def update_employee_advance(**data):
+    try:
+        list_fields_valid = ["name","repay_unclaimed_amount_from_salary","advance_amount","purpose"]
+        del data['cmd']
+        for ind, value in dict(data).items():
+            if ind not in list_fields_valid:
+                gen_response(500,i18n.t('translate.invalid_value', locale=get_language()),[])
+                return
+        if not data.get('name') :
+            gen_response(500,i18n.t('translate.name_require', locale=get_language()),[])
+            return
+        employee_advance_name = data.get('name')
+        doc = frappe.get_doc('Employee Advance', employee_advance_name)
+        if not doc:
+            gen_response(404,i18n.t('translate.doc_not_found', locale=get_language()),[])
+            return
+        for field, value in dict(data).items():
+            setattr(doc, field, value)
+        doc.save()
+        gen_response(200, i18n.t('translate.update_success', locale=get_language()),doc)
+        return
+    except Exception as e:
+        exception_handel(e)
+
+
+#delete a employee_advance
+@frappe.whitelist(methods="DELETE")
+def delete_employee_advance(name):
+    try:
+
+        frappe.delete_doc('Employee Advance',name)
+        gen_response(200, i18n.t('translate.delete_success', locale=get_language()),[])
+    except Exception as e:
+        exception_handel(e)
