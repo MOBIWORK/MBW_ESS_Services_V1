@@ -986,6 +986,7 @@
   "dt": "Employee",
   "fetch_from": null,
   "fetch_if_empty": 0,
+<<<<<<< HEAD
   "fieldname": "manager_area",
   "fieldtype": "Data",
   "hidden": 0,
@@ -1040,6 +1041,8 @@
   "dt": "Employee",
   "fetch_from": null,
   "fetch_if_empty": 0,
+=======
+>>>>>>> 820e7d74546072d5f82f985c40ea38fecf0bc304
   "fieldname": "advance_approver",
   "fieldtype": "Link",
   "hidden": 0,

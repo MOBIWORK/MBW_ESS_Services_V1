@@ -17,53 +17,94 @@ from frappe.desk.query_report import (
 from frappe.core.utils import ljust_list
 from pypika import Query, Table, Field, Order
 import array
+from frappe.client import validate_link
 
 BASE_URL = frappe.utils.get_request_site_address()
 
+
+
+#get approve 
+def get_approver_detail(employee, field) :
+    approver = validate_link(doctype='Employee',docname= employee,fields=json.dumps(["employee_name","department",field]))
+    print("=====1", approver.get(field))
+    Employee = frappe.qb.DocType("Employee")
+    User = frappe.qb.DocType("User")
+    approver_info = (frappe.qb.from_(User)
+                        .inner_join(Employee)
+                        .on(User.email == Employee.user_id)
+                        .where(User.email ==  approver.get(field))
+                        .select(Employee.employee_name.as_("full_name"),Employee.image,User.email)
+                        .run(as_dict=True)
+                        )
+    if len(approver_info) > 0: 
+            for approver_c  in approver_info:
+                approver_c["image"] = validate_image(approver_c.get("image"))
+    else: 
+        approver_info = None
+    return approver_info
 # ==================================================================================================
 ShiftType = frappe.qb.DocType('Shift Type')
 ShiftAssignment = frappe.qb.DocType('Shift Assignment')
 EmployeeCheckin = frappe.qb.DocType("Employee Checkin")
 
 # Take the last shift
-def get_last_check(employee):
+def get_last_check_today(employee):
     time_now = datetime.now()
     last_check = (frappe.qb.from_(EmployeeCheckin)
                               .inner_join(ShiftType)
                               .on(EmployeeCheckin.shift == ShiftType.name)
                               .limit(1)
-                              .where(EmployeeCheckin.employee ==  employee)
+                              .where((EmployeeCheckin.employee ==  employee))
                               .orderby(EmployeeCheckin.time,order= Order.desc)
                               .select('*')
                               .run(as_dict=True))
-    if not last_check:
+    if len(last_check) ==0:
         return False
-    last_check = last_check[0]
-    # return last_check
-    before_a_day = (time_now - timedelta(1)).replace(hour=0,minute=0,second=0)
-    if last_check.get("start_time") > last_check.get('end_time'):
-        if  last_check.get("time") > before_a_day :
-            return last_check
-        return False
-    else :
-        if last_check.get("time") > time_now.replace(hour=0,minute=0,second=0) :
-            return last_check
-        return False
+    last_check= last_check[0]
+    if last_check.get("time").timestamp() > time_now.replace(hour=0,minute=0,second=0).timestamp() :
+        return last_check
+    return False
 
 # Check staff shifts
-def enable_check_shift(employee,shift,time_now):
-    shift_employee = (frappe.qb.from_(ShiftAssignment)
-                      .inner_join(ShiftType)
-                      .on(ShiftAssignment.shift_type == ShiftType.name)
-                      .where((ShiftAssignment.employee == employee) & (ShiftType.name == shift) & (
-                                ((time_now.date() >= ShiftAssignment.start_date) & (time_now.date() <= ShiftAssignment.end_date)) |
-                                ((time_now.date() >= ShiftAssignment.start_date) | (ShiftAssignment.end_date == False))
-                            ))
-                       .select('*')
-                       .run(as_dict=True)
-                      )
+def enable_check_shift(employee,shift,time_now,log_type):
+
+    shift_employee = (frappe.qb.from_(ShiftType)
+                      .inner_join(ShiftAssignment)
+                      .on(ShiftType.name == ShiftAssignment.shift_type)
+                      .where(
+                          (ShiftAssignment.employee == employee) & 
+                          (ShiftAssignment.status == "Active") & 
+                          (ShiftAssignment.docstatus == 1) 
+                          & (ShiftType.name == shift)
+                             )
+                      .select(ShiftAssignment.end_date,ShiftAssignment.start_date,ShiftType.name,ShiftType.total_shift_time, ShiftType.start_time, ShiftType.end_time, ShiftType.allow_check_out_after_shift_end_time, ShiftType.begin_check_in_before_shift_start_time)
+                      .run(as_dict=True)
+                )
     if len(shift_employee) >0: 
-        return True
+        has_shift = False
+        for shift in shift_employee:
+            if not shift.get("end_date") and not shift.get('start_date'):
+                has_shift= shift
+            elif not shift.get("end_date") and  shift.get('start_date') :
+                if shift.get("start_date") <= time_now.date() :
+                    has_shift= shift
+            elif  shift.get("end_date") and not shift.get('start_date') :
+                if shift.get("end_date") >= time_now.date() :
+                    has_shift = shift
+            else :
+                if shift.get("end_date") >= time_now.date()  and shift.get("start_date") <= time_now.date() :
+                    has_shift= shift
+        if has_shift :
+
+            if has_shift.begin_check_in_before_shift_start_time:
+                print('in')
+                if log_type == "OUT":
+                    return True
+                if (time_now.timestamp() - delta_to_time_now(has_shift.get('start_time')) > has_shift.get('begin_check_in_before_shift_start_time') or time_now.timestamp() - delta_to_time_now(has_shift.get('start_time')) < has_shift.get('total_shift_time')):
+                    return True
+                return False
+            return True
+        return False
     return False
 
 
@@ -106,14 +147,31 @@ def today_list_shift(employee_name, time_now):
     query = (ShiftAssignment.employee == employee_name) & (time_now.date() >= ShiftAssignment.start_date)
     if not ShiftAssignment.end_date.isnull() :
         query = (ShiftAssignment.employee == employee_name) & (time_now.date() >= ShiftAssignment.start_date) & (time_now.date() <= ShiftAssignment.end_date)
-    return (frappe.qb.from_(ShiftType)
+    data =  (frappe.qb.from_(ShiftType)
             .inner_join(ShiftAssignment)
             .on(ShiftType.name == ShiftAssignment.shift_type)
-            .where(((ShiftAssignment.employee == employee_name) & (time_now.date() >= ShiftAssignment.start_date) )or ((ShiftAssignment.employee == employee_name) & (time_now.date() >= ShiftAssignment.start_date) & (ShiftAssignment.start_date == None) ))
-            .select(ShiftAssignment.employee, ShiftType.name, ShiftType.start_time, ShiftType.end_time, ShiftType.allow_check_out_after_shift_end_time, ShiftType.begin_check_in_before_shift_start_time)
+            .where(
+                (ShiftAssignment.employee == employee_name) & 
+                            (ShiftAssignment.status == "Active") & 
+                            (ShiftAssignment.docstatus == 1) 
+            )
+            .select(ShiftAssignment.start_date,ShiftAssignment.end_date,ShiftAssignment.employee, ShiftType.name, ShiftType.start_time, ShiftType.end_time, ShiftType.allow_check_out_after_shift_end_time, ShiftType.begin_check_in_before_shift_start_time)
             .run(as_dict=True)
             )
-
+    data_rs = []
+    for shift in data:
+            if not shift.get("end_date") and not shift.get('start_date'):
+                data_rs.append( shift)
+            elif not shift.get("end_date") and  shift.get('start_date') :
+                if shift.get("start_date") <= time_now.date() :
+                    data_rs.append( shift)
+            elif  shift.get("end_date") and not shift.get('start_date') :
+                if shift.get("end_date") >= time_now.date() :
+                    data_rs.append( shift)
+            else :
+                if shift.get("end_date") >= time_now.date()  and shift.get("start_date") <= time_now.date() :
+                    data_rs.append( shift)
+    return data_rs
 
 # is in shift
 def inshift(employee_name,time_now) :
@@ -122,19 +180,28 @@ def inshift(employee_name,time_now) :
                       .on(ShiftType.name == ShiftAssignment.shift_type)
                       .where(
                           (ShiftAssignment.employee == employee_name) & 
+                          (ShiftAssignment.status == "Active") & 
+                          (ShiftAssignment.docstatus == 1) & 
                           (time_now.time() >= ShiftType.start_time) & 
-                          (time_now.time() <= ShiftType.end_time) & 
-                            (
-                                ((time_now.date() >= ShiftAssignment.start_date) & (time_now.date() <= ShiftAssignment.end_date)) |
-                                ((time_now.date() >= ShiftAssignment.start_date) | (ShiftAssignment.end_date == False))
-                            )
+                          (time_now.time() <= ShiftType.end_time) 
                              )
-                      .select(ShiftType.name, ShiftType.start_time, ShiftType.end_time, ShiftType.allow_check_out_after_shift_end_time, ShiftType.begin_check_in_before_shift_start_time)
+                      .select(ShiftAssignment.end_date,ShiftAssignment.start_date,ShiftType.name, ShiftType.start_time, ShiftType.end_time, ShiftType.allow_check_out_after_shift_end_time, ShiftType.begin_check_in_before_shift_start_time)
                       .run(as_dict=True)
                 )
     if len(data) == 0:
-        return False
-    return data[0]
+        return False    
+    for shift in data:
+        if not shift.get("end_date") and not shift.get('start_date'):
+            return shift
+        elif not shift.get("end_date") and  shift.get('start_date') :
+            if shift.get("start_date") <= time_now.date() :
+                return shift
+        elif  shift.get("end_date") and not shift.get('start_date') :
+            if shift.get("end_date") >= time_now.date() :
+                return shift
+        else :
+            if shift.get("end_date") >= time_now.date()  and shift.get("start_date") <= time_now.date() :
+                return shift
 
 # next shift
 def nextshift(employee_name,time_now) :
@@ -142,22 +209,30 @@ def nextshift(employee_name,time_now) :
                         .inner_join(ShiftAssignment)
                         .on(ShiftType.name == ShiftAssignment.shift_type)
                         .where(
-                            (ShiftAssignment.employee == employee_name) 
+                            (ShiftAssignment.employee == employee_name) & 
+                            (ShiftAssignment.status == "Active") & 
+                            (ShiftAssignment.docstatus == 1) 
                             & (time_now.time() <= ShiftType.start_time) 
-                            &
-                            (
-                                ((time_now.date() >= ShiftAssignment.start_date) & (time_now.date() <= ShiftAssignment.end_date)) |
-                                ((time_now.date() >= ShiftAssignment.start_date) | (ShiftAssignment.end_date == False))
-                            )
                             )
                         .orderby(ShiftType.start_time,order= Order.asc)
-                        .select(ShiftType.name, ShiftType.start_time, ShiftType.end_time, ShiftType.allow_check_out_after_shift_end_time, ShiftType.begin_check_in_before_shift_start_time)
+                        .select(ShiftAssignment.end_date,ShiftAssignment.start_date,ShiftType.name, ShiftType.start_time, ShiftType.end_time, ShiftType.allow_check_out_after_shift_end_time, ShiftType.begin_check_in_before_shift_start_time)
                         .run(as_dict=True)
                         )
     if len(data) == 0:
         return False
-    return data[0]
-
+    for shift in data:
+        if not shift.get("end_date") and not shift.get('start_date'):
+            return shift
+        elif not shift.get("end_date") and  shift.get('start_date') :
+            if shift.get("start_date") <= time_now.date() :
+                return shift
+        elif  shift.get("end_date") and not shift.get('start_date') :
+            if shift.get("end_date") >= time_now.date() :
+                return shift
+        else :
+            if shift.get("end_date") >= time_now.date()  and shift.get("start_date") <= time_now.date() :
+                return shift
+    return False
 # current shift
 def shift_now(employee_name, time_now):
     in_shift = inshift(employee_name, time_now)
@@ -213,14 +288,24 @@ def gen_response(status, message, result=[]):
         frappe.response["message"] = message
     frappe.response["result"] = result
 
+def cong_va_xoa_trung(mang1, mang2):
+    # Cộng hai mảng và chuyển kết quả thành một set để loại bỏ các phần tử trùng nhau
+    ket_qua_set = set(mang1 + mang2)
+
+    # Chuyển kết quả trở lại thành một danh sách (nếu cần)
+    ket_qua = list(ket_qua_set)
+
+    return ket_qua
 
 def exception_handel(e):
     frappe.log_error(title="ESS Mobile App Error",
                      message=frappe.get_traceback())
+    return gen_response(406, cstr(e))
+    
     if hasattr(e, "http_status_code"):
         return gen_response(e.http_status_code, cstr(e))
     else:
-        return gen_response(500, cstr(e))
+        return gen_response(406, cstr(e))
 
 # export employee key
 def generate_key(user):
@@ -371,12 +456,16 @@ def generate_report_result(
     res = get_report_result(report, filters) or []
     columns, result, message, chart, report_summary = ljust_list(
         res,5)
-    print("res",report_summary)
+    # print("res==============================cl",columns)
+    # print("res==============================rs", result)
+    # print("res==============================ms", message,)
+    # print("res==============================chart",chart)
+    # print("res==============================rp",report_summary)
     
     # report_column_names = [col["fieldname"] for col in columns]
 
     # convert to list of dicts
-    result = normalize_result(report_summary, columns)
+    result = normalize_result(chart, columns)
 
     return result
 

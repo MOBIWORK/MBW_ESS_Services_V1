@@ -50,7 +50,8 @@ def get_list_ca(**kwargs):
                                         )
         gen_response(200, i18n.t('translate.successfully', locale=get_language()), shift_type)
     except Exception as e:
-        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
+        exception_handel(e)
+        # gen_response(500, i18n.t('translate.error', locale=get_language()), [])
 
 
 # Get list of attendance locations
@@ -96,7 +97,8 @@ def get_list_timesheet_location(**kwargs):
         })
 
     except Exception as e:
-        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
+        exception_handel(e)
+        # gen_response(500, i18n.t('translate.error', locale=get_language()), [])
 
 
 # wifi attendance location
@@ -105,7 +107,7 @@ def get_wifi_timesheet(name):
             .inner_join(TimeSheetWifiIntermediate)
             .on(TimeSheetPosition.name == TimeSheetWifiIntermediate.parent)
             .where(TimeSheetPosition.name == name)
-            .select(TimeSheetWifiIntermediate.wifi,TimeSheetWifiIntermediate.wifi_ip,TimeSheetWifiIntermediate.wifi_name)
+            .select(TimeSheetWifiIntermediate.wifi_name,TimeSheetWifiIntermediate.wifi_address)
             .run(as_dict=True)
             )
     return data

@@ -1,0 +1,116 @@
+* {
+  box-sizing:  border-box;
+}
+
+.table-area {
+    z-index: 0;
+    width: 100%;
+    overflow-x: scroll;
+  }
+  
+  table, td, th {  
+    border: 1px solid #ddd;
+    text-align: left;
+  }
+
+  .table-section table {
+    border-collapse: collapse;
+  }
+  .table-section table thead tr td {
+    white-space: normal;
+    width: fit-content;
+    text-align: center;
+  }
+
+  .table-section table thead tr:nth-child(2) td,.table-section tbody.body-table tr td  {
+    width:200px;
+  }
+
+  .table-section tbody.body-table tr td {
+    text-align: right;
+  }
+
+  .table-background-jobs {
+    margin-bottom: 0px;
+    margin-top: 0px;
+    font-size: var(--text-md);
+    table-layout: fixed;
+  }
+  
+  .table-background-jobs th {
+    font-weight: normal;
+    color: var(--text-muted);
+  }
+  
+  .table-background-jobs td {
+    color: var(--text-light);
+  }
+  
+  .table-background-jobs th,
+  .table-background-jobs td {
+    padding: var(--padding-sm) var(--padding-md);
+  }
+  
+  .table-background-jobs tbody tr:hover {
+    background-color: var(--highlight-color);
+  }
+  
+  .job-name {
+    font-size: var(--text-md);
+    font-family: var(--font-family-monospace);
+    word-break: break-word;
+  }
+  
+  .no-background-jobs {
+    min-height: 320px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+  
+  .no-background-jobs > img {
+    margin-bottom: var(--margin-md);
+    max-height: 100px;
+  }
+  
+  .footer {
+    padding: var(--padding-md);
+  }
+  
+  .table-section {
+    position: relative;
+    width: 100%;
+    overflow-y: scroll;
+  }
+  table.table.table-background-jobs {
+    width: 5000px;
+    max-height: 500px!important;
+    overflow-y: scroll; 
+    table-layout: fixed;
+  }
+
+  table.table.table-background-jobs thead {
+    font-weight: 600;
+    z-index: 2;
+    position: sticky;
+    top: 0; /* Đặt vị trí sticky ở đỉnh của phần tử cha */
+    background-color: #f2f2f2; /* Màu nền cho phần thead khi sticky */
+}
+
+/* co dinh cot ten nhan vien*/
+table tr td:first-child {
+  position: sticky!important;
+  left: 0;
+  background-color: #ffffff;
+  z-index: 2;
+}
+
+.table-section table tr td:nth-child(2) {
+  width: 80px;
+}
+
+
+.table-section table tbody tr:last-child {
+  font-weight: 600;
+}

@@ -56,7 +56,7 @@ def remove_device_notification(user_id, device_id):
         print('===login', e)
         return False
 
-
+#Login
 @frappe.whitelist(allow_guest=True, methods='POST')
 def login(**kwargs):
     try:
@@ -87,7 +87,8 @@ def login(**kwargs):
         })
 
     except frappe.AuthenticationError:
-        gen_response(401, i18n.t('translate.login_error', locale=get_language()), [])
+        gen_response(404, i18n.t('translate.login_error', locale=get_language()), [])
+        # exception_handel(e)
         return None
     except Exception as e:
         exception_handel(e)
@@ -99,7 +100,7 @@ def validate_employee(user):
         raise frappe.AuthenticationError(frappe.response["message"])
 
 
-# Đăng xuất
+#Logout
 @frappe.whitelist(allow_guest=True)
 def logout(device_id=None):
     try:
@@ -109,14 +110,16 @@ def logout(device_id=None):
         frappe.response["message"] = "Logged Out"
         gen_response(200, i18n.t('translate.logout_success', locale=get_language()))
     except frappe.AuthenticationError:
-        gen_response(204, i18n.t('translate.logout_error', locale=get_language()), [])
+        # gen_response(204, i18n.t('translate.logout_error', locale=get_language()), [])
+        exception_handel(e)
         return None
     except Exception as e:
-        gen_response(500, e, [])
+        exception_handel(e)
+        # gen_response(500, e, [])
 
 # Khôi phục mật khẩu
 
-
+#reset password
 @frappe.whitelist(allow_guest=True)
 def reset_password(user):
     if user == "Administrator":
@@ -132,9 +135,10 @@ def reset_password(user):
 
         gen_response(200, i18n.t('translate.email_send_success', locale=get_language()))
     except frappe.DoesNotExistError:
-        frappe.local.response["http_status_code"] = 404
         frappe.clear_messages()
-        gen_response(404, i18n.t('translate.error', locale=get_language()), [])
+        del frappe.response["exc_type"]
+        gen_response(404, i18n.t('translate.user_not_found', locale=get_language()), [])
+        return
 
 
 @frappe.whitelist()

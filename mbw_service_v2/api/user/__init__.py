@@ -4,7 +4,7 @@ from datetime import datetime
 import base64
 from mbw_service_v2.config_translate import i18n
 # cập nhật tài khoản
-@frappe.whitelist()
+@frappe.whitelist(methods="PUT")
 def update_profile(**kwargs):
     try:
         employee_id = get_employee_id()
@@ -14,7 +14,7 @@ def update_profile(**kwargs):
         
         for field, value in dict(kwargs).items():
             if field not in fieldAccess:
-                mess = "Not allow to insert " + field
+                mess = i18n.t('translate.invalid_value', locale=get_language()) + "" + field
                 frappe.local.response['message'] = mess
                 frappe.local.response['http_status_code'] = 404
                 frappe.response["result"] = []
@@ -77,4 +77,5 @@ def get_employee_info() :
 
         gen_response(200,i18n.t('translate.successfully', locale=get_language()),user_info)
     except Exception as e:
-        gen_response(500,i18n.t('translate.error', locale=get_language()), [])
+        exception_handel(e)
+        # gen_response(500,i18n.t('translate.error', locale=get_language()), [])

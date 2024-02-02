@@ -30,6 +30,8 @@ from mbw_service_v2.api.file import (
 from mbw_service_v2.config_translate import i18n
 
 """Begin FaceID"""
+
+
 @frappe.whitelist(methods="GET")
 def get_faceid_employee(**kwargs):
     try:
@@ -57,18 +59,22 @@ def get_faceid_employee(**kwargs):
                 frappe.db.commit()
                 faceids = faceids[4:]
 
-        gen_response(200, i18n.t('translate.successfully', locale=get_language()), faceids)
+        gen_response(200, i18n.t('translate.successfully',
+                     locale=get_language()), faceids)
     except Exception as e:
-        message = e
-        gen_response(500, i18n.t('translate.error', locale=get_language()))
+        # message = e
+        # gen_response(500, i18n.t('translate.error', locale=get_language()))
+        exception_handel(e)
 
 
 @frappe.whitelist(methods="POST")
 def register_faceid_employee(**kwargs):
     doc_face_name = None
     doc_file_name = None
-    
+
     settings = frappe.get_doc("MBW Employee Settings").as_dict()
+    if not settings.get('api_key_face_ekgis'):
+        return gen_response(404, i18n.t('translate.not_found_setting_face', locale=get_language()))
 
     try:
         employee_id = get_employee_id()
@@ -93,7 +99,8 @@ def register_faceid_employee(**kwargs):
         if response.status_code == 200:
             data = json.loads(response.text)
             if int(data.get('status')) == 4:
-                gen_response(404, i18n.t('translate.not_face_recognition', locale=get_language()), {})
+                gen_response(404, i18n.t(
+                    'translate.not_face_recognition', locale=get_language()), {})
                 return None
 
             # insert Employee FaceID
@@ -128,7 +135,8 @@ def register_faceid_employee(**kwargs):
             data['faceid_name'] = doc_face_name
             data['file_url'] = file_url
 
-            gen_response(200, i18n.t('translate.faceid_register_success', locale=get_language()), data)
+            gen_response(200, i18n.t(
+                'translate.faceid_register_success', locale=get_language()), data)
             return None
         else:
             gen_response(404, i18n.t('translate.error', locale=get_language()))
@@ -149,6 +157,9 @@ def register_faceid_employee(**kwargs):
 def update_faceid_employee(**kwargs):
     doc_file_name = None
     settings = frappe.get_doc("MBW Employee Settings").as_dict()
+    if not settings.get('api_key_face_ekgis'):
+        return gen_response(404, i18n.t('translate.not_found_setting_face', locale=get_language()))
+
     try:
         employee_id = get_employee_id()
         faceimage = kwargs.get('faceimage')
@@ -157,7 +168,8 @@ def update_faceid_employee(**kwargs):
         # check doc exists
         check_faceid = frappe.db.exists("Employee FaceID", doc_face_name)
         if not check_faceid:
-            gen_response(404, i18n.t('translate.face_not_found', locale=get_language()), [])
+            gen_response(404, i18n.t('translate.face_not_found',
+                         locale=get_language()), [])
             return None
 
         # get doc
@@ -183,7 +195,8 @@ def update_faceid_employee(**kwargs):
         if response.status_code == 200:
             data = json.loads(response.text)
             if int(data.get('status')) == 4:
-                gen_response(404, i18n.t('translate.not_face_recognition', locale=get_language()), [])
+                gen_response(404, i18n.t(
+                    'translate.not_face_recognition', locale=get_language()), [])
                 return None
 
             # save file and insert Doctype File
@@ -213,7 +226,8 @@ def update_faceid_employee(**kwargs):
             data['faceid_name'] = doc_face_name
             data['file_url'] = file_url
 
-            gen_response(200, i18n.t('translate.faceid_success', locale=get_language()), data)
+            gen_response(200, i18n.t('translate.faceid_success',
+                         locale=get_language()), data)
             return None
         else:
             gen_response(404, i18n.t('translate.error', locale=get_language()))
@@ -226,52 +240,65 @@ def update_faceid_employee(**kwargs):
 
 
 def add_text_to_image(file_name, imgdata, description):
-    ## add text to image
+    # add text to image
     # save image
     doc_file = save_file(file_name, imgdata, "", "",
-                     folder=None, decode=False, is_private=0, df=None)
+                         folder=None, decode=False, is_private=0, df=None)
     # Open an Image
-    path_file = frappe.get_site_path('public') + doc_file.file_url                
+    path_file = frappe.get_site_path('public') + doc_file.file_url
     img = Image.open(path_file)
+    # Lấy thông tin EXIF (nếu có)
+    exif = img.info.get('exif')
     # Call draw Method to add 2D graphics in an image
     I1 = ImageDraw.Draw(img)
     # Custom font style and font size
-    myFont = ImageFont.truetype('FreeMono.ttf', 65)
+    default_font_size = 65
+    font_path = os.path.dirname(__file__)
+    font_relative_path = "../../font"
+    font_directory = os.path.abspath(
+        os.path.join(font_path, font_relative_path)) + "/FreeMono.ttf"
+
+    myFont = ImageFont.truetype(font_directory, default_font_size)
+
+    # myFont = ImageFont.load_default()
+    # default_font_size = myFont.getsize("A")[0]
+
     # Add Text to an image
     lines = []
-    position = (10, 10)
-    x, y = position
-    max_width = img.width - 2 * (x + y)
+    x = 10
+    y = 10
+    max_width = img.width - (x + y)
     font_color = (255, 0, 0)
-    for line in description.split("\\n"):
+    for line in description.split("\n"):
         # Split line into words
         words = line.split()
         current_line = words[0]
 
         for word in words[1:]:
             # Check if adding the next word exceeds max_width
-            if I1.textsize(current_line + " " + word, font=myFont)[0] <= max_width:
+            if I1.textlength(current_line + " " + word, font=myFont) <= max_width:
                 current_line += " " + word
             else:
                 lines.append(current_line)
                 current_line = word
-        
+
         lines.append(current_line)
-    
+
     for line in lines:
         I1.text((x, y), line, font=myFont, fill=font_color)
-        y += myFont.getsize(line)[1]
+        y += default_font_size
     # get image base64
     buffered = io.BytesIO()
-    img.save(buffered, format="PNG")
+    img.save(buffered, format="PNG", exif=exif)
     image_base64_new = base64.b64decode(base64.b64encode(buffered.getvalue()))
-    
+
     # delete file
     frappe.delete_doc('File', doc_file.name)
     path_file = "/files/" + file_name
     delete_file(path_file)
     ##
     return image_base64_new
+
 
 @frappe.whitelist(methods="POST")
 def verify_faceid_employee(**kwargs):
@@ -280,10 +307,13 @@ def verify_faceid_employee(**kwargs):
         api_key_face_ekgis = settings.get('api_key_face_ekgis')
         bucket_name_s3 = settings.get('bucket_name_s3')
         endpoint_s3 = settings.get('endpoint_s3')
-        
+
+        if not api_key_face_ekgis or not bucket_name_s3 or not endpoint_s3:
+            return gen_response(404, i18n.t('translate.not_found_setting_face_s3', locale=get_language()))
+
         employee_id = get_employee_id()
         faceimage = kwargs.get('faceimage')
-        description = kwargs.get('description')
+        description = str(kwargs.get('description'))
 
         # check faceimage have string base64 ex: "data:image/jpeg;base64,"
         list_check = faceimage.split(",")
@@ -296,7 +326,8 @@ def verify_faceid_employee(**kwargs):
         }, fields=['vector'])
 
         if not len(employee_faces):
-            gen_response(404, i18n.t('translate.face_not_found', locale=get_language()), [])
+            gen_response(404, i18n.t('translate.face_not_found',
+                         locale=get_language()), [])
             return None
 
         # call api get vector
@@ -312,7 +343,8 @@ def verify_faceid_employee(**kwargs):
         if response.status_code == 200:
             data = json.loads(response.text)
             if int(data.get('status')) == 4:
-                gen_response(404, i18n.t('translate.not_face_recognition', locale=get_language()), data)
+                gen_response(404, i18n.t(
+                    'translate.not_face_recognition', locale=get_language()), data)
                 return None
 
             image_check = data.get("uploaded_faces")
@@ -320,7 +352,6 @@ def verify_faceid_employee(**kwargs):
             images_register = []
             for face in employee_faces:
                 images_register.append(json.loads(face.get('vector')))
-
             # verify face
             check_verify = verify(image_check, images_register)
             if check_verify:
@@ -329,10 +360,13 @@ def verify_faceid_employee(**kwargs):
                     "_" + str(datetime.now()) + ".png"
 
                 if description:
-                    imgdata_new = add_text_to_image(file_name, imgdata, description)
+                    imgdata_new = add_text_to_image(
+                        file_name, imgdata, description)
                 else:
                     imgdata_new = imgdata
-                
+
+                # imgdata_new = imgdata
+
                 # save file image s3
                 object_name = f"{frappe.local.site}/checkin/{file_name}"
                 my_minio.put_object(bucket_name=bucket_name_s3,
@@ -342,17 +376,21 @@ def verify_faceid_employee(**kwargs):
                 data = {}
                 data["file_url"] = f"https://{endpoint_s3}/{bucket_name_s3}/{object_name}"
                 data['status'] = True
-                gen_response(200, i18n.t('translate.faceid_verify_success', locale=get_language()), data)
+                gen_response(200, i18n.t(
+                    'translate.faceid_verify_success', locale=get_language()), data)
                 return None
             else:
                 data = {}
                 data['status'] = False
-                gen_response(200, i18n.t('translate.faceid_verify_fail', locale=get_language()), data)
+                gen_response(200, i18n.t(
+                    'translate.faceid_verify_fail', locale=get_language()), data)
                 return None
         else:
             gen_response(404, i18n.t('translate.error', locale=get_language()))
     except Exception as e:
-        print(e)
-        gen_response(500, i18n.t('translate.error', locale=get_language()))
+        exception_handel(e)
+        return
+        # print(e)
+        # gen_response(500, i18n.t('translate.error', locale=get_language()))
 
 # End FaceID

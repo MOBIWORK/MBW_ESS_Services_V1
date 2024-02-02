@@ -79,6 +79,7 @@ class MinioConnection:
                                       object_name=object_name, data=data, metadata=metadata,
                                       length=length, part_size=part_size)
 
+
 def create_my_minio():
     settings = frappe.get_doc("MBW Employee Settings").as_dict()
 
@@ -89,7 +90,8 @@ def create_my_minio():
         region="auto",
         secure=0
     )
-    
+
+
 my_minio = create_my_minio()
 
 
@@ -102,6 +104,7 @@ def verify(embedding_check, know_embedding, threshsold=0.5):
     distances = distance_cal([embedding_check], know_embedding)
     distances = np.array(distances)
     mask = distances < threshsold
+    print("mask",mask)
     if True in mask:
         return True
     else:

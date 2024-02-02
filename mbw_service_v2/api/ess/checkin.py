@@ -1,6 +1,6 @@
 import frappe
 import json
-from mbw_service_v2.api.common import  (get_last_check, gen_response,get_employee_id,exception_handel,get_language,get_shift_type_now,
+from mbw_service_v2.api.common import  (get_last_check_today, gen_response,get_employee_id,exception_handel,get_language,get_shift_type_now,
     today_list_shift,
     delta_to_time_now,
     group_fields,
@@ -24,40 +24,43 @@ from mbw_service_v2.config_translate import i18n
 def checkin_shift(**data):
     try:
         ip_network = get_ip_network()
-        id_position = dict(data).get("timesheet_position")
+        id_position = (data).get("timesheet_position")
         
-        wifi_mac = dict(data).get("wifi_mac")
-        shift = dict(data).get("shift")
+        wifi_mac = (data).get("wifi_mac")
+        shift = (data).get("shift")
         timesheet_position_detail = frappe.get_doc("TimeSheet Position",id_position)
         name= get_employee_id()
         time_now = datetime.now()
         if not id_position or not shift: 
             gen_response(500, i18n.t('translate.invalid_value', locale=get_language()),[])
             return
-
-        if not enable_check_shift(name, shift,time_now) : 
-            gen_response(500, i18n.t('translate.not_found_shift', locale=get_language()),[])
-            return
+        
         # Get the record of today's last shift or the most recent cross-day shift
-        last_check = get_last_check(name)
-
+        last_check = get_last_check_today(name)
+        print('last_check',last_check)
         # Get the transmitted shift information
         shift_detail = frappe.get_doc("Shift Type",shift)
+        log_type = "IN"
+
         # Check the record status 
         if last_check :
-            if last_check.get("log_type") == "OUT": 
-                time_enable = delta_to_time_now(shift_detail.get("start_time"))
-                if time_now.timestamp() < time_enable : 
-                    gen_response(500, i18n.t('translate.time_not_in', locale=get_language()),[])
+            if last_check.get('shift').lower() == shift.lower(): 
+                if  last_check.get("log_type") == "OUT": 
+                    gen_response(500, i18n.t('translate.invalid_shift', locale=get_language()),[])
                     return
-            elif last_check.get('shift').lower() != shift.lower()  :
-                gen_response(500, i18n.t('translate.shift_not_out', locale=get_language()),[])
-                return
+                else: 
+                    log_type = "OUT" 
+            else:           
+                if last_check.get("log_type") == "IN": 
+                    gen_response(500, i18n.t('translate.shift_not_out', locale=get_language()),[])
+                    return
+        if not enable_check_shift(name, shift,time_now,log_type) : 
+            gen_response(406, i18n.t('translate.invalid_shift', locale=get_language()),[])
+            return
         # check location
         if timesheet_position_detail:
             wifi_position = timesheet_position_detail.get('wifi')
             mac_position = timesheet_position_detail.get('mac')
-            print()
             is_limited = timesheet_position_detail.get("is_limited")
             employees = timesheet_position_detail.get("employees")
             if is_limited != "All employee" :
@@ -86,26 +89,23 @@ def checkin_shift(**data):
                 if not in_mac and not in_wf :
                     gen_response(500, i18n.t('translate.error_network', locale=get_language()),[])
                     return
-    
-            
-            shift_now = get_shift_type_now(name) 
-            if shift_now.get("shift_type_now"):   
-                new_check = frappe.new_doc("Employee Checkin")
-                data["device_id"] = json.dumps({"longitude": data.get(
-                    "longitude"), "latitude": data.get("latitude")})
-                data['on_map'] = json.dumps({"type":"Feature","properties":{},"geometry":{"type":"Point","coordinates":[data.get(
-                    "longitude"),data.get("latitude")]}})
-                for field, value in dict(data).items():
-                    setattr(new_check, field, value)
-                log_type = "IN" if shift_now.get('shift_status') == False or shift_now.get('shift_status') == "OUT" else "OUT"
-                setattr(new_check,'log_type',log_type)
-                setattr(new_check,"image_attach",data.get("image"))
-                new_check.insert()
-                gen_response(200,i18n.t('translate.successfully', locale=get_language()),new_check)
-                return
-            gen_response(500, i18n.t('translate.no_shift', locale=get_language()),None)
+            new_check = frappe.new_doc("Employee Checkin")
+            data["device_id"] = json.dumps({"longitude": data.get(
+                "longitude"), "latitude": data.get("latitude")})
+            data['on_map'] = json.dumps({"type":"Feature","properties":{},"geometry":{"type":"Point","coordinates":[data.get(
+                "longitude"),data.get("latitude")]}})
+            for field, value in data.items():
+                setattr(new_check, field, value)
+            setattr(new_check,'log_type',log_type)
+            setattr(new_check,'employee',name)
+            setattr(new_check,"image_attach",data.get("image"))
+            new_check.insert()
+            gen_response(200,i18n.t('translate.successfully', locale=get_language()),new_check)
+            return
     except frappe.DoesNotExistError:
         gen_response(404, i18n.t('translate.error', locale=get_language()), []) 
+    except Exception as e: 
+        exception_handel(e)
 
 
 # employee attendance list
@@ -113,6 +113,7 @@ def checkin_shift(**data):
 def get_list_cham_cong(**kwargs):
     try:
         kwargs = frappe._dict(kwargs)
+        employee = get_employee_id()
         date = datetime.fromtimestamp(int(kwargs.get('date')))
         start_time = date.replace(hour=0,minute=0)
         end_time = date.replace(hour=23,minute=59)
@@ -124,7 +125,7 @@ def get_list_cham_cong(**kwargs):
                       .on(EmployeeCheckin.shift == ShiftType.name)
                       .inner_join(Attendance)
                       .on(Attendance.employee == EmployeeCheckin.employee)
-                      .where((EmployeeCheckin.time >= start_time) & (EmployeeCheckin.time <= end_time) & (Attendance.attendance_date == date.date()))
+                      .where((EmployeeCheckin.time >= start_time) & (EmployeeCheckin.time <= end_time) & (Attendance.attendance_date == date.date()) & (EmployeeCheckin.employee == employee))
                       .select(EmployeeCheckin.shift, EmployeeCheckin.log_type, EmployeeCheckin.time, EmployeeCheckin.device_id, ShiftType.start_time, ShiftType.end_time)
                       .run(as_dict=True)
                       )
@@ -133,7 +134,7 @@ def get_list_cham_cong(**kwargs):
     except Exception as e:
         exception_handel(e)
 
-
+#Shift now
 @frappe.whitelist(methods="GET",allow_guest= True)
 def get_shift_now():
     try:
@@ -144,7 +145,7 @@ def get_shift_now():
             "shift_status" : False
                 }
         # take the last shift
-        last_check = get_last_check(name)
+        last_check = get_last_check_today(name)
         # return last_check
         if last_check  :  
             if last_check.get("log_type") == "OUT" : 
@@ -176,7 +177,7 @@ def get_shift_now():
         else: 
             in_shift = inshift(name, time_now)
             shift_now = {
-            "shift_type_now" :in_shift,
+            "shift_type_now" :in_shift if in_shift else False,
             "shift_status" : False
             }
         if shift_now["shift_type_now"]:
@@ -188,13 +189,12 @@ def get_shift_now():
     except Exception as e:
         exception_handel(e)
 
-
+#List shift
 @frappe.whitelist(methods="GET")
 def get_shift_list():
     try:
         name= get_employee_id()
         time_now = datetime.now()
-
         list_shift = today_list_shift(name,time_now)
         for x in list_shift:
             x["start_time_today"] = delta_to_time_now(x["start_time"])
@@ -203,6 +203,7 @@ def get_shift_list():
     except Exception as e:
         exception_handel(e)
 
+#list shift request
 @frappe.whitelist(methods="GET")
 def get_list_shift_request(**kwargs):
     try:
@@ -251,7 +252,9 @@ from frappe.desk.search import search_link, build_for_autosuggest, search_widget
 @frappe.whitelist(methods="POST")
 def create_shift_request(**data) :
     try: 
+        employee_id = get_employee_id()
         new_shift_request = frappe.new_doc('Shift Request')
+        new_shift_request.employee = employee_id
         from_date = datetime.fromtimestamp(int(data.get("from_date"))).date() if data.get("from_date") else False
         to_date = datetime.fromtimestamp(int(data.get("to_date"))).date() if data.get("to_date") else False
         if not from_date or not to_date:
@@ -271,7 +274,6 @@ def create_shift_request(**data) :
                          .select(User.full_name,Employee.image,User.email)
                          .run(as_dict=True)
                          )
- 
         new_shift_request.insert()
         gen_response(201,i18n.t('translate.create_success', locale=get_language()),{
             "shift_request": new_shift_request,
@@ -367,16 +369,14 @@ def create_attendance_request(**kwargs):
         new_doc.insert()
         gen_response(201, i18n.t('translate.create_success', locale=get_language()))
     except Exception as e:
-        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
+       exception_handel(e)
 
-
-#list attendance request
+#list attendace rq
 @frappe.whitelist()
 def get_attendance_request(**kwargs):
     try:
         employee_id = get_employee_id()
         approver = validate_link(doctype='Employee',docname= employee_id,fields=json.dumps(["employee_name","department","custom_attendance_request_approver"]))
-        workflow_state = kwargs.get('status')
         UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
         page_size = 20 if not kwargs.get(
             'page_size') else int(kwargs.get('page_size'))
@@ -384,9 +384,15 @@ def get_attendance_request(**kwargs):
         page = 1 if not kwargs.get('page') or int(
             kwargs.get('page')) <= 0 else int(kwargs.get('page'))
         start = (page - 1) * page_size
+        sortDefault = kwargs.get("sort")
+        if sortDefault == "asc":
+            sortDefault = Order.asc
+        else:
+            sortDefault = Order.desc
+
         Employee = frappe.qb.DocType("Employee")
         User = frappe.qb.DocType("User")
-        if approver['custom_attendance_request_approver']:
+        if approver.get('custom_attendance_request_approver'):
             approver_info = (frappe.qb.from_(User)
                             .inner_join(Employee)
                             .on(User.email == Employee.user_id)
@@ -401,16 +407,14 @@ def get_attendance_request(**kwargs):
         ShiftType = frappe.qb.DocType('Shift Type')
         AttendanceRequest = frappe.qb.DocType('Attendance Request')
         query_code = (AttendanceRequest.employee == employee_id)
-        if workflow_state:
-            query_code = query_code & AttendanceRequest.workflow_state == workflow_state
         queryShift = (frappe.qb.from_(AttendanceRequest)
                       .inner_join(ShiftType)
                       .on(AttendanceRequest.custom_shift == ShiftType.name)
                       .where(query_code)
                       .offset(start)
                       .limit(page_size)
-                      .orderby(AttendanceRequest.creation, order=Order.desc)
-                      .select(AttendanceRequest.name, UNIX_TIMESTAMP(AttendanceRequest.creation).as_("creation"),UNIX_TIMESTAMP(AttendanceRequest.from_date).as_("from_date"), UNIX_TIMESTAMP(AttendanceRequest.to_date).as_("to_date"),AttendanceRequest.workflow_state,AttendanceRequest.half_day,UNIX_TIMESTAMP(AttendanceRequest.half_day_date).as_("half_day_date") ,AttendanceRequest.custom_shift.as_("shift_type"),AttendanceRequest.reason ,AttendanceRequest.explanation, ShiftType.start_time, ShiftType.end_time).run(as_dict=True)
+                      .orderby(AttendanceRequest.creation, order=sortDefault)
+                      .select(AttendanceRequest.name,AttendanceRequest.employee ,AttendanceRequest.employee_name ,UNIX_TIMESTAMP(AttendanceRequest.creation).as_("creation"),UNIX_TIMESTAMP(AttendanceRequest.from_date).as_("from_date"), UNIX_TIMESTAMP(AttendanceRequest.to_date).as_("to_date"),AttendanceRequest.workflow_state,AttendanceRequest.half_day,UNIX_TIMESTAMP(AttendanceRequest.half_day_date).as_("half_day_date") ,AttendanceRequest.custom_shift.as_("shift_type"),AttendanceRequest.reason ,AttendanceRequest.explanation, ShiftType.start_time, ShiftType.end_time).run(as_dict=True)
                       )        
 
         queryDraft = frappe.db.count('Attendance Request', {'workflow_state': "Draft", 'employee': employee_id})
@@ -425,7 +429,7 @@ def get_attendance_request(**kwargs):
         })
     except Exception as e:
         print(e)
-        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
+        exception_handel(e)
 
 #detail attendance
 @frappe.whitelist()
@@ -442,7 +446,7 @@ def get_detail_attendance(name):
                       .on(AttendanceRequest.custom_shift == ShiftType.name)
                       .where(query_code & (AttendanceRequest.name == name))
                       .orderby(AttendanceRequest.creation, order=Order.desc)
-                      .select(AttendanceRequest.name, UNIX_TIMESTAMP(AttendanceRequest.creation).as_("creation"),UNIX_TIMESTAMP(AttendanceRequest.from_date).as_("from_date"), UNIX_TIMESTAMP(AttendanceRequest.to_date).as_("to_date"),AttendanceRequest.workflow_state,AttendanceRequest.half_day,UNIX_TIMESTAMP(AttendanceRequest.half_day_date).as_("half_day_date") ,AttendanceRequest.custom_shift.as_("shift_type"), AttendanceRequest.explanation, ShiftType.start_time, ShiftType.end_time).run(as_dict=True)
+                      .select(AttendanceRequest.name,AttendanceRequest.employee_name ,UNIX_TIMESTAMP(AttendanceRequest.creation).as_("creation"),UNIX_TIMESTAMP(AttendanceRequest.from_date).as_("from_date"), UNIX_TIMESTAMP(AttendanceRequest.to_date).as_("to_date"),AttendanceRequest.workflow_state,AttendanceRequest.half_day,UNIX_TIMESTAMP(AttendanceRequest.half_day_date).as_("half_day_date") ,AttendanceRequest.custom_shift.as_("shift_type"), AttendanceRequest.explanation, ShiftType.start_time, ShiftType.end_time).run(as_dict=True)
                       )        
 
         Employee = frappe.qb.DocType("Employee")
@@ -461,7 +465,7 @@ def get_detail_attendance(name):
             "user_approver": approver_info[0]
         })
     except Exception as e:
-        gen_response(500, i18n.t('translate.error', locale=get_language()), [])
+       exception_handel(e)
 
 # approver attendance information
 @frappe.whitelist(methods='GET')
@@ -484,3 +488,114 @@ def get_approved_attendance():
     except Exception as e:
         exception_handel(e)
 
+#delete shift rq
+@frappe.whitelist(methods="DELETE")
+def delete_shift_rq(name):
+    try:
+
+        frappe.delete_doc('Shift Request',name)
+        gen_response(200, i18n.t('translate.delete_success', locale=get_language()),[])
+    except Exception as e:
+        exception_handel(e)
+
+#update shift rq
+@frappe.whitelist(methods="PUT")
+def update_shift_rq(**data):
+    try:
+        date_format = '%Y/%m/%d'
+        fieldAccess = ["name", "shift_type", "to_date", "from_date"]
+        del data['cmd']
+
+        for field, value in dict(data).items():
+            if field not in fieldAccess:
+                mess = i18n.t('translate.invalid_value', locale=get_language()) + "" + field
+                frappe.local.response['message'] = mess
+                frappe.local.response['http_status_code'] = 404
+                frappe.response["result"] = []
+                return None
+            
+        if not data.get('name'):
+            gen_response(500,i18n.t('translate.name_require', locale=get_language()),[])
+            return
+        if data['from_date'] : 
+            data['from_date'] = datetime.fromtimestamp(int(data.get('from_date'))).strftime(date_format)
+        if data['to_date'] : 
+            data['to_date'] = datetime.fromtimestamp(int(data.get('to_date'))).strftime(date_format)
+
+        shift_name = data.get('name')
+        doc = frappe.get_doc('Shift Request', shift_name)
+        if not doc:
+            gen_response(500,i18n.t('translate.doc_not_found', locale=get_language()),[])
+            return
+        for field, value in dict(data).items():
+            setattr(doc, field, value)
+        doc.save()
+        if doc.get("from_date") :
+            setattr(doc,"from_date",datetime.strptime(doc.get("from_date"), date_format).timestamp()) 
+        if doc.get("to_date") :
+            setattr(doc,"to_date",datetime.strptime(doc.get("to_date"), date_format).timestamp())   
+        
+
+        gen_response(200, i18n.t('translate.update_success', locale=get_language()))
+
+    except Exception as e:
+       exception_handel(e)
+
+
+#delete attendance rq
+@frappe.whitelist(methods="DELETE")
+def delete_attendance_rq(name):
+    try:
+
+        frappe.delete_doc('Attendance Request',name)
+        gen_response(200, i18n.t('translate.delete_success', locale=get_language()),[])
+    except Exception as e:
+        exception_handel(e)
+    
+#update attendance rq
+@frappe.whitelist(methods="PUT")
+def update_attendance_rq(**data):
+    try:
+        date_format = '%Y/%m/%d'
+        fieldAccess = ["name", "custom_shift", "to_date", "from_date", "explanation", "reason", "half_day","half_day_date"]
+        del data['cmd']
+
+        for field, value in dict(data).items():
+            if field not in fieldAccess:
+                mess = i18n.t('translate.invalid_value', locale=get_language()) + "" + field
+                frappe.local.response['message'] = mess
+                frappe.local.response['http_status_code'] = 404
+                frappe.response["result"] = []
+                return None
+            
+        if not data.get('name'):
+            gen_response(500,i18n.t('translate.name_require', locale=get_language()),[])
+            return
+        if data['from_date'] : 
+            data['from_date'] = datetime.fromtimestamp(int(data.get('from_date'))).strftime(date_format)
+        if data['to_date'] : 
+            data['to_date'] = datetime.fromtimestamp(int(data.get('to_date'))).strftime(date_format)
+        if data.get("half_day") == 1 and data.get("half_day_date") == "":
+            gen_response(500,i18n.t('translate.must_has_hafl_date', locale=get_language()),[])
+            return
+        if data['half_day_date'] : 
+            data['half_day_date'] = datetime.fromtimestamp(int(data.get('half_day_date'))).strftime(date_format)
+        shift_name = data.get('name')
+        doc = frappe.get_doc('Attendance Request', shift_name)
+        if not doc:
+            gen_response(500,i18n.t('translate.doc_not_found', locale=get_language()),[])
+            return
+        for field, value in dict(data).items():
+            setattr(doc, field, value)
+        doc.save()
+        if doc.get("from_date") :
+            setattr(doc,"from_date",datetime.strptime(doc.get("from_date"), date_format).timestamp()) 
+        if doc.get("to_date") :
+            setattr(doc,"to_date",datetime.strptime(doc.get("to_date"), date_format).timestamp())   
+        if doc.get("half_day_date") :
+            setattr(doc,"half_day_date",datetime.strptime(doc.get("half_day_date"), date_format).timestamp() )
+
+        gen_response(200, i18n.t('translate.update_success', locale=get_language()))
+
+    except Exception as e:
+       exception_handel(e)

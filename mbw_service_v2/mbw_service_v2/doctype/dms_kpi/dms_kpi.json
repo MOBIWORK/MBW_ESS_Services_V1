@@ -1,0 +1,194 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-12-08 15:37:15.762466",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "sr_1",
+  "employee",
+  "fullname",
+  "cr_1",
+  "employee_dms",
+  "sr_2",
+  "spending_sell_in",
+  "actually_achieved_sell_in",
+  "cr_2",
+  "rate_sell_in",
+  "sc_3",
+  "spending_sell_out",
+  "actually_achieved_sell_out",
+  "cr_3",
+  "rate_sell_out",
+  "bonus_sales",
+  "sr_4",
+  "spending_kpi1",
+  "actually_achieved_kpi1",
+  "cr_4",
+  "rate_kpi1",
+  "bonus_kpi1",
+  "sr_5",
+  "month",
+  "cr_5",
+  "year"
+ ],
+ "fields": [
+  {
+   "fieldname": "spending_sell_in",
+   "fieldtype": "Data",
+   "label": "Chi ti\u00eau sell in"
+  },
+  {
+   "fieldname": "actually_achieved_sell_in",
+   "fieldtype": "Data",
+   "label": "Th\u1ef1c \u0111\u1ea1t sell in"
+  },
+  {
+   "fieldname": "rate_sell_in",
+   "fieldtype": "Data",
+   "label": "T\u1ec9 l\u1ec7 \u0111\u1ea1t sell in"
+  },
+  {
+   "fieldname": "spending_sell_out",
+   "fieldtype": "Data",
+   "label": "Chi ti\u00eau sell out"
+  },
+  {
+   "fieldname": "actually_achieved_sell_out",
+   "fieldtype": "Data",
+   "label": "Th\u1ef1c \u0111\u1ea1t sell out"
+  },
+  {
+   "fieldname": "rate_sell_out",
+   "fieldtype": "Data",
+   "label": "T\u1ec9 l\u1ec7 \u0111\u1ea1t sell out",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bonus_sales",
+   "fieldtype": "Data",
+   "label": "Th\u01b0\u1edfng doanh s\u1ed1",
+   "read_only": 1
+  },
+  {
+   "fieldname": "spending_kpi1",
+   "fieldtype": "Data",
+   "label": "Chi ti\u00eau KPI1"
+  },
+  {
+   "fieldname": "actually_achieved_kpi1",
+   "fieldtype": "Data",
+   "label": "Th\u1ef1c \u0111\u1ea1t KPI1"
+  },
+  {
+   "fieldname": "rate_kpi1",
+   "fieldtype": "Data",
+   "label": "T\u1ec9 l\u1ec7 \u0111\u1ea1t KPI1",
+   "read_only": 1
+  },
+  {
+   "fieldname": "bonus_kpi1",
+   "fieldtype": "Data",
+   "label": "Th\u01b0\u1edfng KPI1",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cr_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "M\u00e3 nh\u00e2n vi\u00ean",
+   "options": "Employee"
+  },
+  {
+   "fieldname": "employee_dms",
+   "fieldtype": "Data",
+   "label": "M\u00e3 Dms"
+  },
+  {
+   "fieldname": "sr_1",
+   "fieldtype": "Section Break",
+   "label": "Th\u00f4ng tin nh\u00e2n vi\u00ean"
+  },
+  {
+   "fieldname": "sr_2",
+   "fieldtype": "Section Break",
+   "label": "Sell In"
+  },
+  {
+   "fieldname": "cr_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sc_3",
+   "fieldtype": "Section Break",
+   "label": "Sell Out"
+  },
+  {
+   "fieldname": "cr_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sr_4",
+   "fieldtype": "Section Break",
+   "label": "KPI I"
+  },
+  {
+   "fieldname": "cr_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sr_5",
+   "fieldtype": "Section Break",
+   "label": "Th\u1eddi gian"
+  },
+  {
+   "fieldname": "month",
+   "fieldtype": "Int",
+   "label": "Th\u00e1ng"
+  },
+  {
+   "fieldname": "cr_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "year",
+   "fieldtype": "Int",
+   "label": "N\u0103m"
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "fullname",
+   "fieldtype": "Data",
+   "label": "Nh\u00e2n vi\u00ean"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2023-12-23 10:17:27.283066",
+ "modified_by": "Administrator",
+ "module": "Mbw Service V2",
+ "name": "DMS KPI",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,5 +1,6 @@
 en:
   not_found_shift: Shift not Assignment.
+  invalid_shift: Shift not Valid.
   time_not_in: Inappropriate time.
   shift_not_out: Not yet clocked out.
   successfully: Success.
@@ -42,3 +43,11 @@ en:
   delete_success: Delete success
   not_found: Not found
   approve_not_setup: Approve not setup yet
+  approve_not_setup: Chưa cài đặt người kiểm duyệt
+  attendance_request: Attendance Request
+  leave_application: Leave Application
+  shift_request: Shift Request
+  overtime_request: Overtime Request
+  not_found_setting_map: Please configure the map in the MBW Employee Settings doctype
+  not_found_setting_face: Please configure the face in the MBW Employee Settings doctype
+  not_found_setting_face_s3: Please configure the face and s3 in the MBW Employee Settings doctype

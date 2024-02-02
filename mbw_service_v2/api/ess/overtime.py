@@ -1,6 +1,6 @@
 import frappe
 import json
-from mbw_service_v2.api.common import  (get_last_check, gen_response,get_employee_id,exception_handel,get_language,get_shift_type_now,
+from mbw_service_v2.api.common import  ( gen_response,get_employee_id,exception_handel,get_language,get_shift_type_now,
     today_list_shift,
     delta_to_time_now,
     group_fields,
@@ -29,8 +29,8 @@ def create_ot_request(**data):
         employee = get_employee_id()
         ot_date = datetime.fromtimestamp(int(data.get('ot_date'))).date()  if data.get('ot_date') else False
         shift = data.get('shift') if data.get('shift') else False
-        ot_start_time = datetime.strptime(data.get('ot_start_time'), "%H:%M").time()  if data.get('ot_start_time') else False
-        ot_end_time = datetime.strptime(data.get('ot_end_time'), "%H:%M").time() if data.get('ot_end_time') else False
+        ot_start_time = datetime.strptime(data.get('ot_start_time'), "%H:%M:%S").time()  if data.get('ot_start_time') else False
+        ot_end_time = datetime.strptime(data.get('ot_end_time'), "%H:%M:%S").time() if data.get('ot_end_time') else False
         ot_approver = data.get('ot_approver') if data.get('ot_approver') else False
         if not ( ot_date or shift or ot_start_time or ot_end_time or ot_approver ) :
             gen_response(500, i18n.t('translate.invalid_value', locale=get_language()), []) 
@@ -40,7 +40,7 @@ def create_ot_request(**data):
         data['ot_date'] = ot_date
         data['posting_date'] = datetime.now().date()
         data['suggested_time'] = (ot_end_time.hour*60 + ot_end_time.minute  - (ot_start_time.hour*60 + ot_start_time.minute))/60
-        field_in = ["ot_date", "shift", "ot_start_time", "ot_end_time", "ot_approver", "posting_date","employee","suggested_time"]
+        field_in = ["ot_date", "shift", "ot_start_time", "ot_end_time", "ot_approver", "posting_date","employee","suggested_time",'reason']
         for field, value in data.items() :
             if field not in field_in: 
                 gen_response(500, i18n.t('translate.invalid_value', locale=get_language()), []) 
@@ -48,8 +48,9 @@ def create_ot_request(**data):
             setattr(new_ot_rq, field, value)
         new_ot_rq.insert()
         gen_response(201, "", new_ot_rq)
-    except frappe.DoesNotExistError:
-        gen_response(404, i18n.t('translate.error', locale=get_language()), []) 
+    except Exception as e:
+        exception_handel(e)
+        # gen_response(404, i18n.t('translate.error', locale=get_language()), []) 
 
 # update ot request
 @frappe.whitelist(methods="PATCH")
@@ -60,8 +61,8 @@ def update_ot_request(**data):
         ot_rq = frappe.get_doc("Overtime Request",ot_name)
         ot_date = datetime.fromtimestamp(int(data.get('ot_date'))).date()  if data.get('ot_date') else False
         shift = data.get('shift') if data.get('shift') else False
-        ot_start_time = datetime.strptime(data.get('ot_start_time'), "%H:%M").time()  if data.get('ot_start_time') else False
-        ot_end_time = datetime.strptime(data.get('ot_end_time'), "%H:%M").time() if data.get('ot_end_time') else False
+        ot_start_time = datetime.strptime(data.get('ot_start_time'), "%H:%M:%S").time()  if data.get('ot_start_time') else False
+        ot_end_time = datetime.strptime(data.get('ot_end_time'), "%H:%M:%S").time() if data.get('ot_end_time') else False
         ot_approver = data.get('ot_approver') if data.get('ot_approver') else False
         if not ( ot_date or shift or ot_start_time or ot_end_time or ot_approver ) :
             gen_response(500, i18n.t('translate.invalid_value', locale=get_language()), []) 
@@ -74,8 +75,10 @@ def update_ot_request(**data):
             setattr(ot_rq, field, value)
         ot_rq.save()
         gen_response(201, "", ot_rq)
-    except frappe.DoesNotExistError:
-        gen_response(404, i18n.t('translate.error', locale=get_language()), []) 
+    except Exception as e:
+        frappe.clear_messages()
+        exception_handel(e)
+        # gen_response(404, i18n.t('translate.error', locale=get_language()), []) 
 
 
 # ot list
@@ -92,11 +95,12 @@ def get_list_ot_request(**params):
         query = ((OtRequest.employee == employee_id) | (OtRequest.ot_approver == employee_info.get("user_id")))
         UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
         if status:
-            query = (((OtRequest.employee == employee_id) | (OtRequest.ot_approver == employee_info.get("user_id"))) and status == OtRequest.status)
+            query = (((OtRequest.employee == employee_id) | (OtRequest.ot_approver == employee_info.get("user_id"))) & status == OtRequest.status)
+        print("query",query)
         list_ot_rq = (
             frappe.qb.from_(OtRequest)
             .where(query)
-            .select(OtRequest.name,UNIX_TIMESTAMP(OtRequest.ot_date),OtRequest.shift,OtRequest.ot_start_time,OtRequest.ot_end_time,OtRequest.ot_approver,UNIX_TIMESTAMP(OtRequest.posting_date),OtRequest.suggested_time,OtRequest.status)
+            .select(OtRequest.name,UNIX_TIMESTAMP(OtRequest.ot_date).as_("ot_date"),OtRequest.shift,OtRequest.ot_start_time,OtRequest.ot_end_time,OtRequest.ot_approver,UNIX_TIMESTAMP(OtRequest.posting_date).as_("posting_date"),OtRequest.suggested_time,OtRequest.reason, OtRequest.status)
             .run(as_dict=True)
         )
 
@@ -116,19 +120,18 @@ def get_list_ot_request(**params):
             approver_info["image"] = validate_image(approver_info.get("image"))
         else: 
             approver_info = None
-        queryDraft = len( frappe.qb.from_(OtRequest)
-            .where(((OtRequest.employee == employee_id) | (OtRequest.ot_approver == employee_info.get("user_id"))) and "Draft" == OtRequest.status)
-            .select(OtRequest.ot_date,OtRequest.shift,OtRequest.ot_date,OtRequest.ot_start_time,OtRequest.ot_end_time,OtRequest.ot_approver,OtRequest.posting_date,OtRequest.suggested_time,OtRequest.status)
-            .run(as_dict=True)
-                         )
+        queryDraft = len(frappe.qb.from_(OtRequest)
+            .where(((OtRequest.employee == employee_id) | (OtRequest.ot_approver == employee_info.get("user_id"))) & ("Draft" == OtRequest.status))
+            .select(OtRequest.employee,OtRequest.ot_date,OtRequest.shift,OtRequest.ot_date,OtRequest.ot_start_time,OtRequest.ot_end_time,OtRequest.ot_approver,OtRequest.posting_date,OtRequest.suggested_time,OtRequest.status)
+            .run(as_dict=True) )
         queryApproved = len( frappe.qb.from_(OtRequest)
-            .where(((OtRequest.employee == employee_id) | (OtRequest.ot_approver == employee_info.get("user_id"))) and "Approved" == OtRequest.status)
-            .select(OtRequest.ot_date,OtRequest.shift,OtRequest.ot_date,OtRequest.ot_start_time,OtRequest.ot_end_time,OtRequest.ot_approver,OtRequest.posting_date,OtRequest.suggested_time,OtRequest.status)
+            .where(((OtRequest.employee == employee_id) | (OtRequest.ot_approver == employee_info.get("user_id"))) & ("Approved" == OtRequest.status))
+            .select(OtRequest.employee,OtRequest.ot_date,OtRequest.shift,OtRequest.ot_date,OtRequest.ot_start_time,OtRequest.ot_end_time,OtRequest.ot_approver,OtRequest.posting_date,OtRequest.suggested_time,OtRequest.status)
             .run(as_dict=True)
                          )
         queryRejected = len( frappe.qb.from_(OtRequest)
-            .where(((OtRequest.employee == employee_id) | (OtRequest.ot_approver == employee_info.get("user_id"))) and "Rejected" == OtRequest.status)
-            .select(OtRequest.ot_date,OtRequest.shift,OtRequest.ot_date,OtRequest.ot_start_time,OtRequest.ot_end_time,OtRequest.ot_approver,OtRequest.posting_date,OtRequest.suggested_time,OtRequest.status)
+            .where(((OtRequest.employee == employee_id) | (OtRequest.ot_approver == employee_info.get("user_id"))) & ("Rejected" == OtRequest.status))
+            .select(OtRequest.employee,OtRequest.ot_date,OtRequest.shift,OtRequest.ot_date,OtRequest.ot_start_time,OtRequest.ot_end_time,OtRequest.ot_approver,OtRequest.posting_date,OtRequest.suggested_time,OtRequest.status)
             .run(as_dict=True)
                          )
         status = params.get("status") if params.get("status") else False

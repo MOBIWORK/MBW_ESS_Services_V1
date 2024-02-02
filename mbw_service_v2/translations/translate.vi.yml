@@ -1,5 +1,6 @@
 vi:
   not_found_shift: Ca này chưa đăng ký.
+  invalid_shift: Ca không hợp lệ
   time_not_in: Thời gian không phù hợp.
   shift_not_out: Chưa chấm công ra.
   successfully: Thành công.
@@ -42,3 +43,10 @@ vi:
   delete_success: Xóa thành công
   not_found: Không tìm thấy
   approve_not_setup: Chưa cài đặt người kiểm duyệt
+  attendance_request: Đơn giải trình chấm công
+  leave_application: Nghỉ phép
+  shift_request: Đăng ký ca
+  overtime_request: Tăng ca
+  not_found_setting_map: Vui lòng định cấu hình map trong tài liệu MBW Employee Settings
+  not_found_setting_face: Vui lòng định cấu hình face trong tài liệu MBW Employee Settings
+  not_found_setting_face_s3: Vui lòng định cấu hình face và s3 trong tài liệu MBW Employee Settings
