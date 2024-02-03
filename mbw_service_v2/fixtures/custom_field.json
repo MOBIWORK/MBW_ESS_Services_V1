@@ -986,10 +986,6 @@
   "dt": "Employee",
   "fetch_from": null,
   "fetch_if_empty": 0,
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
->>>>>>> c862aa8a1e3d9e833dac85e2159dfdd67418a1b2
   "fieldname": "manager_area",
   "fieldtype": "Data",
   "hidden": 0,
@@ -1044,11 +1040,6 @@
   "dt": "Employee",
   "fetch_from": null,
   "fetch_if_empty": 0,
-<<<<<<< HEAD
-=======
-=======
->>>>>>> 820e7d74546072d5f82f985c40ea38fecf0bc304
->>>>>>> c862aa8a1e3d9e833dac85e2159dfdd67418a1b2
   "fieldname": "advance_approver",
   "fieldtype": "Link",
   "hidden": 0,
