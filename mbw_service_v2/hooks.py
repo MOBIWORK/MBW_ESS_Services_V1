@@ -1,7 +1,7 @@
 from . import __version__ as app_version
 
 app_name = "mbw_service_v2"
-app_title = "Mbw Service V2"
+app_title = "MBW ESS"
 app_publisher = "chuyendev"
 app_description = "mbw service"
 app_email = "admin@gmail.com"
