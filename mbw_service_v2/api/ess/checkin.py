@@ -286,19 +286,7 @@ def create_shift_request(**data) :
 @frappe.whitelist(methods='GET')
 def all_shift():
     try:
-        search_widget(
-            doctype='Shift Type',
-            txt= ''.strip(),
-            query = None,
-            searchfield=None,
-            page_length=100,
-            filters=None,
-            reference_doctype="Shift Request",
-            ignore_user_permissions=False,
-        )
-
-        frappe.response["result"] = build_for_autosuggest(frappe.response["values"], doctype='Shift Type')
-        del frappe.response["values"]
+        return gen_response(200,"",frappe.db.get_all("Shift Type",["(name) as value"]))
     except Exception as e:
         exception_handel(e)
 
