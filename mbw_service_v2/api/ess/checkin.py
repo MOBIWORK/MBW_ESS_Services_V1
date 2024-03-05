@@ -432,9 +432,10 @@ def get_attendance_request(**kwargs):
         )
 
         for att in queryShift:
-            shift = frappe.get_doc("Shift Type",att.get("shift"))
-            att["start_time"] = shift.start_time
-            att["end_time"] = shift.end_time
+            if att.get("shift"): 
+                shift = frappe.get_doc("Shift Type",att.get("shift"))
+                att["start_time"] = shift.start_time
+                att["end_time"] = shift.end_time
         queryDraft = frappe.db.count('Attendance Request', {'workflow_state': "Draft", 'employee': employee_id})
         querryApproved = frappe.db.count('Attendance Request', {'workflow_state': "Approved", 'employee': employee_id})
         queryRejected = frappe.db.count('Attendance Request',{'workflow_state': "Rejected", 'employee': employee_id})
