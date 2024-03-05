@@ -391,7 +391,7 @@ def get_attendance_request(**kwargs):
         }
         if status:
             filters.update({
-                "status": status
+                "workflow_state": status
             })
         if sortDefault == "asc":
             sortDefault = "asc"
