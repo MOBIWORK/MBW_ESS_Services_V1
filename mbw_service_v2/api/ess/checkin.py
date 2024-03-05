@@ -17,7 +17,7 @@ from mbw_service_v2.api.common import  (get_last_check_today, gen_response,get_e
 from datetime import datetime
 from pypika import  Order, CustomFunction
 from mbw_service_v2.config_translate import i18n
-
+UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
 
 # Timekeeping service
 @frappe.whitelist(methods="POST")
@@ -377,7 +377,7 @@ def get_attendance_request(**kwargs):
     try:
         employee_id = get_employee_id()
         approver = validate_link(doctype='Employee',docname= employee_id,fields=json.dumps(["employee_name","department","custom_attendance_request_approver"]))
-        UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
+        
         page_size = 20 if not kwargs.get(
             'page_size') else int(kwargs.get('page_size'))
 
@@ -385,10 +385,18 @@ def get_attendance_request(**kwargs):
             kwargs.get('page')) <= 0 else int(kwargs.get('page'))
         start = (page - 1) * page_size
         sortDefault = kwargs.get("sort")
+        status = kwargs.get("status")
+        filters = {
+            "employee": employee_id
+        }
+        if status:
+            filters.update({
+                "status": status
+            })
         if sortDefault == "asc":
-            sortDefault = Order.asc
+            sortDefault = "asc"
         else:
-            sortDefault = Order.desc
+            sortDefault = "desc"
 
         Employee = frappe.qb.DocType("Employee")
         User = frappe.qb.DocType("User")
@@ -404,22 +412,32 @@ def get_attendance_request(**kwargs):
                 info['image'] = validate_image(info.get("image"))
         else: 
             return gen_response(404, i18n.t('translate.approve_not_setup', locale=get_language()))
-        ShiftType = frappe.qb.DocType('Shift Type')
-        AttendanceRequest = frappe.qb.DocType('Attendance Request')
-        query_code = (AttendanceRequest.employee == employee_id)
-        queryShift = (frappe.qb.from_(AttendanceRequest)
-                      .inner_join(ShiftType)
-                      .on(AttendanceRequest.custom_shift == ShiftType.name)
-                      .where(query_code)
-                      .offset(start)
-                      .limit(page_size)
-                      .orderby(AttendanceRequest.creation, order=sortDefault)
-                      .select(AttendanceRequest.name,AttendanceRequest.employee ,AttendanceRequest.employee_name ,UNIX_TIMESTAMP(AttendanceRequest.creation).as_("creation"),UNIX_TIMESTAMP(AttendanceRequest.from_date).as_("from_date"), UNIX_TIMESTAMP(AttendanceRequest.to_date).as_("to_date"),AttendanceRequest.workflow_state,AttendanceRequest.half_day,UNIX_TIMESTAMP(AttendanceRequest.half_day_date).as_("half_day_date") ,AttendanceRequest.custom_shift.as_("shift_type"),AttendanceRequest.reason ,AttendanceRequest.explanation, ShiftType.start_time, ShiftType.end_time).run(as_dict=True)
-                      )        
+          
+        queryShift = frappe.db.get_list("Attendance Request",filters= filters,
+        fields= ['name', 'employee',"employee_name","unix_timestamp(creation) as creation",
+                 "unix_timestamp(creation) as creation",
+                 "unix_timestamp(from_date) as from_date"
+                 ,"unix_timestamp(to_date) as to_date"
+                 ,"workflow_state"
+                 ,"half_day"
+                 ,"unix_timestamp(half_day_date) as half_day_date"
+                 ,"(custom_shift) as shift_type"
+                 ,"reason"
+                 ,"shift"
+                 ,"explanation"
+                ],
+        order_by=f"name {sortDefault}",
+        start = start,
+        page_length=20,
+        )
 
+        for att in queryShift:
+            shift = frappe.get_doc("Shift Type",att.get("shift"))
+            att["start_time"] = shift.start_time
+            att["end_time"] = shift.end_time
         queryDraft = frappe.db.count('Attendance Request', {'workflow_state': "Draft", 'employee': employee_id})
         querryApproved = frappe.db.count('Attendance Request', {'workflow_state': "Approved", 'employee': employee_id})
-        queryRejected = frappe.db.count('Attendance Request', {'workflow_state': "Rejected", 'employee': employee_id})
+        queryRejected = frappe.db.count('Attendance Request',{'workflow_state': "Rejected", 'employee': employee_id})
         return gen_response(200, i18n.t('translate.successfully', locale=get_language()), {
             "data": queryShift,
             "user_approver": approver_info[0],
