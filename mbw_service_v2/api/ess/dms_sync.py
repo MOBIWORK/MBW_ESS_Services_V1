@@ -19,7 +19,7 @@ from mbw_service_v2.config_translate import i18n
 def get_list_sync(**kwargs):
     try:
         list_sync = frappe.db.get_all(
-            'DMS Log', fields=['*'], page_length=20)
+            'ESS Log', fields=['*'], page_length=20)
         result = {
             "data": list_sync
         }
@@ -37,10 +37,10 @@ def get_list_kpi_sync(**kwargs):
         pageSize = 20
         pageNumber = kwargs.get('page') if kwargs.get('page') else 1
         limit_start = (pageNumber - 1) * pageSize
-        total_sync = frappe.db.count('DMS Kpi Log')
+        total_sync = frappe.db.count('ESS Kpi Log')
         total_page =  math.ceil(total_sync/20)
         list_sync = frappe.db.get_all(
-            'DMS Kpi Log', fields=['*'],  limit_start=limit_start, limit_page_length=pageSize)
+            'ESS Kpi Log', fields=['*'],  limit_start=limit_start, limit_page_length=pageSize)
         gen_response(200, i18n.t('translate.successfully', locale=get_language()), {
             "data": list_sync,
             "total_page": total_page

@@ -107,7 +107,7 @@ def get_leave_approve(**data):
                 query_code = (query_code & Doc.status == workflow_state)
 
         #list_shift_rq_for_approver
-        elif doctype == "Overtime Request" :
+        elif doctype == "ESS Overtime Request" :
             typeLeave ='shift'
             query_code = (Employee.ot_approver == employee_info.get("user_id"))
             on1 = Doc.shift
@@ -205,7 +205,7 @@ def count_application(**data):
     AttendanceRequest = frappe.qb.DocType('Attendance Request')
     LeaveApplication = frappe.qb.DocType('Leave Application')
     ShiftRequest = frappe.qb.DocType('Shift Request')
-    OtRequest = frappe.qb.DocType("Overtime Request")
+    OtRequest = frappe.qb.DocType("ESS Overtime Request")
     EmployeeAdvance = frappe.qb.DocType("Employee Advance")
 
     
@@ -497,7 +497,7 @@ def get_list_ot_request_approver(**kwargs):
             sortDefault = Order.asc
         else:
             sortDefault = Order.desc
-        OtRequest = frappe.qb.DocType("Overtime Request")
+        OtRequest = frappe.qb.DocType("ESS Overtime Request")
         Employee = frappe.qb.DocType("Employee")
         ShiftType = frappe.qb.DocType('Shift Type')
         query = (OtRequest.ot_approver == employee_info.get("user_id"))
@@ -566,7 +566,7 @@ def list_employee_approver(**data):
             typeLeave ='shift'
             query_code = (Employee.leave_approver == employee_info.get("user_id"))
         #list_shift_rq_for_approver
-        elif doctype == "Overtime Request" :
+        elif doctype == "ESS Overtime Request" :
             typeLeave ='shift'
             query_code = (Employee.ot_approver == employee_info.get("user_id"))
         #get_list_ot_request_approver

@@ -223,7 +223,7 @@
  "modified": "2023-12-07 15:54:49.925359",
  "modified_by": "Administrator",
  "module": "Mbw Service V2",
- "name": "Payroll MBW",
+ "name": "ESS Payroll MBW",
  "owner": "Administrator",
  "permissions": [
   {

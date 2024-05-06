@@ -25,7 +25,7 @@ from mbw_service_v2.config_translate import i18n
 def create_ot_request(**data):
     try:
         data = dict(data)
-        new_ot_rq = frappe.new_doc("Overtime Request")
+        new_ot_rq = frappe.new_doc("ESS Overtime Request")
         employee = get_employee_id()
         ot_date = datetime.fromtimestamp(int(data.get('ot_date'))).date()  if data.get('ot_date') else False
         shift = data.get('shift') if data.get('shift') else False
@@ -58,7 +58,7 @@ def update_ot_request(**data):
     try:
         data = dict(data)
         ot_name = data.get("name")
-        ot_rq = frappe.get_doc("Overtime Request",ot_name)
+        ot_rq = frappe.get_doc("ESS Overtime Request",ot_name)
         ot_date = datetime.fromtimestamp(int(data.get('ot_date'))).date()  if data.get('ot_date') else False
         shift = data.get('shift') if data.get('shift') else False
         ot_start_time = datetime.strptime(data.get('ot_start_time'), "%H:%M:%S").time()  if data.get('ot_start_time') else False
@@ -89,8 +89,8 @@ def get_list_ot_request(**params):
         employee_id = get_employee_id()
         employee_info = frappe.db.get_value("Employee",employee_id,['*'],as_dict=True)
         status = params.get("status") if params.get("status") else False
-        list_ot = frappe.db.get_list("Overtime Request",["name","ot_date", "shift", "ot_start_time", "ot_end_time", "ot_approver", "posting_date","employee","suggested_time","status"])
-        OtRequest = frappe.qb.DocType("Overtime Request")
+        list_ot = frappe.db.get_list("ESS Overtime Request",["name","ot_date", "shift", "ot_start_time", "ot_end_time", "ot_approver", "posting_date","employee","suggested_time","status"])
+        OtRequest = frappe.qb.DocType("ESS Overtime Request")
         field_in = ["ot_date", "shift", "ot_start_time", "ot_end_time", "ot_approver", "posting_date","employee","suggested_time"]
         query = ((OtRequest.employee == employee_id) | (OtRequest.ot_approver == employee_info.get("user_id")))
         UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
@@ -152,7 +152,7 @@ def get_list_ot_request(**params):
 def delete_ot_request(name):
     try:
 
-        frappe.delete_doc('Overtime Request',name)
+        frappe.delete_doc('ESS Overtime Request',name)
         gen_response(200, i18n.t('translate.delete_success', locale=get_language()),[])
     except Exception as e:
         exception_handel(e)

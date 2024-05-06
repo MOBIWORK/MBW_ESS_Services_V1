@@ -100,7 +100,7 @@
  "modified": "2023-11-01 14:30:00.906860",
  "modified_by": "Administrator",
  "module": "Mbw Service V2",
- "name": "Employee FaceID",
+ "name": "ESS Employee FaceID",
  "owner": "Administrator",
  "permissions": [
   {

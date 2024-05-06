@@ -55,7 +55,7 @@ def checkin_data(**data):
                             dataCheckShift = value.get('data_cc')
                             for data_check in dataCheckShift:
                                 total += 1
-                    new_log = frappe.new_doc("DMS Log")
+                    new_log = frappe.new_doc("ESS Log")
                     data_log = {
                         "ma_nv": emp_data,
                         "checkin_start":  datetime.strptime(from_date, "%d/%m/%Y"),
@@ -270,7 +270,7 @@ def hande_sync_single_employee(ma_nv,emp_data,data_employee_kpi,filters,manage_i
     month = filters['month']
     year = filters['year']
     # them mot log khi dong bo du lieu nhan vien
-    new_log  =frappe.new_doc("DMS Kpi Log")
+    new_log  =frappe.new_doc("ESS Kpi Log")
     reason = ""
     data_log = {
                 "employee_dms":ma_nv,

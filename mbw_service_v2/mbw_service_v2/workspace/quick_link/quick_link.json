@@ -313,7 +313,7 @@
    "type": "Link"
   }
  ],
- "modified": "2023-12-18 15:47:21.525736",
+ "modified": "2024-04-13 08:53:06.976109",
  "modified_by": "Administrator",
  "module": "Mbw Service V2",
  "name": "Quick Link",
@@ -323,7 +323,7 @@
  "public": 1,
  "quick_lists": [],
  "roles": [],
- "sequence_id": 33.0,
+ "sequence_id": 34.0,
  "shortcuts": [],
  "title": "Quick Link"
 }

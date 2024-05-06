@@ -21,7 +21,7 @@
  "modified": "2023-12-06 10:46:27.317922",
  "modified_by": "Administrator",
  "module": "Mbw Service V2",
- "name": "Attendance Reason",
+ "name": "ESS Attendance Reason",
  "owner": "Administrator",
  "permissions": [
   {

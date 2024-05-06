@@ -15,10 +15,10 @@ from datetime import datetime
 from mbw_service_v2.config_translate import i18n
 
 # Get the doctype
-TimeSheetPosition = frappe.qb.DocType('TimeSheet Position')
+TimeSheetPosition = frappe.qb.DocType('ESS TimeSheet Position')
 TimeSheetWifi = frappe.qb.DocType('TimeSheet Wifi')
-TimeSheetWifiIntermediate = frappe.qb.DocType('TimeSheet Wifi intermediate')
-EmployeeChild = frappe.qb.DocType('Employee Child')
+TimeSheetWifiIntermediate = frappe.qb.DocType('ESS TimeSheet Wifi intermediate')
+EmployeeChild = frappe.qb.DocType('ESS Employee Child')
 ShiftAssignment = frappe.qb.DocType('Shift Assignment')
 ShiftType = frappe.qb.DocType('Shift Type')
 
