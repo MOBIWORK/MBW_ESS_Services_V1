@@ -66,11 +66,10 @@ def update_profile(**kwargs):
 def get_employee_info() :
     try:
         employee_id = get_employee_id()
-        print("dữ liệu user",employee_id)
         if not employee_id:
-            gen_response(404 ,i18n.t('translate.user_not_found', locale=get_language()),[])
-            return 
-        user_info = get_info_employee(name= employee_id,fields=["employee", "employee_name","gender", "date_of_birth", "date_of_joining" ,"salutation", "image","user_id","department", "designation","cell_number", "current_address"])
+            return gen_response(404 ,i18n.t('translate.user_not_found', locale=get_language()),[])
+        
+        user_info = get_info_employee(name=employee_id, fields=["employee", "employee_name", "company", "gender", "date_of_birth", "date_of_joining" ,"salutation", "image","user_id","department", "designation","cell_number", "current_address"])
         user_info['date_of_birth'] = user_info['date_of_birth']
         if user_info['image']:
             user_info['image'] = validate_image(user_info['image'])
@@ -78,4 +77,3 @@ def get_employee_info() :
         gen_response(200,i18n.t('translate.successfully', locale=get_language()),user_info)
     except Exception as e:
         exception_handel(e)
-        # gen_response(500,i18n.t('translate.error', locale=get_language()), [])
