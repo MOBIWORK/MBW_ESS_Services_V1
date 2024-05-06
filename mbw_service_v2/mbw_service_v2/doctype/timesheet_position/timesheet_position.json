@@ -114,7 +114,7 @@
  "modified": "2023-11-14 14:57:08.713260",
  "modified_by": "Administrator",
  "module": "Mbw Service V2",
- "name": "ESS TimeSheet Position",
+ "name": "TimeSheet Position",
  "owner": "Administrator",
  "permissions": [
   {

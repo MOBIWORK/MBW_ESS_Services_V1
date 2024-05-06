@@ -100,7 +100,7 @@
  "modified": "2023-11-08 14:50:16.476098",
  "modified_by": "Administrator",
  "module": "Mbw Service V2",
- "name": "ESS MBW Employee Settings",
+ "name": "MBW Employee Settings",
  "owner": "Administrator",
  "permissions": [
   {

@@ -33,7 +33,7 @@
  "modified": "2023-12-11 11:29:56.475408",
  "modified_by": "Administrator",
  "module": "Mbw Service V2",
- "name": "ESS product_1",
+ "name": "product_1",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",

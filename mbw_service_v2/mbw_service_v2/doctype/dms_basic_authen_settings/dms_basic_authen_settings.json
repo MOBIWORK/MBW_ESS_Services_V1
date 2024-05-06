@@ -34,7 +34,7 @@
  "modified": "2023-11-04 09:02:26.160867",
  "modified_by": "Administrator",
  "module": "Mbw Service V2",
- "name": "ESS DMS Basic Authen Settings",
+ "name": "DMS Basic Authen Settings",
  "owner": "Administrator",
  "permissions": [
   {
