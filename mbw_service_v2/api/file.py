@@ -81,7 +81,7 @@ class MinioConnection:
 
 
 def create_my_minio():
-    settings = frappe.get_doc("ESS ESS Employee Settings").as_dict()
+    settings = frappe.get_doc("ESS MBW Employee Settings").as_dict()
 
     return MinioConnection(
         endpoint=settings.get("endpoint_s3"),

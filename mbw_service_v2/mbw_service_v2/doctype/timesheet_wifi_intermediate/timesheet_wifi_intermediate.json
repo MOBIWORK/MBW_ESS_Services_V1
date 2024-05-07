@@ -1,0 +1,40 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-10-03 16:40:50.470458",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "wifi_name",
+  "wifi_address"
+ ],
+ "fields": [
+  {
+   "fieldname": "wifi_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Wifi name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "wifi_address",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Address ip",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2023-11-11 09:07:57.550067",
+ "modified_by": "Administrator",
+ "module": "Mbw Service V2",
+ "name": "TimeSheet Wifi intermediate",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

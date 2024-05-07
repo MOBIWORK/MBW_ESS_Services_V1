@@ -28,7 +28,7 @@ def checkin_shift(**data):
         
         wifi_mac = (data).get("wifi_mac")
         shift = (data).get("shift")
-        timesheet_position_detail = frappe.get_doc("ESS ESS TimeSheet Position",id_position)
+        timesheet_position_detail = frappe.get_doc("ESS TimeSheet Position",id_position)
         name= get_employee_id()
         time_now = datetime.now()
         if not id_position or not shift: 
@@ -331,7 +331,7 @@ def get_approved():
 @frappe.whitelist(methods='GET')
 def get_list_reason():
     try:
-        attandance_reason = frappe.db.get_list('ESS ESS Attendance Reason', fields=["name", "reason_name"])
+        attandance_reason = frappe.db.get_list('ESS Attendance Reason', fields=["name", "reason_name"])
         gen_response(200, i18n.t('translate.successfully', locale=get_language()), attandance_reason)
     except Exception as e:
         return exception_handel(e)

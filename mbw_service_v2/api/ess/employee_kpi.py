@@ -85,7 +85,7 @@ def insert(**kwargs):
                 kwargs[key] = field.get("default")
 
         # add new kpi
-        doc_new = frappe.new_doc('ESS ESS KPI Integration Data')
+        doc_new = frappe.new_doc('ESS KPI Integration Data')
         doc_new.parenttype = "Employee"
         doc_new.parentfield = "kpi_data"
         doc_new.parent = employee_id

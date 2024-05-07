@@ -1,0 +1,132 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "NB.#####",
+ "creation": "2023-10-12 10:27:12.760230",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "notice_title",
+  "description",
+  "column_break_3",
+  "from_date",
+  "to_date",
+  "priority_level",
+  "apply_for",
+  "employees",
+  "section_break_yeir6",
+  "message",
+  "employee_watched"
+ ],
+ "fields": [
+  {
+   "fieldname": "notice_title",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Title",
+   "reqd": 1
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text",
+   "label": "Descriptive"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "From Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "To Date",
+   "reqd": 1
+  },
+  {
+   "default": "B\u00ecnh th\u01b0\u1eddng",
+   "fieldname": "priority_level",
+   "fieldtype": "Select",
+   "label": "Priority Level",
+   "options": "B\u00ecnh th\u01b0\u1eddng\nCao"
+  },
+  {
+   "default": "All Employee",
+   "fieldname": "apply_for",
+   "fieldtype": "Select",
+   "label": "Apply to",
+   "options": "All Employee\nSpecific Employees"
+  },
+  {
+   "depends_on": "eval:doc.apply_for == \"Specific Employees\"",
+   "fieldname": "employees",
+   "fieldtype": "Table MultiSelect",
+   "label": "List Employee",
+   "mandatory_depends_on": "eval:doc.apply_for == \"Specific Employees\"",
+   "options": "Notice Board Employee"
+  },
+  {
+   "fieldname": "section_break_yeir6",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "message",
+   "fieldtype": "Text Editor",
+   "in_list_view": 1,
+   "label": "Issue",
+   "reqd": 1
+  },
+  {
+   "fieldname": "employee_watched",
+   "fieldtype": "Long Text",
+   "hidden": 1,
+   "label": "Viewers",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2023-11-11 09:05:00.308127",
+ "modified_by": "Administrator",
+ "module": "Mbw Service V2",
+ "name": "Notice Board",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee Image",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

@@ -1,0 +1,120 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-11-08 13:56:52.179155",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_map",
+  "geo_service",
+  "api_key_ekgis",
+  "api_key_google",
+  "section_s3",
+  "endpoint_s3",
+  "access_key_s3",
+  "col_1",
+  "key_secret_s3",
+  "bucket_name_s3",
+  "section_face",
+  "api_key_face_ekgis"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_map",
+   "fieldtype": "Section Break",
+   "label": "Map"
+  },
+  {
+   "fieldname": "section_s3",
+   "fieldtype": "Section Break",
+   "label": "S3"
+  },
+  {
+   "fieldname": "endpoint_s3",
+   "fieldtype": "Data",
+   "label": "ENDPOINT S3",
+   "length": 155
+  },
+  {
+   "fieldname": "access_key_s3",
+   "fieldtype": "Data",
+   "label": "ACCESS KEY S3",
+   "length": 155
+  },
+  {
+   "fieldname": "key_secret_s3",
+   "fieldtype": "Data",
+   "label": "KEY SECRET S3",
+   "length": 155
+  },
+  {
+   "fieldname": "bucket_name_s3",
+   "fieldtype": "Data",
+   "label": "BUCKET NAME S3",
+   "length": 155
+  },
+  {
+   "fieldname": "section_face",
+   "fieldtype": "Section Break",
+   "label": "Face"
+  },
+  {
+   "fieldname": "api_key_face_ekgis",
+   "fieldtype": "Data",
+   "label": "API KEY FACE EKGIS",
+   "length": 155
+  },
+  {
+   "fieldname": "col_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Ekgis",
+   "fieldname": "geo_service",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Geo Service",
+   "options": "Ekgis\nGoogle",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.geo_service !==\"Google\"",
+   "fieldname": "api_key_ekgis",
+   "fieldtype": "Data",
+   "label": "API KEY Ekgis",
+   "length": 155
+  },
+  {
+   "depends_on": "eval:doc.geo_service ==\"Google\"",
+   "fieldname": "api_key_google",
+   "fieldtype": "Data",
+   "label": "API KEY Google",
+   "length": 155
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2023-11-08 14:50:16.476098",
+ "modified_by": "Administrator",
+ "module": "Mbw Service V2",
+ "name": "MBW Employee Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
