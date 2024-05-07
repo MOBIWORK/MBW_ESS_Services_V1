@@ -36,26 +36,26 @@ from mbw_service_v2.config_translate import i18n
 def get_faceid_employee(**kwargs):
     try:
         employee_id = get_employee_id()
-        faceids = frappe.db.get_list('ESS Employee FaceID', filters={
+        faceids = frappe.db.get_list('ESS ESS Employee FaceID', filters={
                                      "employee": employee_id}, fields=["name", "url"], order_by='creation asc',)
 
         if len(faceids) < 4:
             # Delete old faceids
             for face in faceids:
-                frappe.delete_doc('ESS Employee FaceID', face.name)
+                frappe.delete_doc('ESS ESS Employee FaceID', face.name)
             frappe.db.commit()
             faceids = []
         elif len(faceids) > 4:
             if len(faceids) < 8:
                 for i in range(len(faceids)):
                     if i > 3:
-                        frappe.delete_doc('ESS Employee FaceID', faceids[i].name)
+                        frappe.delete_doc('ESS ESS Employee FaceID', faceids[i].name)
                 frappe.db.commit()
                 faceids = faceids[0:4]
             elif len(faceids) == 8:
                 for i in range(len(faceids)):
                     if i <= 3:
-                        frappe.delete_doc('ESS Employee FaceID', faceids[i].name)
+                        frappe.delete_doc('ESS ESS Employee FaceID', faceids[i].name)
                 frappe.db.commit()
                 faceids = faceids[4:]
 
@@ -72,7 +72,7 @@ def register_faceid_employee(**kwargs):
     doc_face_name = None
     doc_file_name = None
 
-    settings = frappe.get_doc("ESS MBW Employee Settings").as_dict()
+    settings = frappe.get_doc("ESS ESS Employee Settings").as_dict()
     if not settings.get('api_key_face_ekgis'):
         return gen_response(404, i18n.t('translate.not_found_setting_face', locale=get_language()))
 
@@ -103,8 +103,8 @@ def register_faceid_employee(**kwargs):
                     'translate.not_face_recognition', locale=get_language()), {})
                 return None
 
-            # insert ESS Employee FaceID
-            new_doc_face = frappe.new_doc("ESS Employee FaceID")
+            # insert ESS ESS Employee FaceID
+            new_doc_face = frappe.new_doc("ESS ESS Employee FaceID")
             new_doc_face.employee = employee_id
             new_doc_face.insert()
             doc_face_name = new_doc_face.get('name')
@@ -113,18 +113,18 @@ def register_faceid_employee(**kwargs):
             file_name = employee_id + "_" + str(datetime.now()) + "_.png"
             imgdata = base64.b64decode(faceimage)
 
-            doc_file = save_file(file_name, imgdata, "ESS Employee FaceID", doc_face_name,
+            doc_file = save_file(file_name, imgdata, "ESS ESS Employee FaceID", doc_face_name,
                                  folder=None, decode=False, is_private=0, df=None)
 
             # delete image copy
             path_file = "/files/" + file_name
             delete_file(path_file)
 
-            # update ESS Employee FaceID
+            # update ESS ESS Employee FaceID
             doc_file_name = doc_file.get('name')
             base_url = frappe.utils.get_request_site_address()
             file_url = base_url + doc_file.get('file_url')
-            doc_face = frappe.get_doc('ESS Employee FaceID', doc_face_name)
+            doc_face = frappe.get_doc('ESS ESS Employee FaceID', doc_face_name)
             doc_face.id_image = doc_file_name
             doc_face.url = file_url
             doc_face.image = file_url
@@ -145,7 +145,7 @@ def register_faceid_employee(**kwargs):
     except Exception as e:
         # delete when error
         if doc_face_name:
-            frappe.delete_doc('ESS Employee FaceID', doc_face_name)
+            frappe.delete_doc('ESS ESS Employee FaceID', doc_face_name)
         if doc_file_name:
             frappe.delete_doc('File', doc_file_name)
 
@@ -156,7 +156,7 @@ def register_faceid_employee(**kwargs):
 @frappe.whitelist(methods="POST")
 def update_faceid_employee(**kwargs):
     doc_file_name = None
-    settings = frappe.get_doc("ESS MBW Employee Settings").as_dict()
+    settings = frappe.get_doc("ESS ESS Employee Settings").as_dict()
     if not settings.get('api_key_face_ekgis'):
         return gen_response(404, i18n.t('translate.not_found_setting_face', locale=get_language()))
 
@@ -166,14 +166,14 @@ def update_faceid_employee(**kwargs):
         doc_face_name = kwargs.get('faceid_name')
 
         # check doc exists
-        check_faceid = frappe.db.exists("ESS Employee FaceID", doc_face_name)
+        check_faceid = frappe.db.exists("ESS ESS Employee FaceID", doc_face_name)
         if not check_faceid:
             gen_response(404, i18n.t('translate.face_not_found',
                          locale=get_language()), [])
             return None
 
         # get doc
-        doc_face = frappe.get_doc('ESS Employee FaceID', doc_face_name)
+        doc_face = frappe.get_doc('ESS ESS Employee FaceID', doc_face_name)
         id_image_old = doc_face.id_image
 
         # check faceimage have string base64 ex: "data:image/jpeg;base64,"
@@ -202,14 +202,14 @@ def update_faceid_employee(**kwargs):
             # save file and insert Doctype File
             file_name = employee_id + "_" + str(datetime.now()) + "_.png"
             imgdata = base64.b64decode(faceimage)
-            doc_file_new = save_file(file_name, imgdata, "ESS Employee FaceID", doc_face_name,
+            doc_file_new = save_file(file_name, imgdata, "ESS ESS Employee FaceID", doc_face_name,
                                      folder=None, decode=False, is_private=0, df=None)
 
             # delete image copy
             path_file = "/files/" + file_name
             delete_file(path_file)
 
-            # update ESS Employee FaceID
+            # update ESS ESS Employee FaceID
             doc_file_name = doc_file_new.get('name')
             base_url = frappe.utils.get_request_site_address()
             file_url = base_url + doc_file_new.get('file_url')
@@ -303,7 +303,7 @@ def add_text_to_image(file_name, imgdata, description):
 @frappe.whitelist(methods="POST")
 def verify_faceid_employee(**kwargs):
     try:
-        settings = frappe.get_doc("ESS MBW Employee Settings").as_dict()
+        settings = frappe.get_doc("ESS ESS Employee Settings").as_dict()
         api_key_face_ekgis = settings.get('api_key_face_ekgis')
         bucket_name_s3 = settings.get('bucket_name_s3')
         endpoint_s3 = settings.get('endpoint_s3')
@@ -321,7 +321,7 @@ def verify_faceid_employee(**kwargs):
             faceimage = list_check[1]
 
         # get list vector employee register
-        employee_faces = frappe.db.get_list("ESS Employee FaceID", filters={
+        employee_faces = frappe.db.get_list("ESS ESS Employee FaceID", filters={
             'employee': employee_id
         }, fields=['vector'])
 

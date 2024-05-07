@@ -23,9 +23,9 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "TimeSheet position",
+   "label": "ESS TimeSheet Position",
    "link_count": 0,
-   "link_to": "TimeSheet Position",
+   "link_to": "ESS TimeSheet Position",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -97,9 +97,9 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Employee FaceID",
+   "label": "ESS Employee FaceID",
    "link_count": 0,
-   "link_to": "Employee FaceID",
+   "link_to": "ESS Employee FaceID",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -117,7 +117,7 @@
    "is_query_report": 0,
    "label": "Announcement list",
    "link_count": 0,
-   "link_to": "Notice Board",
+   "link_to": "ESS Notice Board",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -219,9 +219,9 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "OverTime Request",
+   "label": "ESS Overtime Request",
    "link_count": 0,
-   "link_to": "Overtime Request",
+   "link_to": "ESS Overtime Request",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -239,7 +239,7 @@
    "is_query_report": 0,
    "label": "Configure Basic Authentication for DMS",
    "link_count": 0,
-   "link_to": "DMS Basic Authen Settings",
+   "link_to": "ESS Basic Authen Settings",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -257,9 +257,9 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "DMS Log",
+   "label": "ESS Log",
    "link_count": 0,
-   "link_to": "DMS Log",
+   "link_to": "ESS Log",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"

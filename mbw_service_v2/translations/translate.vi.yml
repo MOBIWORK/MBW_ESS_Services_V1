@@ -47,6 +47,6 @@ vi:
   leave_application: Nghỉ phép
   shift_request: Đăng ký ca
   overtime_request: Tăng ca
-  not_found_setting_map: Vui lòng định cấu hình map trong tài liệu MBW Employee Settings
-  not_found_setting_face: Vui lòng định cấu hình face trong tài liệu MBW Employee Settings
-  not_found_setting_face_s3: Vui lòng định cấu hình face và s3 trong tài liệu MBW Employee Settings
+  not_found_setting_map: Vui lòng định cấu hình map trong tài liệu ESS Employee Settings
+  not_found_setting_face: Vui lòng định cấu hình face trong tài liệu ESS Employee Settings
+  not_found_setting_face_s3: Vui lòng định cấu hình face và s3 trong tài liệu ESS Employee Settings

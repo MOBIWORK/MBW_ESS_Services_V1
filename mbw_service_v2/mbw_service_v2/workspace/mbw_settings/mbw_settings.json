@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"jWRUNu7NEG\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">MBW Settings</span>\",\"col\":12}},{\"id\":\"flmL0JOZZ7\",\"type\":\"card\",\"data\":{\"card_name\":\"MBW Employee Settings\",\"col\":4}}]",
+ "content": "[{\"id\":\"jWRUNu7NEG\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">MBW Settings</span>\",\"col\":12}},{\"id\":\"flmL0JOZZ7\",\"type\":\"card\",\"data\":{\"card_name\":\"ESS Employee Settings\",\"col\":4}}]",
  "creation": "2023-11-14 10:44:04.799631",
  "custom_blocks": [],
  "docstatus": 0,
@@ -15,7 +15,7 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "MBW Employee Settings",
+   "label": "ESS Employee Settings",
    "link_count": 1,
    "onboard": 0,
    "type": "Card Break"
@@ -23,9 +23,9 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "MBW Employee Settings",
+   "label": "ESS Employee Settings",
    "link_count": 0,
-   "link_to": "MBW Employee Settings",
+   "link_to": "ESS Employee Settings",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"

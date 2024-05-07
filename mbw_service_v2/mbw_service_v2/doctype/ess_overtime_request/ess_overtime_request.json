@@ -1,0 +1,221 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "autoname": "OT-.MM.-.YYYY.-.######",
+ "creation": "2023-11-20 15:00:57.708585",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "employee",
+  "attendance",
+  "employee_name",
+  "department",
+  "company",
+  "sb_1",
+  "ot_date",
+  "shift",
+  "ot_start_time",
+  "ot_end_time",
+  "suggested_time",
+  "reason",
+  "sb_3",
+  "ot_approver",
+  "posting_date",
+  "status",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Nh\u00e2n vi\u00ean",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "attendance",
+   "fieldtype": "Link",
+   "label": "Attendance Marked",
+   "options": "Attendance"
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "T\u00ean nh\u00e2n vi\u00ean"
+  },
+  {
+   "fetch_from": "employee.department",
+   "fieldname": "department",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Ph\u00f2ng ban",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "C\u00f4ng ty ",
+   "options": "Company"
+  },
+  {
+   "fieldname": "sb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "shift",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Ca l\u00e0m vi\u1ec7c",
+   "options": "Shift Type",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "shift.end_time",
+   "fieldname": "ot_start_time",
+   "fieldtype": "Time",
+   "label": "Th\u1eddi gian b\u1eaft \u0111\u1ea7u",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "ot_end_time",
+   "fieldtype": "Time",
+   "label": "Th\u1eddi gian k\u1ebft th\u00fac",
+   "reqd": 1
+  },
+  {
+   "fieldname": "suggested_time",
+   "fieldtype": "Float",
+   "label": "S\u1ed1 gi\u1edd l\u00e0m th\u00eam \u0111\u1ec1 xu\u1ea5t",
+   "read_only": 1
+  },
+  {
+   "fieldname": "reason",
+   "fieldtype": "Data",
+   "label": "L\u00fd do"
+  },
+  {
+   "fieldname": "sb_3",
+   "fieldtype": "Section Break",
+   "label": "Duy\u1ec7t \u0111\u01a1n"
+  },
+  {
+   "fieldname": "ot_approver",
+   "fieldtype": "Link",
+   "label": "Ng\u01b0\u1eddi duy\u1ec7t",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Ng\u00e0y t\u1ea1o",
+   "options": "Now",
+   "reqd": 1
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Tr\u1ea1ng th\u00e1i",
+   "options": "Draft\nApproved\nRejected",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "ESS Overtime Request",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "ot_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Ng\u00e0y l\u00e0m th\u00eam",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2023-11-21 16:08:16.690590",
+ "modified_by": "Administrator",
+ "module": "Mbw Service V2",
+ "name": "ESS ESS Overtime Request",
+ "name_case": "UPPER CASE",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "All",
+   "share": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

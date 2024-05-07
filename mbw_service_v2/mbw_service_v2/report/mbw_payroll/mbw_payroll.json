@@ -15,7 +15,7 @@
  "name": "MBW Payroll",
  "owner": "Administrator",
  "prepared_report": 0,
- "ref_doctype": "Payroll MBW",
+ "ref_doctype": "ESS Payroll",
  "report_name": "MBW Payroll",
  "report_type": "Script Report",
  "roles": [

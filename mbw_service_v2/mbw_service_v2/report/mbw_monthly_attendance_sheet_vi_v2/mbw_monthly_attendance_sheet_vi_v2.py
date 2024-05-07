@@ -299,7 +299,7 @@ def get_attendance_map(filters: Filters) -> Dict:
                 if d.working_hours and d.total_shift_time and  d.exchange_to_working_day:
                     overtime_leave = False
                     if d.working_hours > d.total_shift_time :
-                        overtime_leave = frappe.db.get_value("Overtime Request", {"employee": d.employee, "ot_date": date_att,"workflow_state": "Approved"},['*'],as_dict=True)
+                        overtime_leave = frappe.db.get_value("ESS Overtime Request", {"employee": d.employee, "ot_date": date_att,"workflow_state": "Approved"},['*'],as_dict=True)
                         if overtime_leave:
                             #hệ số chuyển đổi (tam thoi fix cung, se co cau hinh rieng)
                             conversion_factor = 0.2
@@ -664,7 +664,7 @@ def get_attendance_summary_and_days(employee: str, filters: Filters) -> Tuple[Di
     sum_half_day_shift = Sum(half_day_case_shift).as_("total_half_days_shift")
 
     #Tong thoi gian tang ca
-    OverTimeRequest = frappe.qb.DocType("Overtime Request")
+    OverTimeRequest = frappe.qb.DocType("ESS Overtime Request")
     EmployeeCheckin = frappe.qb.DocType("Employee Checkin")
     ot_total = (
         frappe.qb.from_(OverTimeRequest)

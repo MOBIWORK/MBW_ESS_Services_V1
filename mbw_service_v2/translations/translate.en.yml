@@ -47,7 +47,7 @@ en:
   attendance_request: Attendance Request
   leave_application: Leave Application
   shift_request: Shift Request
-  overtime_request: Overtime Request
-  not_found_setting_map: Please configure the map in the MBW Employee Settings doctype
-  not_found_setting_face: Please configure the face in the MBW Employee Settings doctype
-  not_found_setting_face_s3: Please configure the face and s3 in the MBW Employee Settings doctype
+  overtime_request: ESS Overtime Request
+  not_found_setting_map: Please configure the map in the ESS Employee Settings doctype
+  not_found_setting_face: Please configure the face in the ESS Employee Settings doctype
+  not_found_setting_face_s3: Please configure the face and s3 in the ESS Employee Settings doctype

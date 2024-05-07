@@ -55,8 +55,8 @@ class DMSAttendanceSync {
     }
 
     let doc = await frappe.db.get_doc(
-      "DMS Basic Authen Settings",
-      "DMS Basic Authen Settings"
+      "ESS Basic Authen Settings",
+      "ESS Basic Authen Settings"
     );
 
     if (!doc?.id || !doc?.token_key) {
