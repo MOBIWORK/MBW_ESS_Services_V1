@@ -15,7 +15,7 @@ function setFieldValue(frm, latitude = 0, longitude = 0, address) {
     frm.set_value("address", address);
 }
 
-frappe.ui.form.on("TimeSheet Position", {
+frappe.ui.form.on("ESS TimeSheet Position", {
     refresh: function (frm) {
         setDefaultViewMap(frm);
     },

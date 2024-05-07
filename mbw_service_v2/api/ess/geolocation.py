@@ -15,7 +15,7 @@ def get_address_location(**kwargs):
     try:
         lat = kwargs.get('lat')
         lon = kwargs.get('lon')
-        settings = frappe.db.get_singles_dict("ESS MBW Employee Settings")
+        settings = frappe.db.get_singles_dict("ESS Employee Settings")
         geo_service = settings.get("geo_service")
 
         if geo_service == "Ekgis":
@@ -39,7 +39,7 @@ def get_address_location(**kwargs):
 def get_coordinates_location(**kwargs):
     try:
         address = kwargs.get("address")
-        settings = frappe.db.get_singles_dict("ESS MBW Employee Settings")
+        settings = frappe.db.get_singles_dict("ESS Employee Settings")
         geo_service = settings.get("geo_service")
 
         if geo_service == "Ekgis":
