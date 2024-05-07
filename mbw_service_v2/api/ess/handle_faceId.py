@@ -72,7 +72,7 @@ def register_faceid_employee(**kwargs):
     doc_face_name = None
     doc_file_name = None
 
-    settings = frappe.get_doc("ESS MBW Employee Settings").as_dict()
+    settings = frappe.get_doc("ESS Employee Settings").as_dict()
     if not settings.get('api_key_face_ekgis'):
         return gen_response(404, i18n.t('translate.not_found_setting_face', locale=get_language()))
 
@@ -156,7 +156,7 @@ def register_faceid_employee(**kwargs):
 @frappe.whitelist(methods="POST")
 def update_faceid_employee(**kwargs):
     doc_file_name = None
-    settings = frappe.get_doc("ESS MBW Employee Settings").as_dict()
+    settings = frappe.get_doc("ESS Employee Settings").as_dict()
     if not settings.get('api_key_face_ekgis'):
         return gen_response(404, i18n.t('translate.not_found_setting_face', locale=get_language()))
 
@@ -303,7 +303,7 @@ def add_text_to_image(file_name, imgdata, description):
 @frappe.whitelist(methods="POST")
 def verify_faceid_employee(**kwargs):
     try:
-        settings = frappe.get_doc("ESS MBW Employee Settings").as_dict()
+        settings = frappe.get_doc("ESS Employee Settings").as_dict()
         api_key_face_ekgis = settings.get('api_key_face_ekgis')
         bucket_name_s3 = settings.get('bucket_name_s3')
         endpoint_s3 = settings.get('endpoint_s3')
