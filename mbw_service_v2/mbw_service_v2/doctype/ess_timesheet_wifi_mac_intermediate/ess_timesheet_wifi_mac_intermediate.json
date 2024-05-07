@@ -1,0 +1,41 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-11-09 15:08:11.402715",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "mac_name",
+  "mac_address"
+ ],
+ "fields": [
+  {
+   "fieldname": "mac_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Mac name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "mac_address",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Address mac",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2023-11-11 09:07:27.788679",
+ "modified_by": "Administrator",
+ "module": "Mbw Service V2",
+ "name": "ESS TimeSheet Wifi mac intermediate",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

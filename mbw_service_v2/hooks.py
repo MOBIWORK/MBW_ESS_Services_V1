@@ -225,6 +225,9 @@ doc_events = {
 # "mbw_service_v2.auth.validate"
 # ]
 
+on_session_creation = [
+    "mbw_service_v2.controllers.role_permissions.update_sales_roles_permissions"
+]
 
 fixtures = [
     {

@@ -1,0 +1,245 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2023-12-07 15:54:49.925359",
+ "default_view": "List",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "employee",
+  "employee_name",
+  "positions",
+  "area_manager",
+  "wage",
+  "dependent_person",
+  "days",
+  "salary_and_allowance",
+  "total_not_bonuses",
+  "spending_sell_in",
+  "actually_achieved_sell_in",
+  "rate_sell_in",
+  "spending_sell_out",
+  "actually_achieved_sell_out",
+  "rate_sell_out",
+  "bonus_sales",
+  "spending_kpi1",
+  "actually_achieved_kpi1",
+  "rate_kpi1",
+  "bonus_kpi1",
+  "spending_kpi2",
+  "actually_achieved_kpi2",
+  "rate_kpi2",
+  "bonus_kpi2",
+  "other_bonuses",
+  "gross_pay",
+  "tax_deductions",
+  "taxable_income",
+  "tax",
+  "social_insurance",
+  "minus_advance",
+  "other_deductions",
+  "total_deductions",
+  "real_total"
+ ],
+ "fields": [
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Employee",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Data",
+   "label": "Employee name"
+  },
+  {
+   "fieldname": "positions",
+   "fieldtype": "Data",
+   "label": "Positions"
+  },
+  {
+   "fieldname": "area_manager",
+   "fieldtype": "Data",
+   "label": "Area manager"
+  },
+  {
+   "fieldname": "wage",
+   "fieldtype": "Data",
+   "label": "Wage"
+  },
+  {
+   "fieldname": "dependent_person",
+   "fieldtype": "Data",
+   "label": "Dependent person"
+  },
+  {
+   "fieldname": "days",
+   "fieldtype": "Data",
+   "label": "Days"
+  },
+  {
+   "fieldname": "salary_and_allowance",
+   "fieldtype": "Data",
+   "label": "Salary and allowance"
+  },
+  {
+   "fieldname": "total_not_bonuses",
+   "fieldtype": "Float",
+   "label": "Total not bonuses"
+  },
+  {
+   "fieldname": "spending_sell_in",
+   "fieldtype": "Float",
+   "label": "Spending sell in"
+  },
+  {
+   "fieldname": "actually_achieved_sell_in",
+   "fieldtype": "Float",
+   "label": "Actually achieved sell in"
+  },
+  {
+   "fieldname": "rate_sell_in",
+   "fieldtype": "Float",
+   "label": "Rate sell in"
+  },
+  {
+   "fieldname": "spending_sell_out",
+   "fieldtype": "Float",
+   "label": "Spending sell out"
+  },
+  {
+   "fieldname": "actually_achieved_sell_out",
+   "fieldtype": "Float",
+   "label": "Actually achieved sell out"
+  },
+  {
+   "fieldname": "rate_sell_out",
+   "fieldtype": "Float",
+   "label": "Rate sell out"
+  },
+  {
+   "fieldname": "bonus_sales",
+   "fieldtype": "Float",
+   "label": "Bonus sales"
+  },
+  {
+   "fieldname": "spending_kpi1",
+   "fieldtype": "Float",
+   "label": "Spending KPI1"
+  },
+  {
+   "fieldname": "actually_achieved_kpi1",
+   "fieldtype": "Float",
+   "label": "Actually achieved KPI1"
+  },
+  {
+   "fieldname": "rate_kpi1",
+   "fieldtype": "Float",
+   "label": "Rate KPI1"
+  },
+  {
+   "fieldname": "bonus_kpi1",
+   "fieldtype": "Float",
+   "label": "Bonus KPI1"
+  },
+  {
+   "fieldname": "spending_kpi2",
+   "fieldtype": "Float",
+   "label": "Spending KPI2"
+  },
+  {
+   "fieldname": "actually_achieved_kpi2",
+   "fieldtype": "Float",
+   "label": "Actually achieved KPI2"
+  },
+  {
+   "fieldname": "rate_kpi2",
+   "fieldtype": "Float",
+   "label": "Rate KPI2"
+  },
+  {
+   "fieldname": "bonus_kpi2",
+   "fieldtype": "Float",
+   "label": "Bonus KPI2"
+  },
+  {
+   "fieldname": "other_bonuses",
+   "fieldtype": "Float",
+   "label": "Other bonuses"
+  },
+  {
+   "fieldname": "gross_pay",
+   "fieldtype": "Float",
+   "label": "Gross pay"
+  },
+  {
+   "fieldname": "tax_deductions",
+   "fieldtype": "Float",
+   "label": "Tax deductions"
+  },
+  {
+   "fieldname": "taxable_income",
+   "fieldtype": "Float",
+   "label": "Taxable income"
+  },
+  {
+   "fieldname": "tax",
+   "fieldtype": "Float",
+   "label": "Tax"
+  },
+  {
+   "fieldname": "social_insurance",
+   "fieldtype": "Float",
+   "label": "Social insurance"
+  },
+  {
+   "fieldname": "minus_advance",
+   "fieldtype": "Float",
+   "label": "Minus advance"
+  },
+  {
+   "fieldname": "other_deductions",
+   "fieldtype": "Float",
+   "label": "Other deductions"
+  },
+  {
+   "fieldname": "total_deductions",
+   "fieldtype": "Float",
+   "label": "Total deductions"
+  },
+  {
+   "fieldname": "real_total",
+   "fieldtype": "Float",
+   "label": "Real total"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2023-12-07 15:54:49.925359",
+ "modified_by": "Administrator",
+ "module": "Mbw Service V2",
+ "name": "ESS Payroll",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
