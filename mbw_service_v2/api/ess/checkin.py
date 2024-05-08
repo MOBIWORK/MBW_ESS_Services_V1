@@ -17,6 +17,7 @@ from mbw_service_v2.api.common import  (get_last_check_today, gen_response,get_e
 from datetime import datetime
 from pypika import  Order, CustomFunction
 from mbw_service_v2.config_translate import i18n
+import pytz
 UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
 
 # Timekeeping service
@@ -139,7 +140,10 @@ def get_list_cham_cong(**kwargs):
 def get_shift_now():
     try:
         name= get_employee_id()
-        time_now = datetime.now()
+        now_utc = datetime.now(pytz.utc)
+        hcm_timezone = pytz.timezone('Asia/Ho_Chi_Minh')
+        time_now = now_utc.astimezone(hcm_timezone)
+
         shift_now = {
             "shift_type_now" : False,
             "shift_status" : False
@@ -194,7 +198,9 @@ def get_shift_now():
 def get_shift_list():
     try:
         name= get_employee_id()
-        time_now = datetime.now()
+        now_utc = datetime.now(pytz.utc)
+        hcm_timezone = pytz.timezone('Asia/Ho_Chi_Minh')
+        time_now = now_utc.astimezone(hcm_timezone)
         list_shift = today_list_shift(name,time_now)
         for x in list_shift:
             x["start_time_today"] = delta_to_time_now(x["start_time"])
