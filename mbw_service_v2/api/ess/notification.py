@@ -28,7 +28,7 @@ def get_list_notification(**kwargs):
         start = (page - 1) * page_size
 
         NoticeBoard = DocType("ESS Notice Board")
-        EmployeeJoin = frappe.qb.DocType('ESSESS Notice Board Employee')
+        EmployeeJoin = frappe.qb.DocType('ESS Notice Board Employee')
         Employee = frappe.qb.DocType('Employee')
         UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
         
