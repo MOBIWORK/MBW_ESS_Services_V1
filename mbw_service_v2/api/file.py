@@ -92,7 +92,7 @@ def create_my_minio():
     )
 
 
-my_minio = create_my_minio()
+my_minio = create_my_minio
 
 
 def distance_cal(embedding_check, know_embedding):

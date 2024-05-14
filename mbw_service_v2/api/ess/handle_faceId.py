@@ -339,7 +339,7 @@ def verify_faceid_employee(**kwargs):
 
         response = requests.request(
             "POST", url, headers=headers, data=payload)
-
+        print("========",response)
         if response.status_code == 200:
             data = json.loads(response.text)
             if int(data.get('status')) == 4:
@@ -369,7 +369,7 @@ def verify_faceid_employee(**kwargs):
 
                 # save file image s3
                 object_name = f"{frappe.local.site}/checkin/{file_name}"
-                my_minio.put_object(bucket_name=bucket_name_s3,
+                my_minio().put_object(bucket_name=bucket_name_s3,
                                     object_name=object_name, data=io.BytesIO(imgdata_new))
 
                 # data response
@@ -388,8 +388,9 @@ def verify_faceid_employee(**kwargs):
         else:
             gen_response(404, i18n.t('translate.error', locale=get_language()))
     except Exception as e:
-        exception_handel(e)
-        return
+        print("==========",e)
+        return exception_handel(e)
+        
         # print(e)
         # gen_response(500, i18n.t('translate.error', locale=get_language()))
 
