@@ -442,7 +442,6 @@ def post_image(name_image, faceimage, doc_type, doc_name):
     file_url = BASE_URL + doc_file.get('file_url')
     return file_url
 
-
 @frappe.read_only()
 def generate_report_result(
         report, filters=None, user=None, custom_columns=None, is_tree=False, parent_field=None

@@ -1,8 +1,10 @@
 import frappe
-from mbw_service_v2.api.common import (gen_response,exception_handel,get_info_employee,get_employee_id,get_language, post_image, validate_image)
+from frappe import _
+from mbw_service_v2.api.common import (gen_response,exception_handel,get_info_employee,get_employee_id,get_language, post_image, validate_image,get_user_id)
 from datetime import datetime
 import base64
 from mbw_service_v2.config_translate import i18n
+BASE_URL = frappe.utils.get_request_site_address()
 # cập nhật tài khoản
 @frappe.whitelist(methods="PUT")
 def update_profile(**kwargs):
@@ -75,5 +77,31 @@ def get_employee_info() :
             user_info['image'] = validate_image(user_info['image'])
 
         gen_response(200,i18n.t('translate.successfully', locale=get_language()),user_info)
+    except Exception as e:
+        exception_handel(e)
+
+
+# lấy thông tin nhân viên
+@frappe.whitelist(methods="GET")
+def get_user_info() :
+    try:
+        user_id = get_user_id()
+        if not user_id:
+            return gen_response(404 ,i18n.t('translate.user_not_found', locale=get_language()),[])
+        
+        user_info = frappe.db.get_value("User",user_id,["full_name","email","user_image","name"],as_dict=1)
+        employee_info = ""
+        try:
+            employee = frappe.db.get_value("Employee",{"user_id":user_id},["department"],as_dict=1)
+            if employee and employee.department:
+                employee_info = employee.department
+            else: 
+                raise ValueError("Không tìm thấy nhân viên")
+        except Exception as e:
+            employee_info= "unknown"
+        user_info["department"] = employee_info
+        if user_info.get("user_image"):
+            user_info["user_image"] = BASE_URL+user_info["user_image"]
+        gen_response(200,_(""),user_info)
     except Exception as e:
         exception_handel(e)
