@@ -344,7 +344,7 @@ def verify_faceid_employee(**kwargs):
             data = json.loads(response.text)
             if int(data.get('status')) == 4:
                 gen_response(404, i18n.t(
-                    'translate.not_face_recognition', locale=get_language()), data)
+                    'translate.not_face_recognition', locale=get_language()), {})
                 return None
 
             image_check = data.get("uploaded_faces")
