@@ -12,7 +12,9 @@ app_license = "MIT"
 
 # include js, css files in header of desk.html
 # app_include_css = "/assets/mbw_service_v2/css/mbw_service_v2.css"
-# app_include_js = "/assets/mbw_service_v2/js/mbw_service_v2.js"
+app_include_js = [
+    "/assets/mbw_service_v2/js/map_default.js"
+]
 
 # include js, css files in header of web template
 # web_include_css = "/assets/mbw_service_v2/css/mbw_service_v2.css"
