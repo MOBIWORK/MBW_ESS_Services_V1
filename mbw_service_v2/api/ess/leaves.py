@@ -1,5 +1,5 @@
 import frappe
-
+from frappe import _
 from mbw_service_v2.api.common import (gen_response,exception_handel, get_language, get_employee_id, validate_datetime, validate_empty,get_user_id, get_employee_by_user, validate_image)
 from pypika import Order, CustomFunction, Tuple
 from datetime import datetime
@@ -222,10 +222,13 @@ def get_list_leave_type(**kwargs):
 
 @frappe.whitelist()
 def get_leave_details():
-    employee = get_employee_id()
-    leave_approver = get_employee_by_user(get_user_id(), ["*"]).get("leave_approver")
+    user = get_user_id()
+    employee_info = get_employee_by_user(user, ["*"])
+    if not employee_info:
+        return gen_response(500,_("You are not Employee"),{})
+    leave_approver = employee_info.get("leave_approver")
     date = datetime.now().date()
-    allocation_records = get_leave_allocation_records(employee, date)
+    allocation_records = get_leave_allocation_records(employee_info.get("name"), date)
     leave_allocation = {}
     precision = cint(frappe.db.get_single_value("System Settings", "float_precision", cache=True))
 
