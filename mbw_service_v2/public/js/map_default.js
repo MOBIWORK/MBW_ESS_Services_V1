@@ -7,10 +7,7 @@ const map_settings = frappe.provide("frappe.utils.map_defaults");
 // // New default location (middle of germany).
 map_settings.center = [105.777775,21.055938];
 // // new zoomlevel: see the whole country, not just a single city
-map_settings.zoom = 20;
 
 // // Use a different map: satellite instead of streets
-map_settings.tiles = "https://api.ekgis.vn/v2/maps/raster/osm/bright/5/25/14.png?api_key=wtpM0U1ZmE2s87LEZNSHf63Osc1a2sboaozCQNsy" ;
+map_settings.tiles = "https://api.ekgis.vn/v2/maps/osmplus/{x}/{y}/{z}.pbf?api_key=tpM0U1ZmE2s87LEZNSHf63Osc1a2sboaozCQNsy" ;
 map_settings.options.attribution = "Tiles &copy; Esri &mdash; Source: Ekgis Community";
-
-console.log
