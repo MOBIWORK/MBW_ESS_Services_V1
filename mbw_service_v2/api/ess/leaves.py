@@ -262,6 +262,6 @@ def get_leave_details():
     lwp = frappe.get_list("Leave Type", filters={"is_lwp": 1}, pluck="name")
     gen_response(200, i18n.t('translate.successfully', locale=get_language()), {
         "leave_allocation": leave_allocation,
-        "leave_approver": [query_approver[0]],
+        "leave_approver": [query_approver[0]] if len(query_approver)> 0 else "",
         "lwps": lwp,
     })
