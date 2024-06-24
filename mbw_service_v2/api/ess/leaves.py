@@ -154,7 +154,9 @@ def create_leave(**kwargs):
     
     except Exception as e:
         if hasattr(e, "http_status_code") and e.http_status_code == 417:
-            gen_response(417, f"{i18n.t('translate.employee', locale=get_language())} {employee_id} {i18n.t('translate.title_2', locale=get_language())} {new_doc.leave_type} {i18n.t('translate.from_date', locale=get_language())} {(new_doc.from_date).strftime('%d-%m-%Y')} {i18n.t('translate.to_date', locale=get_language())} {(new_doc.to_date).strftime('%d-%m-%Y')}")
+            from frappe.utils import cstr
+            return gen_response(417,cstr(e),{})
+            # gen_response(417, f"{i18n.t('translate.employee', locale=get_language())} {employee_id} {i18n.t('translate.title_2', locale=get_language())} {new_doc.leave_type} {i18n.t('translate.from_date', locale=get_language())} {(new_doc.from_date).strftime('%d-%m-%Y')} {i18n.t('translate.to_date', locale=get_language())} {(new_doc.to_date).strftime('%d-%m-%Y')}")
         else:   exception_handel(e)
 
 ##update a leave
