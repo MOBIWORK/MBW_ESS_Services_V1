@@ -227,6 +227,7 @@ def get_leave_details():
     if not employee_info:
         return gen_response(500,_("You are not Employee"),{})
     leave_approver = employee_info.get("leave_approver")
+    employee = employee_info.get("name")
     date = datetime.now().date()
     allocation_records = get_leave_allocation_records(employee_info.get("name"), date)
     leave_allocation = {}
