@@ -13,7 +13,9 @@ app_license = "MIT"
 # include js, css files in header of desk.html
 # app_include_css = "/assets/mbw_service_v2/css/mbw_service_v2.css"
 app_include_js = [
-    "/assets/mbw_service_v2/js/map_default.js"
+    "/assets/mbw_service_v2/js/map_default.js",
+    "/assets/mbw_service_v2/js/workspace.js",
+
 ]
 
 # include js, css files in header of web template
@@ -28,7 +30,7 @@ app_include_js = [
 # webform_include_css = {"doctype": "public/css/doctype.css"}
 
 # include js in page
-# page_js = {"page" : "public/js/file.js"}
+page_js = {"page" : "public/js/workspace.js"}
 
 # include js in doctype views
 # doctype_js = {"doctype" : "public/js/doctype.js"}
