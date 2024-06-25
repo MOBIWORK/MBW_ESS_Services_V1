@@ -66,7 +66,7 @@ app_include_js = [
 # ------------
 
 # before_install = "mbw_service_v2.install.before_install"
-# after_install = "mbw_service_v2.install.after_install"
+after_install = "mbw_service_v2.setup.after_install.after_install"
 
 # Uninstallation
 # ------------
