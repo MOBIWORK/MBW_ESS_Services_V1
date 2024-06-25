@@ -80,7 +80,7 @@ after_install = "mbw_service_v2.setup.after_install.after_install"
 # Name of the app being installed is passed as an argument
 
 # before_app_install = "mbw_service_v2.utils.before_app_install"
-after_app_install = "mbw_service_v2.setup.after_install.after_install"
+# after_app_install = "mbw_service_v2.setup.after_install.after_install"
 
 # Integration Cleanup
 # -------------------
