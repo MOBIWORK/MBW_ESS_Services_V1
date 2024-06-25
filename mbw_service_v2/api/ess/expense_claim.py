@@ -4,12 +4,13 @@ from mbw_service_v2.api.common import (
     get_employee_id,
     exception_handel,
     get_language,
-    validate_image
+    validate_image,
+    get_pending_amount
 )
 
 from frappe.desk.search import search_link
 from hrms.payroll.doctype.salary_structure_assignment.salary_structure_assignment import get_employee_currency
-from hrms.hr.doctype.employee_advance.employee_advance import get_pending_amount
+# from hrms.hr.doctype.employee_advance.employee_advance import get_pending_amount
 from datetime import datetime
 from frappe.client import validate_link
 import json
@@ -22,8 +23,8 @@ def create_employee_advance(**data):
         employee = get_employee_id()
         posting_date = datetime.now().date()
         ok = validate_link("Employee",employee,json.dumps(["company","employee_name","department", "employee"]))
-        currency = get_employee_currency(employee=ok.get("employee"))
         pedding_amount = get_pending_amount(employee=ok.get("employee"),posting_date = posting_date)
+        currency = get_employee_currency(employee=ok.get("employee"))
         account_advance = validate_link(doctype="Company",docname=ok.get('company'), fields= json.dumps(["default_employee_advance_account"]) )
         if account_advance:
             data['docstatus'] = 0

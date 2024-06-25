@@ -559,3 +559,14 @@ def doc_status(status):
         return "Submitted"
     else:
         return "Cancelled"
+def get_pending_amount(employee,posting_date):
+    from frappe.query_builder.functions import Sum
+    Advance = frappe.qb.DocType("Employee Advance")
+    return (frappe.qb.from_(Advance)
+			.select(Sum(Advance.advance_amount - Advance.paid_amount))
+			.where(
+				(Advance.employee == employee)
+				& (Advance.docstatus == 1)
+				& (Advance.posting_date <= posting_date)
+				& (Advance.status == "Unpaid")).run()
+			)
