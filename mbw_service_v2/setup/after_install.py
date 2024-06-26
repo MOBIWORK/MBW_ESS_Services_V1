@@ -1,6 +1,6 @@
 import frappe
 
-def after_install() :
+def after_install(name,**arg) :
     create_work_state()
     create_role()
     create_work_flow()
