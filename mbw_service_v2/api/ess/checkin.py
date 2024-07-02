@@ -25,6 +25,7 @@ UNIX_TIMESTAMP = CustomFunction('UNIX_TIMESTAMP', ['day'])
 def checkin_shift(**data):
     try:
         ip_network = get_ip_network()
+        print("ip==========================",ip_network)
         id_position = (data).get("timesheet_position")
         
         wifi_mac = (data).get("wifi_mac")

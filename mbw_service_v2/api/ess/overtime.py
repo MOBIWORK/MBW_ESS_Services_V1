@@ -25,12 +25,13 @@ from mbw_service_v2.config_translate import i18n
 def create_ot_request(**data):
     try:
         data = dict(data)
+        print("data",data)
         new_ot_rq = frappe.new_doc("ESS Overtime Request")
         employee = get_employee_id()
         ot_date = datetime.fromtimestamp(int(data.get('ot_date'))).date()  if data.get('ot_date') else False
         shift = data.get('shift') if data.get('shift') else False
-        ot_start_time = datetime.strptime(data.get('ot_start_time'), "%H:%M").time()  if data.get('ot_start_time') else False
-        ot_end_time = datetime.strptime(data.get('ot_end_time'), "%H:%M").time() if data.get('ot_end_time') else False
+        ot_start_time = datetime.strptime(data.get('ot_start_time'), "%H:%M:%S").time()  if data.get('ot_start_time') else False
+        ot_end_time = datetime.strptime(data.get('ot_end_time'), "%H:%M:%S").time() if data.get('ot_end_time') else False
         ot_approver = data.get('ot_approver') if data.get('ot_approver') else False
         if not ( ot_date or shift or ot_start_time or ot_end_time or ot_approver ) :
             gen_response(500, i18n.t('translate.invalid_value', locale=get_language()), []) 
