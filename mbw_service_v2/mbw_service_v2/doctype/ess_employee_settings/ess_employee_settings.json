@@ -45,7 +45,7 @@
   },
   {
    "fieldname": "key_secret_s3",
-   "fieldtype": "Data",
+   "fieldtype": "Password",
    "label": "KEY SECRET S3",
    "length": 155
   },
@@ -62,7 +62,7 @@
   },
   {
    "fieldname": "api_key_face_ekgis",
-   "fieldtype": "Data",
+   "fieldtype": "Password",
    "label": "API KEY FACE EKGIS",
    "length": 155
   },
@@ -82,14 +82,14 @@
   {
    "depends_on": "eval:doc.geo_service !==\"Google\"",
    "fieldname": "api_key_ekgis",
-   "fieldtype": "Data",
+   "fieldtype": "Password",
    "label": "API KEY Ekgis",
    "length": 155
   },
   {
    "depends_on": "eval:doc.geo_service ==\"Google\"",
    "fieldname": "api_key_google",
-   "fieldtype": "Data",
+   "fieldtype": "Password",
    "label": "API KEY Google",
    "length": 155
   }
@@ -97,7 +97,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-11-08 14:50:16.476098",
+ "modified": "2024-07-12 09:14:13.754744",
  "modified_by": "Administrator",
  "module": "Mbw Service V2",
  "name": "ESS Employee Settings",
