@@ -84,19 +84,14 @@ def register_faceid_employee(**kwargs):
         list_check = faceimage.split(",")
         if len(list_check) == 2:
             faceimage = list_check[1]
-
         # call api get vector
         url = f"https://api.ekgis.vn/deepvision/faceid/v1/encoding?api_key={settings.get('api_key_face_ekgis')}"
         headers = {
             'Content-Type': 'application/json'
         }
         payload = json.dumps({"faceimage": faceimage})
-
-        response = requests.request(
-            "POST", url, headers=headers, data=payload)
-
-        # check response
-        if response.status_code == 200:
+        try:
+            response = requests.request("POST", url, headers=headers, data=payload)
             data = json.loads(response.text)
             if int(data.get('status')) == 4:
                 gen_response(404, i18n.t(
@@ -135,12 +130,10 @@ def register_faceid_employee(**kwargs):
             data['faceid_name'] = doc_face_name
             data['file_url'] = file_url
 
-            gen_response(200, i18n.t(
+            return gen_response(200, i18n.t(
                 'translate.faceid_register_success', locale=get_language()), data)
-            return None
-        else:
-            gen_response(404, i18n.t('translate.error', locale=get_language()))
-            return None
+        except Exception as e:            
+            raise ValueError(e)
 
     except Exception as e:
         # delete when error
@@ -148,9 +141,8 @@ def register_faceid_employee(**kwargs):
             frappe.delete_doc('ESS Employee FaceID', doc_face_name)
         if doc_file_name:
             frappe.delete_doc('File', doc_file_name)
-
-        message = e
-        gen_response(500, i18n.t('translate.error', locale=get_language()))
+        print("=======================",e)
+        exception_handel(e)
 
 
 @frappe.whitelist(methods="POST")
